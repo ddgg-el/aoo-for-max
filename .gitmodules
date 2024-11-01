@@ -1,0 +1,6 @@
+[submodule "aoo"]
+	path = aoo
+	url = https://git.iem.at/aoo/aoo.git
+[submodule "max-sdk"]
+	path = max-sdk
+	url = https://github.com/Cycling74/max-sdk.git
