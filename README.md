@@ -29,7 +29,7 @@ Duplica e rinomina la cartella `source/aoo_template`. Rinomina e modifica il fil
 
 Inoltre è utile lavorare su un `branch` separato che verrà poi combinato con `main`.
 
-#### Configurazione linter VSCODE:
+#### Configurazione Intellisense VSCODE:
 ```json
 "includePath": [
 	"${default}",
