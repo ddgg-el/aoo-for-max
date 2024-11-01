@@ -21,10 +21,11 @@ git submodule update --init --recursive
 Modifica il file `aoo/include/aoo_types.h:100`
 ```c++
 typedef double AooSample; // <---- manca il ;
+------------------------^
 ```
 
 #### Per iniziare
-Duplica la cartella `source/aoo_template`, rinominala e modifica i file `simplemsp~` e il nome della classe con il nome dell'oggetto sul quale si vuole lavorare. 
+Duplica e rinomina la cartella `source/aoo_template`. Rinomina e modifica il file `simplemsp~.c` usando il nome dell'oggetto sul quale si vuole lavorare. 
 
 Inoltre è utile lavorare su un `branch` separato che verrà poi combinato con `main`.
 
