@@ -1,5 +1,7 @@
 include(${MAX_INCLUDE_DIR}/max-sdk-base/script/max-pretarget.cmake)
 
+## Max externals minimum compile 10.11 Aoo minimum compile 10.13
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
 #############################################################
 # MAX EXTERNAL
 #############################################################
