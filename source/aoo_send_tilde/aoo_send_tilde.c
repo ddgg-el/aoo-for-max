@@ -38,7 +38,7 @@ void ext_main(void *r)
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo_send~", (method)aoo_send_new, (method)dsp_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
+	t_class *c = class_new(gensym("aoo_send~"), (method)aoo_send_new, (method)dsp_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
 
 	class_addmethod(c, (method)aoo_send_float,		"float",	A_FLOAT, 0);
 	class_addmethod(c, (method)aoo_send_dsp64,		"dsp64",	A_CANT, 0);
