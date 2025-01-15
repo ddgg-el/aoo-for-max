@@ -38,6 +38,17 @@ public:
 
 void format_makedefault(AooFormatStorage &f, int nchannels);
 
+int datatype_element_size(AooDataType type);
+
+double get_elapsed_ms(AooNtpTime tt);
+
+int data_to_atoms(const AooData& data, int argc, t_atom *argv);
+
+int stream_message_to_atoms(const AooStreamMessage& data, int argc, t_atom *argv);
+
+/*//////////////////////////// priority queue ////////////////////////////////*/
+
+
 template<typename T>
 struct t_queue_item {
     template<typename U>
@@ -48,12 +59,9 @@ struct t_queue_item {
 };
 
 template<typename T>
+bool operator> (const t_queue_item<T>& a, const t_queue_item<T>& b) {
+    return a.time > b.time;
+}
+
+template<typename T>
 using t_priority_queue = aoo::priority_queue<t_queue_item<T>, std::greater<t_queue_item<T>>>;
-
-int datatype_element_size(AooDataType type);
-
-double get_elapsed_ms(AooNtpTime tt);
-
-int data_to_atoms(const AooData& data, int argc, t_atom *argv);
-
-int stream_message_to_atoms(const AooStreamMessage& data, int argc, t_atom *argv);

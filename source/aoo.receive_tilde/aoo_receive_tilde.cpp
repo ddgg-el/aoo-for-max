@@ -40,21 +40,25 @@ struct t_stream_message
 // struct to represent the object's state
 struct t_aoo_receive_tilde {
 	t_pxobject		ob;			// the object itself (t_pxobject in MSP instead of t_object)
-	double			offset; 	// the value of a property of our object
+	t_outlet *x_msgout = nullptr;
+	
 	int32_t x_nchannels = 0;
+	std::unique_ptr<t_sample *[]> x_vec;
+
 	t_clock *x_clock = nullptr;
 	t_clock *x_queue_clock = nullptr;
-	bool x_multi = false;
+	t_priority_queue<t_stream_message> x_queue;
+	
+    bool x_multi = false;
 	AooId x_id = 0;
 	AooSink::Ptr x_sink;
-	std::unique_ptr<t_sample *[]> x_vec;
-	t_outlet *x_msgout = nullptr;
-	t_priority_queue<t_stream_message> x_queue;
 	// node
     t_node *x_node = nullptr;
-	void dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id);
-	t_aoo_receive_tilde(int argc, t_atom *argv);
+	
+    t_aoo_receive_tilde(int argc, t_atom *argv);
 	~t_aoo_receive_tilde();
+	
+    void dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id);
 	
 } ;
 
@@ -75,7 +79,7 @@ static void aoo_receive_queue_tick(t_aoo_receive_tilde *x)
             AooStreamMessage msg { 0, m.channel, m.type,
                                  (int32_t)m.data.size(), m.data.data() };
             x->dispatch_stream_message(msg, m.address, m.id);
-            // queue.pop();
+            queue.pop();
         } else {
             break;
         }
@@ -273,7 +277,6 @@ void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv)
 		dsp_setup((t_pxobject *)x, 1);	// MSP inlets: arg is # of inlets and is REQUIRED!
 		// use 0 if you don't need inlets
 		new (x) t_aoo_receive_tilde(argc, argv);
-		x->offset = 0.0;
 	}
 	return (x);
 }
@@ -325,7 +328,7 @@ void aoo_receive_tilde_perform64(t_aoo_receive_tilde *x, t_object *dsp64, double
 
 	// this perform method simply copies the input to the output, offsetting the value
 	while (n--)
-		*outL++ = *inL++ + x->offset;
+		*outL++ = *inL++;
 }
 
 
