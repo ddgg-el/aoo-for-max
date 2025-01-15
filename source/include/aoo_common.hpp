@@ -4,8 +4,12 @@
 
 #include "aoo.h"
 #include "aoo_client.hpp"
+#include "aoo_sink.hpp"
 #include "common/log.hpp"
 #include "common/time.hpp"
+#include "common/net_utils.hpp"
+#include "common/priority_queue.hpp"
+
 
 #define AOO_MAX_NUM_CHANNELS 256
 
@@ -33,3 +37,23 @@ public:
 };
 
 void format_makedefault(AooFormatStorage &f, int nchannels);
+
+template<typename T>
+struct t_queue_item {
+    template<typename U>
+    t_queue_item(U&& _data, double _time)
+        : data(std::forward<U>(_data)), time(_time) {}
+    T data;
+    double time;
+};
+
+template<typename T>
+using t_priority_queue = aoo::priority_queue<t_queue_item<T>, std::greater<t_queue_item<T>>>;
+
+int datatype_element_size(AooDataType type);
+
+double get_elapsed_ms(AooNtpTime tt);
+
+int data_to_atoms(const AooData& data, int argc, t_atom *argv);
+
+int stream_message_to_atoms(const AooStreamMessage& data, int argc, t_atom *argv);

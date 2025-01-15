@@ -408,13 +408,13 @@ void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double sampler
 // this is the 64-bit perform method audio vectors
 void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
-	t_double *inL = ins[0];		// we get audio for each inlet of the object from the **ins argument
-	t_double *outL = outs[0];	// we get audio for each outlet of the object from the **outs argument
-	int n = sampleframes;
+	// t_double *inL = ins[0];		// we get audio for each inlet of the object from the **ins argument
+	// t_double *outL = outs[0];	// we get audio for each outlet of the object from the **outs argument
+	// int n = sampleframes;
 
-	// this perform method simply copies the input to the output, offsetting the value
-	while (n--)
-		// *outL++ = x->offset;
-		*outL++ = *inL++ + x->offset;
+	// // this perform method simply copies the input to the output, offsetting the value
+	// while (n--)
+	// 	// *outL++ = x->offset;
+	// 	*outL++ = *inL++ + x->offset;
 }
 

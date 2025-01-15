@@ -18,7 +18,11 @@ struct t_dejitter {
     t_object ob;            // The object itself (t_object in Max/MSP)
 
     void update();
-    static void tick(t_dejitter *x);
+    // static void tick(t_dejitter *x);
+    static void tick(t_dejitter *x) {
+        x->update();
+        clock_delay(x->d_clock, sys_getblksize()); // once per DSP tick
+    }
 
     int d_refcount;        // Reference count
 private:
@@ -123,10 +127,10 @@ uint64_t dejitter_osctime(t_dejitter *x) {
     return x->osctime();
 }
 
-void ext_main(void *r){
-    t_class *c;
-    c = class_new("aoo dejitter", 0, 0,
-                               sizeof(t_dejitter), 0L, A_GIMME, 0);
-    class_register(CLASS_NOBOX, dejitter_class);
-    dejitter_class = c;
-}
+// void ext_main(void *r){
+//     t_class *c;
+//     c = class_new("aoo dejitter", 0, 0,
+//                                sizeof(t_dejitter), 0L, A_GIMME, 0);
+//     class_register(CLASS_NOBOX, dejitter_class);
+//     dejitter_class = c;
+// }
