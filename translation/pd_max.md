@@ -1,5 +1,5 @@
 |Pd|Max|
---------
+|--|---|
 |[t_signal](#t_signal)|[t_signal](#t_signal)|
 |[t_pd](#t_pd)||
 |[t_symbol](#t_symbol)||
@@ -8,6 +8,11 @@
 |SETFLOAT|atom_setfloat|
 |A_SYMBOL|A_SYM|
 |t_pd|t_class|
+|pd_new|object_alloc|
+|t_method|method|
+|w_symbol|w_sym|
+|pd_error|object_error|
+|clock_getlogicaltime|gettime|
 
 **PD structures all defined in m_pd.h**
 

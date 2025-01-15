@@ -43,13 +43,16 @@ foreach (project_dir ${PROJECT_DIRS})
 	set(project_path ${CMAKE_CURRENT_SOURCE_DIR}/source/${project_dir})
   if (EXISTS "${project_path}/CMakeLists.txt")
    # Non compilare aoo_template
-    if(NOT "${project_dir}" STREQUAL "aoo_template")
+    if(NOT "${project_dir}" STREQUAL "aoo_template_tilde" AND NOT "${project_dir}" STREQUAL "aoo_template")
       string(REGEX REPLACE "_tilde" "~" EXTERN_PROJECT_NAME_DEFAULT "${project_dir}")
-      message("*** Generating: ${EXTERN_PROJECT_NAME_DEFAULT} ***\n")
+      message("*** Generating: ${EXTERN_PROJECT_NAME_DEFAULT} ***")
       add_subdirectory(${project_path})
     endif ()
   endif ()
 endforeach ()
+
+message("\n********************************\n")
+
 
 ################################################################
 

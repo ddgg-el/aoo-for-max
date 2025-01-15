@@ -17,7 +17,7 @@ file(GLOB PROJECT_SRC
 	 "*.c"
      "*.cpp"
 )
-add_library(
+add_library( 
 	${PROJECT_NAME} 
 	MODULE
 	${PROJECT_SRC}
