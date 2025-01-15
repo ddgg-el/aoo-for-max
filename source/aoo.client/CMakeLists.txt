@@ -16,6 +16,7 @@ file(GLOB PROJECT_SRC
      "*.h"
 	 "*.c"
      "*.cpp"
+	 "common/*.cpp"
 )
 add_library( 
 	${PROJECT_NAME} 

@@ -29,6 +29,15 @@ public:
 
 	virtual void release(t_class *obj, void *x = nullptr) = 0;
 
+	virtual bool find_peer(const aoo::ip_address& addr,
+                           t_symbol *& group, t_symbol *& user) const = 0;
+
+    virtual bool find_peer(t_symbol * group, t_symbol * user,
+                           aoo::ip_address& addr) const = 0;
+
+	virtual int serialize_endpoint(const aoo::ip_address& addr, AooId id,
+                                   int argc, t_atom *argv) const = 0;
+
 	// virtual AooClient * client() = 0;
 
 	// virtual int port() const = 0;
@@ -49,7 +58,7 @@ int data_to_atoms(const AooData& data, int argc, t_atom *argv);
 int stream_message_to_atoms(const AooStreamMessage& data, int argc, t_atom *argv);
 
 // TODO: speriamo bene
-double clock_getsystimeafter(double deltime)
+double clock_getsystimeafter(double deltime);
 
 /*//////////////////////////// priority queue ////////////////////////////////*/
 

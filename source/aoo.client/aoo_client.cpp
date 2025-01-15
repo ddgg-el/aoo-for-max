@@ -11,6 +11,16 @@
 
 #include "aoo_common.hpp"
 
+
+struct t_peer
+{
+    t_symbol *group_name;
+    t_symbol *user_name;
+    AooId group_id;
+    AooId user_id;
+    aoo::ip_address address;
+};
+
 ////////////////////////// object struct
 struct t_aoo_client
 {
@@ -19,6 +29,17 @@ struct t_aoo_client
 	t_object					ob;			// the object itself (must be first)
 
 	// t_dejitter *x_dejitter;
+	const t_peer * find_peer(const aoo::ip_address& addr) const;
+
+    const t_peer * find_peer(AooId group, AooId user) const;
+
+    const t_peer * find_peer(t_symbol *group, t_symbol *user) const;
+
+
+
+
+
+	std::vector<t_peer> x_peers;
 };
 /*
 t_aoo_client::t_aoo_client(int argc, t_atom *argv)
@@ -41,6 +62,61 @@ t_aoo_client::t_aoo_client(int argc, t_atom *argv)
     }
 }
 */
+
+const t_peer * t_aoo_client::find_peer(const aoo::ip_address& addr) const {
+    for (auto& peer : x_peers) {
+        if (peer.address == addr) {
+            return &peer;
+        }
+    }
+    return nullptr;
+}
+
+
+const t_peer * t_aoo_client::find_peer(AooId group, AooId user) const {
+    for (auto& peer : x_peers) {
+        if (peer.group_id == group && peer.user_id == user) {
+            return &peer;
+        }
+    }
+    return nullptr;
+}
+
+const t_peer * t_aoo_client::find_peer(t_symbol *group, t_symbol *user) const {
+    for (auto& peer : x_peers) {
+        if (peer.group_name == group && peer.user_name == user) {
+            return &peer;
+        }
+    }
+    return nullptr;
+}
+
+// for t_node
+bool aoo_client_find_peer(t_aoo_client *x, const aoo::ip_address& addr,
+                          t_symbol *& group, t_symbol *& user)
+{
+    if (auto peer = x->find_peer(addr)) {
+        group = peer->group_name;
+        user = peer->user_name;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// for t_node
+bool aoo_client_find_peer(t_aoo_client *x, t_symbol *group, t_symbol *user,
+                          aoo::ip_address& addr)
+{
+    if (auto peer = x->find_peer(group, user)) {
+        addr = peer->address;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 ///////////////////////// function prototypes
 //// standard set
 void *aoo_client_new(t_symbol *s, long argc, t_atom *argv);
