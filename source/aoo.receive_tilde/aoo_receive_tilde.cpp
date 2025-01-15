@@ -9,6 +9,10 @@
 #include "ext_obex.h"		// required for "new" style objects
 #include "z_dsp.h"			// required for MSP objects
 #include <vector>
+#include <string.h>
+#include <assert.h>
+#include <stdio.h>
+#include <inttypes.h>
 #include "aoo_common.hpp"
 
 
@@ -50,6 +54,8 @@ struct t_aoo_receive_tilde {
     t_node *x_node = nullptr;
 	void dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id);
 	t_aoo_receive_tilde(int argc, t_atom *argv);
+	~t_aoo_receive_tilde();
+	
 } ;
 
 static void aoo_receive_tick(t_aoo_receive_tilde *x)
@@ -62,14 +68,14 @@ static void aoo_receive_queue_tick(t_aoo_receive_tilde *x)
 {
     auto& queue = x->x_queue;
     auto now = gettime();
-
+	post("daje");
     while (!queue.empty()){
         if (queue.top().time <= now) {
             auto& m = queue.top().data;
             AooStreamMessage msg { 0, m.channel, m.type,
                                  (int32_t)m.data.size(), m.data.data() };
             x->dispatch_stream_message(msg, m.address, m.id);
-            queue.pop();
+            // queue.pop();
         } else {
             break;
         }
@@ -143,6 +149,9 @@ t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
     // arg #4 (optional): latency (ms)
     float latency = argc > 3 ? atom_getfloat(argv + 3) : DEFAULT_LATENCY;
 
+    // event outlet
+    x_msgout = outlet_new(this, 0);
+
     // make signal outlets
     for (int i = 0; i < noutlets; ++i){
         outlet_new(this, "signal");
@@ -151,8 +160,7 @@ t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
     if (x_nchannels > 0) {
         x_vec = std::make_unique<t_sample *[]>(x_nchannels);
     }
-    // event outlet
-    x_msgout = outlet_new(this, 0);
+
 
     // create and initialize AooSink object
     x_sink = AooSink::create(x_id);
@@ -169,36 +177,57 @@ t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
     // aoo_receive_port(this, port);
 }
 
+t_aoo_receive_tilde::~t_aoo_receive_tilde()
+{
+    if (x_node){
+        x_node->release((t_class *)this, x_sink.get());
+    }
+    clock_free(x_clock);
+    clock_free(x_queue_clock);
+}
+
+
 void t_aoo_receive_tilde::dispatch_stream_message(const AooStreamMessage& msg,
                                             const aoo::ip_address& address, AooId id) {
     // 5 extra atoms for endpoint (host, port, ID) + message (channel, type)
     // NB: in case of "fake" stream messages, we just over-allocate.
     auto size = 5 + (msg.size / datatype_element_size(msg.type));
+	// un'array dove verrà copiato il messaggio da mandare all'outlet
     auto vec = (t_atom *)alloca(sizeof(t_atom) * size);
 	// TODO  
     // if (!x_node->serialize_endpoint(address, id, 3, vec)) {
     //     error("bug: dispatch_stream_message: serialize_endpoint");
     //     return;
     // }
+	// comunica attraverso l'outlet lo stato della connesione (credo)
     if (msg.type == kAooDataStreamState) {
-        AooStreamState state;
-        assert(msg.size == sizeof(state)); // see aoo_receive_handle_event()
-        memcpy(&state, msg.data, sizeof(state));
-        atom_setfloat(vec + 3, state);
 
+        AooStreamState state;
+		// blocca l'esecuzione del programma se i due dati sono di dimensioni diverse (misura di sicurezza)
+        assert(msg.size == sizeof(state)); // see aoo_receive_handle_event()
+		// copia dentro state msg.data, un'informazione che sarà di dimensione sizeof(state)
+        memcpy(&state, msg.data, sizeof(state));
+		// copia in vec il valore float/int che insica lo "stato" dell'oggetto
+        atom_setfloat(vec + 3, state);
+		// mandalo fuori dall'outlet (con la stringa "state")
         outlet_anything(x_msgout, gensym("state"), 4, vec);
     } else if (msg.type == kAooDataStreamTime) {
+		//se in vece il messaggio è un'informazione legata al tempo
         AooNtpTime tt[2];
+		// vedi sopra
         assert(msg.size == sizeof(tt)); // see aoo_receive_handle_event()
+		// copia in tt msg.data che sarà di dimensione sizeof(tt)
         memcpy(tt, msg.data, sizeof(tt));
+		// copia in vec+3 il tempo trascorso da boh
+		// e in vecì4 stessa cosa
         atom_setfloat(vec + 3, get_elapsed_ms(tt[0]));
         atom_setfloat(vec + 4, get_elapsed_ms(tt[1]));
-
+		// e manda in outlet questi due valori
         outlet_anything(x_msgout, gensym("time"), 5, vec);
     } else {
-        // message
+        // message - converti il messaggio in "atom" / quindi fallo diventare un messaggio leggibile in max
         stream_message_to_atoms(msg, size - 3, vec + 3);
-
+		// mandalo in outlet
         outlet_anything(x_msgout, gensym("msg"), size, vec);
     }
 }
@@ -224,7 +253,7 @@ void ext_main(void *r)
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo.receive~", (method)aoo_receive_tilde_new, (method)dsp_free, (long)sizeof(t_aoo_receive_tilde), 0L, A_GIMME, 0);
+	t_class *c = class_new("aoo.receive~", (method)aoo_receive_tilde_new, (method)aoo_receive_tilde_free, (long)sizeof(t_aoo_receive_tilde), 0L, A_GIMME, 0);
 
 
 	class_addmethod(c, (method)aoo_receive_tilde_dsp64,		"dsp64",	A_CANT, 0);
@@ -244,7 +273,6 @@ void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv)
 		dsp_setup((t_pxobject *)x, 1);	// MSP inlets: arg is # of inlets and is REQUIRED!
 		// use 0 if you don't need inlets
 		new (x) t_aoo_receive_tilde(argc, argv);
-		outlet_new(x, "signal"); 		// signal outlet (note "signal" rather than NULL)
 		x->offset = 0.0;
 	}
 	return (x);
@@ -254,7 +282,7 @@ void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv)
 // NOT CALLED!, we use dsp_free for a generic free function
 void aoo_receive_tilde_free(t_aoo_receive_tilde *x)
 {
-	;
+    x->~t_aoo_receive_tilde();
 }
 
 
