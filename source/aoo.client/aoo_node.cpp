@@ -35,9 +35,16 @@ public:
 
 };
 
-
-
-
+bool t_node_imp::find_peer(const aoo::ip_address& addr,
+                           t_symbol *& group, t_symbol *& user) const {
+    if (x_clientobj &&
+            aoo_client_find_peer(
+               (t_aoo_client *)x_clientobj, addr, group, user)) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 bool t_node_imp::find_peer(t_symbol * group, t_symbol * user,
                            aoo::ip_address& addr) const {
