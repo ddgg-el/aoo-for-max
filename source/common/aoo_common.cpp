@@ -1,6 +1,10 @@
 #include "aoo_common.hpp"
 #include "codec/aoo_pcm.h"
+#include "codec/aoo_null.h"
 
+#if AOO_USE_OPUS
+#include "codec/aoo_opus.h"
+#endif
 
 
 void format_makedefault(AooFormatStorage &f, int nchannels)
@@ -37,6 +41,90 @@ int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv)
     atom_setfloat(argv, msg.channel);
     AooData data { msg.type, msg.data, (AooSize)msg.size };
     return data_to_atoms(data, argc - 1, argv + 1) + 1;
+}
+
+int format_to_atoms(const AooFormat &f, int argc, t_atom *argv)
+{
+    if (argc < 4){
+        error("BUG: format_to_atoms: too few atoms!");
+        return 0;
+    }
+    t_symbol *codec = gensym(f.codecName);
+    atom_setsym(argv, codec);
+    atom_setfloat(argv + 1, f.numChannels);
+    atom_setfloat(argv + 2, f.blockSize);
+    atom_setfloat(argv + 3, f.sampleRate);
+
+    if (codec == gensym(kAooCodecNull)){
+        // null <channels> <blocksize> <samplerate>
+        return 4;
+    } else if (codec == gensym(kAooCodecPcm)){
+        // pcm <channels> <blocksize> <samplerate> <bitdepth>
+        if (argc < 5){
+            error("BUG: format_to_atoms: too few atoms for pcm format!");
+            return 0;
+        }
+        auto& fmt = (AooFormatPcm &)f;
+        int nbytes;
+        switch (fmt.bitDepth){
+        case kAooPcmInt8:
+            nbytes = 1;
+            break;
+        case kAooPcmInt16:
+            nbytes = 2;
+            break;
+        case kAooPcmInt24:
+            nbytes = 3;
+            break;
+        case kAooPcmFloat32:
+            nbytes = 4;
+            break;
+        case kAooPcmFloat64:
+            nbytes = 8;
+            break;
+        default:
+            object_error(0, "format_to_atoms: bad bitdepth argument %d", fmt.bitDepth);
+            return 0;
+        }
+        atom_setfloat(argv + 4, nbytes);
+        return 5;
+    }
+#if AOO_USE_OPUS
+    else if (codec == gensym(kAooCodecOpus)){
+        // opus <channels> <blocksize> <samplerate> <application>
+        if (argc < 5){
+            error("BUG: format_to_atoms: too few atoms for opus format!");
+            return 0;
+        }
+
+        auto& fmt = (AooFormatOpus &)f;
+
+        // application type
+        t_symbol *type;
+        switch (fmt.applicationType){
+        case OPUS_APPLICATION_VOIP:
+            type = gensym("voip");
+            break;
+        case OPUS_APPLICATION_RESTRICTED_LOWDELAY:
+            type = gensym("lowdelay");
+            break;
+        case OPUS_APPLICATION_AUDIO:
+            type = gensym("audio");
+            break;
+        default:
+            object_error(0, "format_to_atoms: bad application type argument %d",
+                  fmt.applicationType);
+            return 0;
+        }
+        atom_setsym(argv + 4, type);
+
+        return 5;
+    }
+#endif
+    else {
+        object_error(0, "format_to_atoms: unknown format %s!", codec->s_name);
+    }
+    return 0;
 }
 
 int data_to_atoms(const AooData& data, int argc, t_atom *argv) {
@@ -86,4 +174,8 @@ int data_to_atoms(const AooData& data, int argc, t_atom *argv) {
     }
     assert(ptr <= (data.data + data.size));
     return numatoms;
+}
+
+double clock_getsystimeafter(double deltime){
+    return systime_ms()*deltime;
 }

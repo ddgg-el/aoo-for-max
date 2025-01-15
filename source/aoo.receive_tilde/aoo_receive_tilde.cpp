@@ -24,6 +24,13 @@ const int kAooDataStreamTime = -3; // AooEventStreamTime
 const int kAooDataStreamState = -2; // AooEventStreamState
 // NB: kAooDataUnspecified = -1
 
+struct t_source
+{
+    aoo::ip_address s_address;
+    AooId s_id;
+    t_symbol *s_group;
+    t_symbol *s_user;
+};
 
 struct t_stream_message
 {
@@ -43,6 +50,7 @@ struct t_aoo_receive_tilde {
 	t_outlet *x_msgout = nullptr;
 	
 	int32_t x_nchannels = 0;
+    int32_t x_samplerate = 0;
 	std::unique_ptr<t_sample *[]> x_vec;
 
 	t_clock *x_clock = nullptr;
@@ -54,6 +62,8 @@ struct t_aoo_receive_tilde {
 	AooSink::Ptr x_sink;
 	// node
     t_node *x_node = nullptr;
+    // sources
+    std::vector<t_source> x_sources;
 	
     t_aoo_receive_tilde(int argc, t_atom *argv);
 	~t_aoo_receive_tilde();
@@ -66,7 +76,6 @@ static void aoo_receive_tick(t_aoo_receive_tilde *x)
 {
     x->x_sink->pollEvents();
 }
-
 
 static void aoo_receive_queue_tick(t_aoo_receive_tilde *x)
 {
@@ -90,7 +99,245 @@ static void aoo_receive_queue_tick(t_aoo_receive_tilde *x)
     }
 }
 
+static void aoo_receive_handle_stream_message(t_aoo_receive_tilde *x, const AooStreamMessage *msg, const AooEndpoint *ep)
+{
+    auto delay = (double)msg->sampleOffset / (double)x->x_samplerate * 1000.0;
+    if (delay > 0) {
+        // put on queue and schedule on clock (using logical time)
+        auto abstime = clock_getsystimeafter(delay);
+        // reschedule if we are the next due element
+        if (x->x_queue.empty() || abstime < x->x_queue.top().time) {
+            clock_set(x->x_queue_clock, abstime);
+        }
+        x->x_queue.emplace(t_stream_message(*msg, *ep), abstime);
+    } else {
+        // dispatch immediately
+        aoo::ip_address addr((const sockaddr *)ep->address, ep->addrlen);
+        x->dispatch_stream_message(*msg, addr, ep->id);
+    }
 
+}
+
+static void aoo_receive_handle_event(t_aoo_receive_tilde *x, const AooEvent *event, int32_t)
+{
+    switch (event->type){
+    case kAooEventSourceAdd:
+    case kAooEventSourceRemove:
+    case kAooEventInviteDecline:
+    case kAooEventInviteTimeout:
+    case kAooEventUninviteTimeout:
+    case kAooEventBufferOverrun:
+    case kAooEventBufferUnderrun:
+    case kAooEventFormatChange:
+    case kAooEventStreamStart:
+    case kAooEventStreamStop:
+    case kAooEventStreamState:
+    case kAooEventStreamLatency:
+    case kAooEventStreamTime:
+    case kAooEventBlockDrop:
+    case kAooEventBlockResend:
+    case kAooEventBlockXRun:
+    case kAooEventSourcePing:
+    {
+        // common endpoint header
+        auto& ep = event->endpoint.endpoint;
+        // crea un riferimento ad un nodo per creare un indirizzo ip
+        aoo::ip_address addr((const sockaddr *)ep.address, ep.addrlen);
+        const int maxsize = 32;
+        // crea un msg
+        t_atom msg[maxsize];
+        if (!x->x_node->serialize_endpoint(addr, ep.id, 3, msg)) {
+            error("bug: aoo_receive_handle_event: serialize_endpoint");
+            return;
+        }
+        // dipendendo dal tipo di evento:
+        // event data
+        switch (event->type){
+        // quando aoo.send~ aggiunge (add) questo receive come AOO sink
+        case kAooEventSourceAdd:
+        {
+            // first add to source list; try to find peer name!
+            t_symbol *group = nullptr;
+            t_symbol *user = nullptr;
+            // cerca una connecssione
+            x->x_node->find_peer(addr, group, user);
+            // aggiunge la connessione all'array delle sorgenti
+            x->x_sources.push_back({ addr, ep.id, group, user });
+            // stampa il messaggio "add"
+            outlet_anything(x->x_msgout, gensym("add"), 3, msg);
+            break;
+        }
+        // quando aoo.send~ rimuove (remove) questo receive come AOO sink
+        case kAooEventSourceRemove:
+        {
+            // loop nell'array delle sorgenti
+            // e cancella una sorgente se presente nel loop
+            // first remove from source list
+            auto& sources = x->x_sources;
+            for (auto it = sources.begin(); it != sources.end(); ++it){
+                if ((it->s_address == addr) && (it->s_id == ep.id)){
+                    x->x_sources.erase(it);
+                    break;
+                }
+            }
+            // informa in Max
+            outlet_anything(x->x_msgout, gensym("remove"), 3, msg);
+            break;
+        }
+        case kAooEventInviteDecline:
+        {
+            outlet_anything(x->x_msgout, gensym("invite_decline"), 3, msg);
+            break;
+        }
+        case kAooEventInviteTimeout:
+        {
+            outlet_anything(x->x_msgout, gensym("invite_timeout"), 3, msg);
+            break;
+        }
+        case kAooEventUninviteTimeout:
+        {
+            outlet_anything(x->x_msgout, gensym("uninvite_timeout"), 3, msg);
+            break;
+        }
+        case kAooEventSourcePing:
+        {
+            auto& e = event->sourcePing;
+
+            double delta1 = aoo_ntpTimeDuration(e.t1, e.t2) * 1000.0;
+            double delta2 = aoo_ntpTimeDuration(e.t3, e.t4) * 1000.0;
+            double total_rtt = aoo_ntpTimeDuration(e.t1, e.t4) * 1000.0;
+            double network_rtt = total_rtt - aoo_ntpTimeDuration(e.t2, e.t3) * 1000;
+
+            atom_setfloat(msg + 3, delta1);
+            atom_setfloat(msg + 4, delta2);
+            atom_setfloat(msg + 5, network_rtt);
+            atom_setfloat(msg + 6, total_rtt);
+
+            outlet_anything(x->x_msgout, gensym("ping"), 7, msg);
+
+            break;
+        }
+        case kAooEventBufferOverrun:
+        {
+            outlet_anything(x->x_msgout, gensym("overrun"), 3, msg);
+            break;
+        }
+        case kAooEventBufferUnderrun:
+        {
+            outlet_anything(x->x_msgout, gensym("underrun"), 3, msg);
+            break;
+        }
+        case kAooEventFormatChange:
+        {
+            // skip first 3 atoms
+            int n = format_to_atoms(*event->formatChange.format, maxsize - 3, msg + 3);
+            outlet_anything(x->x_msgout, gensym("format"), n + 3, msg);
+            break;
+        }
+        case kAooEventStreamStart:
+        {
+            auto& e = event->streamStart;
+            if (e.metadata){
+                // <ip> <port> <id> <type> <data...>
+                auto count = 4 + (e.metadata->size / datatype_element_size(e.metadata->type));
+                auto vec = (t_atom *)alloca(count * sizeof(t_atom));
+                // copy endpoint
+                memcpy(vec, msg, 3 * sizeof(t_atom));
+                // copy data
+                data_to_atoms(*e.metadata, count - 3, vec + 3);
+
+                outlet_anything(x->x_msgout, gensym("start"), count, vec);
+            } else {
+                outlet_anything(x->x_msgout, gensym("start"), 3, msg);
+            }
+            break;
+        }
+        case kAooEventStreamStop:
+        {
+            outlet_anything(x->x_msgout, gensym("stop"), 3, msg);
+            break;
+        }
+        case kAooEventStreamState:
+        {
+            auto state = event->streamState.state;
+            auto offset = event->streamState.sampleOffset;
+            if (offset > 0) {
+                // HACK: schedule as fake stream message
+                AooStreamMessage msg;
+                msg.type = kAooDataStreamState;
+                msg.sampleOffset = offset;
+                msg.size = sizeof(state);
+                msg.data = (AooByte *)&state;
+                aoo_receive_handle_stream_message(x, &msg, &ep);
+            } else {
+                atom_setfloat(msg + 3, state);
+                outlet_anything(x->x_msgout, gensym("state"), 4, msg);
+            }
+            break;
+        }
+        case kAooEventStreamLatency:
+        {
+            atom_setfloat(msg + 3, event->streamLatency.sourceLatency * 1000);
+            atom_setfloat(msg + 4, event->streamLatency.sinkLatency * 1000);
+            atom_setfloat(msg + 5, event->streamLatency.bufferLatency * 1000);
+            outlet_anything(x->x_msgout, gensym("latency"), 6, msg);
+            break;
+        }
+        case kAooEventStreamTime:
+        {
+            AooNtpTime tt[2];
+            tt[0] = event->streamTime.sourceTime;
+            tt[1] = event->streamTime.sinkTime;
+            auto offset = event->streamTime.sampleOffset;
+            if (offset > 0) {
+                // HACK: schedule as fake stream message
+                AooStreamMessage msg;
+                msg.type = kAooDataStreamTime;
+                msg.sampleOffset = offset;
+                msg.size = sizeof(tt);
+                msg.data = (AooByte *)tt;
+                aoo_receive_handle_stream_message(x, &msg, &ep);
+            } else {
+                atom_setfloat(msg + 3, get_elapsed_ms(tt[0]));
+                atom_setfloat(msg + 4, get_elapsed_ms(tt[1]));
+                outlet_anything(x->x_msgout, gensym("time"), 5, msg);
+            }
+            break;
+        }
+        case kAooEventBlockDrop:
+        {
+            atom_setfloat(msg + 3, event->blockDrop.count);
+            outlet_anything(x->x_msgout, gensym("block_dropped"), 4, msg);
+            break;
+        }
+        case kAooEventBlockResend:
+        {
+            atom_setfloat(msg + 3, event->blockResend.count);
+            outlet_anything(x->x_msgout, gensym("block_resent"), 4, msg);
+            break;
+        }
+        case kAooEventBlockXRun:
+        {
+            atom_setfloat(msg + 3, event->blockXRun.count);
+            outlet_anything(x->x_msgout, gensym("block_xrun"), 4, msg);
+            break;
+        }
+        default:
+            error("BUG: aoo_receive_handle_event: bad case label!");
+            break;
+        }
+
+        break; // !
+    }
+    default:
+        object_post((t_object*)x, "%s: unknown event type (%d)",
+                object_classname(x), event->type);
+        break;
+    }
+}
+
+
+// member functions
 t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_receive_tick);
@@ -171,8 +418,8 @@ t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
 
 	//TODO 
     // // set event handler
-    // x_sink->setEventHandler((AooEventHandler)aoo_receive_handle_event,
-    //                          this, kAooEventModePoll);
+    x_sink->setEventHandler((AooEventHandler)aoo_receive_handle_event,
+                             this, kAooEventModePoll);
 
     x_sink->setLatency(latency * 0.001);
 
@@ -189,7 +436,6 @@ t_aoo_receive_tilde::~t_aoo_receive_tilde()
     clock_free(x_clock);
     clock_free(x_queue_clock);
 }
-
 
 void t_aoo_receive_tilde::dispatch_stream_message(const AooStreamMessage& msg,
                                             const aoo::ip_address& address, AooId id) {

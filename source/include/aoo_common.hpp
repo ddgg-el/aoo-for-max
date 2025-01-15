@@ -42,9 +42,14 @@ int datatype_element_size(AooDataType type);
 
 double get_elapsed_ms(AooNtpTime tt);
 
+int format_to_atoms(const AooFormat &f, int argc, t_atom *argv);
+
 int data_to_atoms(const AooData& data, int argc, t_atom *argv);
 
 int stream_message_to_atoms(const AooStreamMessage& data, int argc, t_atom *argv);
+
+// TODO: speriamo bene
+double clock_getsystimeafter(double deltime)
 
 /*//////////////////////////// priority queue ////////////////////////////////*/
 
