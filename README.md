@@ -36,8 +36,12 @@ Inoltre è utile lavorare su un `branch` separato che verrà poi combinato con `
 	"${workspaceFolder}/",
 	"${workspaceFolder}/aoo/include",
 	"${workspaceFolder}/aoo",
+	"${workspaceFolder}/aoo/deps/opus/include",
+    "${workspaceFolder}/aoo/deps/portaudio/include",
 	"${workspaceFolder}/source/include",
 	"${workspaceFolder}/max-sdk-base/c74support/**/"
+	// Percorso alla sorgente di pd che potrebbe essere diverso in funzione della versione di Pd installata
+	"/Applications/Pd-0.54-1.app/Contents/Resources/src/"
 ],
 ```
 
@@ -48,7 +52,6 @@ $ cd build
 $ cmake ..
 $ cmake --build . -j${nproc}
 ```
-**All'oggi 1 Novembre 2024 il progetto `aoo.send~` non compila a causa di `aoo_setup.cpp` non ancora implementato**
 
 Gli externals compilati verranno installati nella cartella `externals`
 
@@ -59,3 +62,6 @@ Per verificare che gli oggetti funzionino bisogna aggiungere la cartella `extern
 
 Per gli externals di PD
 [https://github.com/pure-data/externals-howto/](https://github.com/pure-data/externals-howto/)
+
+Max SDK
+[https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html](https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html)

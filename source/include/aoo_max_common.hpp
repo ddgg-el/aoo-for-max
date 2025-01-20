@@ -1,46 +1,30 @@
-#include "aoo_common.hpp"
+#pragma once
+
+#include "ext.h"
+#include "z_dsp.h"
+
+#include "aoo.h"
+#include "aoo_types.h"
+#include "common/time.hpp"
+#include "common/utils.hpp"
+#include "common/bit_utils.hpp"
+#include "common/priority_queue.hpp"
+
 #include "codec/aoo_pcm.h"
 #include "codec/aoo_null.h"
-
 #if AOO_USE_OPUS
 #include "codec/aoo_opus.h"
 #endif
 
-
-void format_makedefault(AooFormatStorage &f, int nchannels)
-{
-    AooFormatPcm_init((AooFormatPcm *)&f, nchannels,
-                      sys_getsr(), 64, kAooPcmFloat32);
-}
-
-int datatype_element_size(AooDataType type) {
-    switch (type) {
-    case kAooDataFloat32:
-        return 4;
-    case kAooDataFloat64:
-        return 8;
-    case kAooDataInt16:
-        return 2;
-    case kAooDataInt32:
-        return 4;
-    case kAooDataInt64:
-        return 8;
-    default:
-        return 1;
-    }
-}
-
-//originariamente era in setup
 static AooNtpTime g_start_time;
 double get_elapsed_ms(AooNtpTime tt) {
     return aoo::time_tag::duration(g_start_time, tt);
 }
 
-int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv) {
-    assert(argc > 2);
-    atom_setfloat(argv, msg.channel);
-    AooData data { msg.type, msg.data, (AooSize)msg.size };
-    return data_to_atoms(data, argc - 1, argv + 1) + 1;
+void format_makedefault(AooFormatStorage &f, int nchannels)
+{
+    AooFormatPcm_init((AooFormatPcm *)&f, nchannels,
+                      sys_getsr(), 64, kAooPcmFloat32);
 }
 
 int format_to_atoms(const AooFormat &f, int argc, t_atom *argv)
@@ -127,6 +111,23 @@ int format_to_atoms(const AooFormat &f, int argc, t_atom *argv)
     return 0;
 }
 
+int datatype_element_size(AooDataType type) {
+    switch (type) {
+    case kAooDataFloat32:
+        return 4;
+    case kAooDataFloat64:
+        return 8;
+    case kAooDataInt16:
+        return 2;
+    case kAooDataInt32:
+        return 4;
+    case kAooDataInt64:
+        return 8;
+    default:
+        return 1;
+    }
+}
+
 int data_to_atoms(const AooData& data, int argc, t_atom *argv) {
     assert(data.size != 0);
     auto numatoms = data.size / datatype_element_size(data.type) + 1;
@@ -176,6 +177,36 @@ int data_to_atoms(const AooData& data, int argc, t_atom *argv) {
     return numatoms;
 }
 
-double clock_getsystimeafter(double deltime){
-    return systime_ms()*deltime;
+int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv) {
+    assert(argc > 2);
+    atom_setfloat(argv, msg.channel);
+    AooData data { msg.type, msg.data, (AooSize)msg.size };
+    return data_to_atoms(data, argc - 1, argv + 1) + 1;
 }
+
+// TODO: speriamo bene
+double clock_getsystimeafter(double deltime)
+{
+	return systime_ms()*deltime;
+}
+
+
+///////////////////////////// priority queue ////////////////////////////////
+
+template<typename T>
+struct t_queue_item {
+    template<typename U>
+    t_queue_item(U&& _data, double _time)
+        : data(std::forward<U>(_data)), time(_time) {}
+    T data;
+    double time;
+};
+
+template<typename T>
+bool operator> (const t_queue_item<T>& a, const t_queue_item<T>& b) {
+    return a.time > b.time;
+}
+
+template<typename T>
+using t_priority_queue = aoo::priority_queue<t_queue_item<T>, std::greater<t_queue_item<T>>>;
+

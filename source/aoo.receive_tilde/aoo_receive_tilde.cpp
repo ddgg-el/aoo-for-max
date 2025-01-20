@@ -4,17 +4,8 @@
 	original by: jeremy bernstein, jeremy@bootsquad.com
 	@ingroup examples
 */
-
-#include "ext.h"			// standard Max include, always required (except in Jitter)
-#include "ext_obex.h"		// required for "new" style objects
-#include "z_dsp.h"			// required for MSP objects
-#include <vector>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
-#include <inttypes.h>
-#include "aoo_common.hpp"
-
+#include "aoo.h"
+#include "aoo_receive_tilde.h"
 
 // for hardware buffer sizes up to 1024 @ 44.1 kHz
 #define DEFAULT_LATENCY 25
@@ -24,60 +15,13 @@ const int kAooDataStreamTime = -3; // AooEventStreamTime
 const int kAooDataStreamState = -2; // AooEventStreamState
 // NB: kAooDataUnspecified = -1
 
-struct t_source
-{
-    aoo::ip_address s_address;
-    AooId s_id;
-    t_symbol *s_group;
-    t_symbol *s_user;
-};
 
-struct t_stream_message
-{
-    t_stream_message(const AooStreamMessage& msg, const AooEndpoint& ep)
-        : address((const sockaddr *)ep.address, ep.addrlen), id(ep.id),
-          channel(msg.channel), type(msg.type), data(msg.data, msg.data + msg.size) {}
-    aoo::ip_address address;
-    AooId id;
-    int32_t channel;
-    AooDataType type;
-    std::vector<AooByte> data;
-};
-
-// struct to represent the object's state
-struct t_aoo_receive_tilde {
-	t_pxobject		ob;			// the object itself (t_pxobject in MSP instead of t_object)
-	t_outlet *x_msgout = nullptr;
-	
-	int32_t x_nchannels = 0;
-    int32_t x_samplerate = 0;
-	std::unique_ptr<t_sample *[]> x_vec;
-
-	t_clock *x_clock = nullptr;
-	t_clock *x_queue_clock = nullptr;
-	t_priority_queue<t_stream_message> x_queue;
-	
-    bool x_multi = false;
-	AooId x_id = 0;
-	AooSink::Ptr x_sink;
-	// node
-    t_node *x_node = nullptr;
-    // sources
-    std::vector<t_source> x_sources;
-	
-    t_aoo_receive_tilde(int argc, t_atom *argv);
-	~t_aoo_receive_tilde();
-	
-    void dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id);
-	
-} ;
-
-static void aoo_receive_tick(t_aoo_receive_tilde *x)
+static void aoo_receive_tick(t_aoo_receive *x)
 {
     x->x_sink->pollEvents();
 }
 
-static void aoo_receive_queue_tick(t_aoo_receive_tilde *x)
+static void aoo_receive_queue_tick(t_aoo_receive *x)
 {
     auto& queue = x->x_queue;
     auto now = gettime();
@@ -99,7 +43,7 @@ static void aoo_receive_queue_tick(t_aoo_receive_tilde *x)
     }
 }
 
-static void aoo_receive_handle_stream_message(t_aoo_receive_tilde *x, const AooStreamMessage *msg, const AooEndpoint *ep)
+static void aoo_receive_handle_stream_message(t_aoo_receive *x, const AooStreamMessage *msg, const AooEndpoint *ep)
 {
     auto delay = (double)msg->sampleOffset / (double)x->x_samplerate * 1000.0;
     if (delay > 0) {
@@ -118,7 +62,7 @@ static void aoo_receive_handle_stream_message(t_aoo_receive_tilde *x, const AooS
 
 }
 
-static void aoo_receive_handle_event(t_aoo_receive_tilde *x, const AooEvent *event, int32_t)
+static void aoo_receive_handle_event(t_aoo_receive *x, const AooEvent *event, int32_t)
 {
     switch (event->type){
     case kAooEventSourceAdd:
@@ -336,9 +280,51 @@ static void aoo_receive_handle_event(t_aoo_receive_tilde *x, const AooEvent *eve
     }
 }
 
+static void aoo_receive_set(t_aoo_receive *x, int f1, int f2)
+{
+    int port = f1;
+    AooId id = f2;
+
+    if (id == x->x_id && port == x->x_port) {
+        return;
+    }
+
+    if (id < 0) {
+        object_error((t_object*)x, "%s: bad id %d", object_classname(x), id);
+        return;
+    }
+
+    if (port < 0) {
+        // NB: 0 is allowed (= don't listen)!
+        object_error((t_object*)x, "%s: bad port %d", object_classname(x), id);
+        return;
+    }
+
+    // always release node!
+    if (x->x_node) {
+        x->x_node->release((t_class *)x, x->x_sink.get());
+    }
+
+    if (id != x->x_id) {
+        x->x_sink->setId(id);
+        x->x_id = id;
+    }
+
+    if (port) {
+        x->x_node = t_node::get((t_class *)x, port, x->x_sink.get(), id);
+    } else {
+        x->x_node = nullptr;
+    }
+    x->x_port = port;
+}
+// Vedi sopra
+static void aoo_receive_port(t_aoo_receive *x, int f)
+{
+    aoo_receive_set(x, f, x->x_id);
+}
 
 // member functions
-t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
+t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_receive_tick);
     x_queue_clock = clock_new(this, (method)aoo_receive_queue_tick);
@@ -416,19 +402,19 @@ t_aoo_receive_tilde::t_aoo_receive_tilde(int argc, t_atom *argv)
     // create and initialize AooSink object
     x_sink = AooSink::create(x_id);
 
-	//TODO 
-    // // set event handler
+    // // set event handler per il Sink
     x_sink->setEventHandler((AooEventHandler)aoo_receive_handle_event,
                              this, kAooEventModePoll);
 
+    // imposta la latenza per il sink
     x_sink->setLatency(latency * 0.001);
 
-	//TODO 
     // finally we're ready to receive messages
-    // aoo_receive_port(this, port);
+    // imposto la porta e l'id del sink
+    aoo_receive_port(this, port);
 }
 
-t_aoo_receive_tilde::~t_aoo_receive_tilde()
+t_aoo_receive::~t_aoo_receive()
 {
     if (x_node){
         x_node->release((t_class *)this, x_sink.get());
@@ -437,8 +423,7 @@ t_aoo_receive_tilde::~t_aoo_receive_tilde()
     clock_free(x_queue_clock);
 }
 
-void t_aoo_receive_tilde::dispatch_stream_message(const AooStreamMessage& msg,
-                                            const aoo::ip_address& address, AooId id) {
+void t_aoo_receive::dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id) {
     // 5 extra atoms for endpoint (host, port, ID) + message (channel, type)
     // NB: in case of "fake" stream messages, we just over-allocate.
     auto size = 5 + (msg.size / datatype_element_size(msg.type));
@@ -483,27 +468,16 @@ void t_aoo_receive_tilde::dispatch_stream_message(const AooStreamMessage& msg,
 }
 
 
-// method prototypes
-void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv);
-void aoo_receive_tilde_free(t_aoo_receive_tilde *x);
-void aoo_receive_tilde_assist(t_aoo_receive_tilde *x, void *b, long m, long a, char *s);
-void aoo_receive_tilde_dsp64(t_aoo_receive_tilde *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
-void aoo_receive_tilde_perform64(t_aoo_receive_tilde *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam);
-
-
-// global class pointer variable
-static t_class *aoo_receive_tilde_class = NULL;
-
 
 //***********************************************************************************************
 
-void ext_main(void *r)
+extern "C" void ext_main(void *r)
 {
 	// object initialization, note the use of dsp_free for the freemethod, which is required
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo.receive~", (method)aoo_receive_tilde_new, (method)aoo_receive_tilde_free, (long)sizeof(t_aoo_receive_tilde), 0L, A_GIMME, 0);
+	t_class *c = class_new("aoo.receive~", (method)aoo_receive_tilde_new, (method)aoo_receive_tilde_free, (long)sizeof(t_aoo_receive), 0L, A_GIMME, 0);
 
 
 	class_addmethod(c, (method)aoo_receive_tilde_dsp64,		"dsp64",	A_CANT, 0);
@@ -511,43 +485,42 @@ void ext_main(void *r)
 
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);
-	aoo_receive_tilde_class = c;
+	aoo_receive_class = c;
 }
 
 
 void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv)
 {
-	t_aoo_receive_tilde *x = (t_aoo_receive_tilde *)object_alloc(aoo_receive_tilde_class);
+	t_aoo_receive *x = (t_aoo_receive *)object_alloc(aoo_receive_class);
 
 	if (x) {
 		dsp_setup((t_pxobject *)x, 1);	// MSP inlets: arg is # of inlets and is REQUIRED!
 		// use 0 if you don't need inlets
-		new (x) t_aoo_receive_tilde(argc, argv);
+		new (x) t_aoo_receive(argc, argv);
 	}
 	return (x);
 }
 
-
-// NOT CALLED!, we use dsp_free for a generic free function
-void aoo_receive_tilde_free(t_aoo_receive_tilde *x)
+void aoo_receive_tilde_free(t_aoo_receive *x)
 {
-    x->~t_aoo_receive_tilde();
+    x->~t_aoo_receive();
 }
 
 
-void aoo_receive_tilde_assist(t_aoo_receive_tilde *x, void *b, long m, long a, char *s)
+void aoo_receive_tilde_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 {
-	if (m == ASSIST_INLET) { //inlet
-		sprintf(s, "I am inlet %ld", a);
-	}
-	else {	// outlet
-		sprintf(s, "I am outlet %ld", a);
-	}
+	// if (m == ASSIST_INLET) { //inlet
+	// 	sprintf(s, "I am inlet %ld", a);
+	// }
+	// else {	// outlet
+	// 	sprintf(s, "I am outlet %ld", a);
+	// }
+    ;
 }
 
 
 // registers a function for the signal chain in Max
-void aoo_receive_tilde_dsp64(t_aoo_receive_tilde *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
+void aoo_receive_tilde_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
 	post("my sample rate is: %f", samplerate);
 	// post(count);
@@ -566,7 +539,7 @@ void aoo_receive_tilde_dsp64(t_aoo_receive_tilde *x, t_object *dsp64, short *cou
 
 
 // this is the 64-bit perform method audio vectors
-void aoo_receive_tilde_perform64(t_aoo_receive_tilde *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
+void aoo_receive_tilde_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
 	t_double *inL = ins[0];		// we get audio for each inlet of the object from the **ins argument
 	t_double *outL = outs[0];	// we get audio for each outlet of the object from the **outs argument

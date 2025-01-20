@@ -1,43 +1,8 @@
-#include "ext.h"            // standard Max include, always required
-#include "ext_obex.h"       // required for "new" style objects
-#include "ext_common.h"     // common utilities for Max objects
-
-#include "aoo_common.hpp"
-
-t_class *dejitter_class;
-
-struct t_dejitter {
-    static constexpr const char *bindsym = "aoo dejitter";
-
-    t_dejitter();
-    ~t_dejitter();
-
-    double osctime() const {
-        return d_osctime_adjusted;
-    }
-    t_object ob;            // The object itself (t_object in Max/MSP)
-
-    void update();
-    // static void tick(t_dejitter *x);
-    static void tick(t_dejitter *x) {
-        x->update();
-        clock_delay(x->d_clock, sys_getblksize()); // once per DSP tick
-    }
-
-    int d_refcount;        // Reference count
-private:
-    void *d_clock;          // Pointer to a Max clock object
-    aoo::time_tag d_last_osctime;  // Last recorded OSC time
-    aoo::time_tag d_osctime_adjusted; // Adjusted OSC time
-    double d_last_big_delta = 0; // Last big delta time
-#if DEJITTER_CHECK
-    double d_last_logical_time = -1;
-#endif
-};
+#include "aoo_max_dejitter.h"
 
 
 t_dejitter::t_dejitter()
-    : d_last_osctime(0), d_osctime_adjusted(0), d_last_big_delta(0), d_refcount(1)
+    : d_refcount(1), d_last_osctime(0), d_osctime_adjusted(0), d_last_big_delta(0)
 {
     d_clock = clock_new(this, (method)tick);
     // Bind the object to a symbol in Max/MSP
