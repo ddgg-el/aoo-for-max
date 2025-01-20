@@ -1,5 +1,6 @@
 #include "aoo_max_dejitter.h"
 
+t_class *dejitter_class;
 
 t_dejitter::t_dejitter()
     : d_refcount(1), d_last_osctime(0), d_osctime_adjusted(0), d_last_big_delta(0)

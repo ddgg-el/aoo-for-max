@@ -3,6 +3,7 @@
 #include "ext.h"			// standard Max include
 
 #include "aoo_max_globals.h"
+#include "aoo_max_common.hpp"
 
 #include "aoo_client.hpp"
 #include "common/net_utils.hpp"
@@ -27,11 +28,11 @@ public:
 	virtual int serialize_endpoint(const aoo::ip_address& addr, AooId id,
                                    int argc, t_atom *argv) const = 0;
 
-	// virtual AooClient * client() = 0;
+	virtual AooClient * client() = 0;
 
 	virtual int port() const = 0;
 
-	// virtual void notify() = 0;
+	virtual void notify() = 0;
 };
 
 class t_node_imp final : public t_node
@@ -78,6 +79,11 @@ public:
     bool add_object(t_class *obj, void *x, AooId id);
 
     int port() const override { return x_port; }
+
+    AooClient * client() override { return x_client.get(); }
+
+     void notify() override { x_client->notify(); }
+
 
 #if NETWORK_THREAD_POLL
     void perform_io();
