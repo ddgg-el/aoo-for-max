@@ -478,19 +478,21 @@ extern "C" void ext_main(void *r)
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo.receive~", (method)aoo_receive_tilde_new, (method)aoo_receive_tilde_free, (long)sizeof(t_aoo_receive), 0L, A_GIMME, 0);
+	t_class *c = class_new("aoo.receive~", (method)aoo_receive_new, (method)aoo_receive_free, (long)sizeof(t_aoo_receive), 0L, A_GIMME, 0);
 
 
-	class_addmethod(c, (method)aoo_receive_tilde_dsp64,		"dsp64",	A_CANT, 0);
-	class_addmethod(c, (method)aoo_receive_tilde_assist,	"assist",	A_CANT, 0);
+	class_addmethod(c, (method)aoo_receive_dsp64,	"dsp64",	A_CANT, 0);
+	class_addmethod(c, (method)aoo_receive_assist,	"assist",	A_CANT, 0);
 
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);
 	aoo_receive_class = c;
+    aoo_node_setup();
+
 }
 
 
-void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv)
+void *aoo_receive_new(t_symbol *s, long argc, t_atom *argv)
 {
 	t_aoo_receive *x = (t_aoo_receive *)object_alloc(aoo_receive_class);
 
@@ -502,13 +504,13 @@ void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv)
 	return (x);
 }
 
-void aoo_receive_tilde_free(t_aoo_receive *x)
+void aoo_receive_free(t_aoo_receive *x)
 {
     x->~t_aoo_receive();
 }
 
 
-void aoo_receive_tilde_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
+void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 {
 	// if (m == ASSIST_INLET) { //inlet
 	// 	sprintf(s, "I am inlet %ld", a);
@@ -521,7 +523,7 @@ void aoo_receive_tilde_assist(t_aoo_receive *x, void *b, long m, long a, char *s
 
 
 // registers a function for the signal chain in Max
-void aoo_receive_tilde_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
+void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
 	post("my sample rate is: %f", samplerate);
 	// post(count);
@@ -535,12 +537,12 @@ void aoo_receive_tilde_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, do
 	// 5: flags to alter how the signal chain handles your object -- just pass 0
 	// 6: a generic pointer that you can use to pass any additional data to your perform method
 
-	object_method(dsp64, gensym("dsp_add64"), x, aoo_receive_tilde_perform64, 0, NULL);
+	object_method(dsp64, gensym("dsp_add64"), x, aoo_receive_perform64, 0, NULL);
 }
 
 
 // this is the 64-bit perform method audio vectors
-void aoo_receive_tilde_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
+void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
 	t_double *inL = ins[0];		// we get audio for each inlet of the object from the **ins argument
 	t_double *outL = outs[0];	// we get audio for each outlet of the object from the **outs argument

@@ -59,10 +59,9 @@ struct t_aoo_receive {
 	
 } ;
 
-
 // MAX MSP method prototypes
-void *aoo_receive_tilde_new(t_symbol *s, long argc, t_atom *argv);
-void aoo_receive_tilde_free(t_aoo_receive *x);
-void aoo_receive_tilde_assist(t_aoo_receive *x, void *b, long m, long a, char *s);
-void aoo_receive_tilde_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
-void aoo_receive_tilde_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam);
+void *aoo_receive_new(t_symbol *s, long argc, t_atom *argv);
+void aoo_receive_free(t_aoo_receive *x);
+void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s);
+void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
+void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam);
