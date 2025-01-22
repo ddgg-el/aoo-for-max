@@ -76,6 +76,8 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
         } else {
             msg = aoo_strerror(err);
         }
+        object_error((t_object*)this->x_clientobj, "Could not create node: %s", msg.c_str());
+        // FIX
         throw std::runtime_error("could not create node: " + msg);
     }
     // get socket type

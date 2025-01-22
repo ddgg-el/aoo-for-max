@@ -1,8 +1,8 @@
 /**
 	@file
 	aoo.receive~: a simple audio object for Max
-	original by: jeremy bernstein, jeremy@bootsquad.com
-	@ingroup examples
+	original by: Christof Ressi, ported to Max by Francesca Seggioli
+	@ingroup network
 */
 
 #include "aoo.h"
