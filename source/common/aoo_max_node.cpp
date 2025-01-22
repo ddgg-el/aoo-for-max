@@ -1,14 +1,24 @@
 #include "ext_critical.h"
-
 #include "aoo_max_node.h"
 
 #include "common/log.hpp"
 #include "common/sync.hpp"
 
+t_class *aoo_client_class = nullptr;
+t_class *aoo_send_class = nullptr;
+t_class *aoo_receive_class = nullptr;
+t_class *aoo_node_class = nullptr;
 
-
-// TODO:documenta
-t_node * t_node::get(t_class *obj, int port, void *x, AooId id)
+/**
+ * @brief find or create a node that can be assigned to an object
+ * 
+ * @param obj the object to which it will be assigned
+ * @param port the port
+ * @param x an AooClient
+ * @param id the id
+ * @return t_node* 
+ */
+t_node * t_node::get(t_object *obj, int port, void *x, AooId id)
 {
     t_node_imp *node = nullptr;
     // make bind symbol for port number
@@ -16,20 +26,19 @@ t_node * t_node::get(t_class *obj, int port, void *x, AooId id)
     snprintf(buf, sizeof(buf), "aoo_node %d", port);
     t_symbol *s = gensym(buf);
     // find or create node
-    // TODO:
-    // auto y = (t_node_proxy *)pd_findbyclass(s, node_proxy_class);
-    // if (y) {
-    //     node = y->x_node;
-    // } else {
-    try {
-        // finally create aoo node instance
-        node = new t_node_imp(s, port);
-    } catch (const std::exception& e) {
-        object_error((t_object*)obj, "%s: %s", object_classname(obj), e.what());
-        return nullptr;
+    auto y = (t_node_imp *)object_findregistered(aoo_node_class->c_sym, s);
+    if (y) {
+        node = y;
+    } else {
+        try {
+            // finally create aoo node instance
+            node = new t_node_imp(s, port);
+        } catch (const std::exception& e) {
+            object_error((t_object*)obj, "%s: %s", object_classname(obj), e.what());
+            return nullptr;
+        }
     }
-    // }
-
+    // connect the object to the node
     if (!node->add_object(obj, x, id)){
         // never fails for new t_node_imp!
         return nullptr;
@@ -38,19 +47,25 @@ t_node * t_node::get(t_class *obj, int port, void *x, AooId id)
     return node;
 }
 
-// TODO: documenta
+/**
+ * @brief Construct a new t_node_imp object
+ * 
+ * @param s a symbol "aoo_node <port>"
+ * @param port 
+ */
+// instantiate a node | a node is a wrapper around an AooClient
 t_node_imp::t_node_imp(t_symbol *s, int port)
-    : x_port(port) //, x_bindsym(s),
+    : x_bindsym(s), x_port(port)
 {
     LOG_DEBUG("create AooClient on port " << port);
     auto client = AooClient::create();
 
-    // client->setEventHandler([](void *user, const AooEvent *event, AooThreadLevel level) {
-    //     auto x = static_cast<t_node_imp *>(user);
-    //     if (x->x_clientobj) {
-    //         aoo_client_handle_event((t_aoo_client *)x->x_clientobj, event, level);
-    //     }
-    // }, this, kAooEventModePoll);
+    client->setEventHandler([](void *user, const AooEvent *event, AooThreadLevel level) {
+        auto x = static_cast<t_node_imp *>(user);
+        if (x->x_clientobj) {
+            aoo_client_handle_event((t_aoo_client *)x->x_clientobj, event, level);
+        }
+    }, this, kAooEventModePoll);
 
     AooClientSettings settings;
     settings.portNumber = port;
@@ -73,9 +88,9 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
 
     // success
     x_client = std::move(client);
+    // post("t_node_imp::t_node_imp %s", *x_bindsym);
+    object_new(CLASS_NOBOX, x_bindsym, this);
 
-    // pd_bind(&x_proxy.x_pd, x_bindsym);
-/*
 #if NETWORK_THREAD_POLL
     // start network I/O thread
     LOG_DEBUG("start network thread");
@@ -87,26 +102,21 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
         perform_io();
     });
 #else
+    t_max_err err;
     // start send thread
-    LOG_DEBUG("start network send thread");
-    x_sendthread = std::thread([this, pd=pd_this]() {
-    #ifdef PDINSTANCE
-        pd_setinstance(pd);
-    #endif
-        aoo::sync::lower_thread_priority();
-        send();
-    });
+    post("start network send thread");
+    err = systhread_create((method)send, this, 0, 0, 0, &x_sendthread);
+    if(err != MAX_ERR_NONE){
+        object_error((t_object*)this, "could not create send thread");
+    }
     // start receive thread
-    LOG_DEBUG("start network receive thread");
-    x_recvthread = std::thread([this, pd=pd_this]() {
-    #ifdef PDINSTANCE
-        pd_setinstance(pd);
-    #endif
-        aoo::sync::lower_thread_priority();
-        receive();
-    });
+    post("start network receive thread");
+    err = systhread_create((method)receive, this, 0, 0, 0, &x_recvthread);
+    if(err != MAX_ERR_NONE){
+        object_error((t_object*)this, "could not create receive thread");
+    }
 #endif
-*/
+
 
     object_post(nullptr, "aoo: new node on port %d", port);
 }
@@ -114,12 +124,16 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
 // TODO: documenta
 t_node_imp::~t_node_imp()
 {
+    object_unregister(this);
+    
     // pd_unbind(&x_proxy.x_pd, x_bindsym);
-
+    unsigned int c_ret;
+    unsigned int s_ret;
+    unsigned int r_ret;
     // stop the client and join threads
     x_client->stop();
-    if (x_clientthread.joinable()){
-        x_clientthread.join();
+    if (x_clientthread){
+        systhread_join(x_clientthread, &c_ret);
     }
 #if NETWORK_THREAD_POLL
     LOG_DEBUG("join network thread");
@@ -131,17 +145,18 @@ t_node_imp::~t_node_imp()
 #else
     LOG_DEBUG("join network threads");
     // join both threads
-    if (x_sendthread.joinable()) {
-        x_sendthread.join();
+    
+    if (x_sendthread) {
+        systhread_join(x_sendthread, &s_ret);
     }
-    if (x_recvthread.joinable()) {
-        x_recvthread.join();
+    if (x_recvthread) {
+        systhread_join(x_recvthread, &r_ret);
     }
 #endif
 
     object_post(nullptr, "aoo: released node on port %d", x_port);
 }
-// TODO: documenta
+// given an address, find the peer group and user
 bool t_node_imp::find_peer(const aoo::ip_address& addr,
                            t_symbol *& group, t_symbol *& user) const {
     if (x_clientobj &&
@@ -173,13 +188,14 @@ int t_node_imp::serialize_endpoint(const aoo::ip_address &addr, AooId id,
         return 0;
     }
     t_symbol *group, *user;
+    // try to find a peer with a matching address/group
     if (find_peer(addr, group, user)) {
-        // group name, user name, id
+        // write group name, user name, id in msg
         atom_setsym(argv, group);
         atom_setsym(argv + 1, user);
         atom_setfloat(argv + 2, id);
     } else {
-        // ip string, port number, id
+        // wirte ip string, port number, id in msg
         atom_setsym(argv, gensym(addr.name()));
         atom_setfloat(argv + 1, addr.port());
         atom_setfloat(argv + 2, id);
@@ -187,8 +203,9 @@ int t_node_imp::serialize_endpoint(const aoo::ip_address &addr, AooId id,
     return 3;
 }
 // TODO: documenta
-void t_node_imp::run_client() {
-    auto err = x_client->run(kAooInfinite);
+void t_node_imp::run_client(t_node_imp *x) {
+    aoo::sync::lower_thread_priority();
+    auto err = x->x_client->run(kAooInfinite);
     if (err != kAooOk) {
         std::string msg;
         if (err == kAooErrorSocket) {
@@ -197,44 +214,56 @@ void t_node_imp::run_client() {
             msg = aoo_strerror(err);
         }
         critical_enter(0);
-        object_error((t_object*)x_clientobj, "%s: TCP error: %s",
-                 (x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
+        object_error((t_object*)x->x_clientobj, "%s: TCP error: %s",
+                 (x->x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
         // TODO: handle error
         critical_exit(0);
     }
 }
 
-// TODO: documenta
-bool t_node_imp::add_object(t_class *obj, void *x, AooId id)
+/**
+ * @brief 
+ * 
+ * @param obj either an aoo_client, aoo_send or aoo_receive
+ * @param x an AooClient
+ * @param id an id
+ * @return true 
+ * @return false 
+ */
+bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
 {
-    if (obj == aoo_client_class){
+    t_class * obj_class = object_class(obj);
+
+    if (obj_class == aoo_client_class){
         // aoo_client
         if (!x_clientobj){
             // TODO: verifica!
             x_clientobj = (t_object*)obj;
             // start thread lazily
-            if (!x_clientthread.joinable()){
-                x_clientthread = std::thread([this](){
-                    aoo::sync::lower_thread_priority();
-                    run_client();
-                });
+            t_max_err err = systhread_create((method)run_client, this, 0, 0, 0, &x_clientthread);
+            if(err != MAX_ERR_NONE){
+                object_error((t_object*)obj, "could not create client thread");
             }
         } else {
             object_error((t_object*)obj, "%s on port %d already exists!",
                      object_classname(obj), port());
             return false;
         }
-    } else  if (obj == aoo_send_class){
+    }
+
+    else  if (obj_class == aoo_send_class){
         if (x_client->addSource((AooSource *)x) != kAooOk){
             object_error((t_object*)obj, "%s with ID %d on port %d already exists!",
                      object_classname(obj), id, port());
         }
-    } else if (obj == aoo_receive_class){
+    }
+    else if (obj_class == aoo_receive_class){
         if (x_client->addSink((AooSink *)x) != kAooOk){
             object_error((t_object*)obj, "%s with ID %d on port %d already exists!",
                      object_classname(obj), id, port());
         }
-    } else {
+    }
+    else {
         error("BUG: t_node_imp: bad client");
         return false;
     }
@@ -244,16 +273,20 @@ bool t_node_imp::add_object(t_class *obj, void *x, AooId id)
 
 
 // TODO: documenta
-void t_node_imp::release(t_class *obj, void *x)
+void t_node_imp::release(t_object *obj, void *x)
 {
-    if (obj == aoo_client_class){
+    t_class * obj_class = object_class(obj);
+    if (obj_class == aoo_client_class){
         // client
         x_clientobj = nullptr;
-    } else if (obj == aoo_send_class){
+    }
+    else if (obj_class == aoo_send_class){
         x_client->removeSource((AooSource *)x);
-    } else if (obj == aoo_receive_class){
+    } 
+    else if (obj_class == aoo_receive_class){
         x_client->removeSink((AooSink *)x);
-    } else {
+    }
+    else {
         error("BUG: t_node_imp::release");
         return;
     }
@@ -310,8 +343,9 @@ void t_node_imp::perform_io() {
     }
 }
 #else
-void t_node_imp::send() {
-    auto err = x_client->send(kAooInfinite);
+void t_node_imp::send(t_node_imp *x) {
+    aoo::sync::lower_thread_priority();
+    auto err = x->x_client->send(kAooInfinite);
     if (err != kAooOk) {
         std::string msg;
         if (err == kAooErrorSocket) {
@@ -320,15 +354,16 @@ void t_node_imp::send() {
             msg = aoo_strerror(err);
         }
         critical_enter(0);
-        object_error(x_clientobj, "%s: UDP send error: %s",
-                 (x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
+        object_error(x->x_clientobj, "%s: UDP send error: %s",
+                 (x->x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
         // TODO: handle error
         critical_exit(0);
     }
 }
 
-void t_node_imp::receive() {
-    auto err = x_client->receive(kAooInfinite);
+void t_node_imp::receive(t_node_imp *x) {
+    aoo::sync::lower_thread_priority();
+    auto err = x->x_client->receive(kAooInfinite);
     if (err != kAooOk) {
         std::string msg;
         if (err == kAooErrorSocket) {
@@ -337,13 +372,22 @@ void t_node_imp::receive() {
             msg = aoo_strerror(err);
         }
         critical_enter(0);
-        object_error(x_clientobj, "%s: UDP receive error: %s",
-                 (x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
+        object_error(x->x_clientobj, "%s: UDP receive error: %s",
+                 (x->x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
         // TODO: handle error
         critical_exit(0);
     }
 }
 #endif
+
+void aoo_node_setup(void)
+{
+    t_class *c;
+    c = class_new("aoo_node", 0, 0, sizeof(t_node_imp), 0L, A_NOTHING, 0);
+    class_register(CLASS_NOBOX, c);
+    aoo_node_class = c;
+
+}
 
 /*////////////////////// aoo node //////////////////*/
 

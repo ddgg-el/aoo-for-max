@@ -5,6 +5,7 @@
 
 	@ingroup	examples
 */
+// #include "aoo_max_globals.h"
 #include "aoo_client.h"
 
 /*

@@ -160,6 +160,16 @@ int data_to_atoms(const AooData& data, int argc, t_atom *argv) {
     return numatoms;
 }
 
+int address_to_atoms(const aoo::ip_address& addr, int argc, t_atom *a)
+{
+    if (argc < 2){
+        return 0;
+    }
+    atom_setsym(a, gensym(addr.name()));
+    atom_setfloat(a + 1, addr.port());
+    return 2;
+}
+
 int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv) {
     assert(argc > 2);
     atom_setfloat(argv, msg.channel);
@@ -171,4 +181,19 @@ int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv)
 double clock_getsystimeafter(double deltime)
 {
 	return systime_ms()*deltime;
+}
+
+// make sure we only actually query the time once per DSP tick.
+// This is used in aoo_send~ and aoo_receive~, but also in aoo_client,
+// if dejitter is disabled.
+uint64_t get_osctime(){
+    thread_local double lastclocktime = -1;
+    thread_local aoo::time_tag osctime;
+
+    auto now = gettime();
+    if (now != lastclocktime){
+        osctime = aoo::time_tag::now();
+        lastclocktime = now;
+    }
+    return osctime;
 }

@@ -1,159 +1,25 @@
 /**
 	@file
-	aoo_send~: a simple audio object for Max
-	original by: jeremy bernstein, jeremy@bootsquad.com
-	@ingroup examples
+	aoo.send~: a simple audio object for Max
+	original by: Christof Ressi, ported to Max bz Davide Gagliardi
+	@ingroup network
 */
-
 #include "aoo_send_tilde.h"
-
-
-
 
 static void aoo_send_tick(t_aoo_send *x)
 {
     x->x_source->pollEvents();
 }
-/*
-static void aoo_send_set(t_aoo_send *x, int f1, int f2)
-{
-    int port = f1;
-    AooId id = f2;
-
-    if (id == x->x_id && port == x->x_port) {
-        return;
-    }
-
-    if (id < 0) {
-        object_error((t_object*)x, "%s: bad id %d", object_classname(x), id);
-        return;
-    }
-
-    if (port < 0) {
-        // NB: 0 is allowed (= don't listen)!
-        object_error((t_object*)x, "%s: bad port %d", object_classname(x), id);
-        return;
-    }
-
-    // always release node!
-    if (x->x_node) {
-        x->x_node->release((t_class *)x, x->x_source.get());
-    }
-
-    if (id != x->x_id) {
-        x->x_source->setId(id);
-        x->x_id = id;
-    }
-
-    if (port) {
-        x->x_node = t_node::get((t_class *)x, port, x->x_source.get(), id);
-    } else {
-        x->x_node = nullptr;
-    }
-    x->x_port = port;
-}
-
-static void aoo_send_port(t_aoo_send *x, int f)
-{
-    aoo_send_set(x, f, x->x_id);
-}
-*/
-t_aoo_send::t_aoo_send(int argc, t_atom *argv)
-{
-    x_clock = clock_new(this, (method)aoo_send_tick);
-
-    // flags multichannel support
-    // while (argc && argv->a_type == A_SYM) {
-    //     auto flag = argv->a_w.w_sym->s_name;
-    //     if (*flag == '-') {
-    //         if (!strcmp(flag, "-m")) {
-    //             if (g_signal_setmultiout) {
-    //                 x_multi = true;
-    //             } else {
-    //                 pd_error(this, "%s: no multi-channel support, ignoring '-m' flag", classname(this));
-    //             }
-    //         } else {
-    //             pd_error(this, "%s: ignore unknown flag '%s",
-    //                      classname(this), flag);
-    //         }
-    //         argc--; argv++;
-    //     } else {
-    //         break;
-    //     }
-    // }
-
-    // arg #1: channels
-    int ninlets;
-    if (x_multi) {
-        // one multi-channel inlet
-        ninlets = 1;
-        // x_nchannels is used to keep track of the channel count, see "dsp" method.
-        // The creation argument sets the initial number of channels, so we can set
-        // the default format. NB: the channel count cannot be zero!
-        x_nchannels = std::max<int>(atom_getfloatarg(0, argc, argv), 1);
-    } else {
-        // NB: users may explicitly specify 0 channels for pure message streams!
-        // (In this case, the user must provide the number of "message channels"
-        // - if needed - with the "format" message.)
-        ninlets = argc > 0 ? atom_getfloat(argv) : 1;
-        if (ninlets < 0){
-            ninlets = 0;
-        } else if (ninlets > AOO_MAX_NUM_CHANNELS) {
-            // NB: in theory we can support any number of channels;
-            // this rather meant to handle patches that accidentally
-            // use the old argument order where the port would come first!
-            object_error((t_object*)this, "%s: channel count (%d) out of range",
-                     object_classname(this), ninlets);
-            ninlets = 0;
-        }
-        x_nchannels = ninlets;
-    }
-
-    // arg #2 (optional): port number
-    // NB: 0 means "don't listen"
-    int port = atom_getfloatarg(1, argc, argv);
-
-    // arg #3 (optional): ID
-    AooId id = atom_getfloatarg(2, argc, argv);
-    if (id < 0) {
-        object_error((t_object*)this, "%s: bad id % d, setting to 0", object_classname(this), id);
-        id = 0;
-    }
-    x_id = id;
-
-    // make additional inlets
-    dsp_setup((t_pxobject *)this, ninlets);	// MSP inlets: arg is # of inlets and is REQUIRED!
-
-    // channel vector
-    if (x_nchannels > 0) {
-        x_vec = std::make_unique<t_sample *[]>(x_nchannels);
-    }
-    // make event outlet
-    x_msgout = outlet_new(this, 0);
-
-    // create and initialize AooSource object
-    x_source = AooSource::create(x_id);
-
-    // set event handler
-    // x_source->setEventHandler((AooEventHandler)aoo_send_handle_event,
-                            //   this, kAooEventModePoll);
-
-    // set default format
-    AooFormatStorage fmt;
-    format_makedefault(fmt, x_nchannels);
-    x_source->setFormat(fmt.header);
-    x_codec = gensym(fmt.header.codecName);
-
-    x_source->setBufferSize(DEFBUFSIZE * 0.001);
-
-    // finally we're ready to receive messages
-    // aoo_send_port(this, port);
-}
-/*
+/**
+ * @brief // how to handle the incoming events
+ * 
+ * @param x the object
+ * @param event the type of the event
+ */
 static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
 {
     switch (event->type){
-    case kAooEventSinkPing:
+    case kAooEventSinkPing: // all these cases react to the code defined for kAooEventFrameResend
     case kAooEventInvite:
     case kAooEventUninvite:
     case kAooEventSinkAdd:
@@ -164,8 +30,9 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
         auto& ep = event->endpoint.endpoint;
         aoo::ip_address addr((const sockaddr *)ep.address, ep.addrlen);
         t_atom msg[12];
+        // once it has the id and the ip address of the endpoint, it serializes the endpoint
         if (!x->x_node->serialize_endpoint(addr, ep.id, 3, msg)) {
-            bug("aoo_send_handle_event: serialize_endpoint");
+            error("BUG: aoo_send_handle_event: serialize_endpoint");
             return;
         }
         // event data
@@ -222,8 +89,8 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
                 x->add_sink(addr, ep.id);
             } else {
                 // the sink might have been added concurrently by the user (very unlikely)
-                logpost(x, PD_DEBUG, "%s: sink %s %d %d already added",
-                        classname(x), addr.name(), addr.port(), ep.id);
+                object_post((t_object*)x, "%s: sink %s %d %d already added",
+                        object_classname(x), addr.name(), addr.port(), ep.id);
             }
             break;
         }
@@ -233,8 +100,8 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
                 x->remove_sink(addr, ep.id);
             } else {
                 // the sink might have been removed concurrently by the user (very unlikely)
-                logpost(x, PD_DEBUG, "%s: sink %s %d %d already removed",
-                        classname(x), addr.name(), addr.port(), ep.id);
+                object_post((t_object *)x, "%s: sink %s %d %d already removed",
+                        object_classname(x), addr.name(), addr.port(), ep.id);
             }
             break;
         }
@@ -248,11 +115,11 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
             double total_rtt = aoo_ntpTimeDuration(e.t1, e.t4) * 1000.0;
             double network_rtt = total_rtt - aoo_ntpTimeDuration(e.t2, e.t3) * 1000;
 
-            SETFLOAT(msg + 3, delta1);
-            SETFLOAT(msg + 4, delta2);
-            SETFLOAT(msg + 5, network_rtt);
-            SETFLOAT(msg + 6, total_rtt);
-            SETFLOAT(msg + 7, e.packetLoss);
+            atom_setfloat(msg + 3, delta1);
+            atom_setfloat(msg + 4, delta2);
+            atom_setfloat(msg + 5, network_rtt);
+            atom_setfloat(msg + 6, total_rtt);
+            atom_setfloat(msg + 7, e.packetLoss);
 
             outlet_anything(x->x_msgout, gensym("ping"), 8, msg);
 
@@ -260,24 +127,226 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
         }
         case kAooEventFrameResend:
         {
-            SETFLOAT(msg + 3, event->frameResend.count);
+            atom_setfloat(msg + 3, event->frameResend.count);
             outlet_anything(x->x_msgout, gensym("frame_resent"), 4, msg);
             break;
         }
         default:
-            bug("aoo_send_handle_event: bad case label!");
+            error("BUG: aoo_send_handle_event: bad case label!");
             break;
         }
 
         break; // !
     }
     default:
-        logpost(x, PD_VERBOSE, "%s: unknown event type (%d)",
-                classname(x), event->type);
+        object_post((t_object*)x, "%s: unknown event type (%d)",
+                object_classname(x), event->type);
         break;
     }
 }
-*/
+/**
+ * @brief initialize x_node with the given port and id
+ * 
+ * @param x l'oggetto
+ * @param f1 la porta
+ * @param f2 l'id
+ */
+static void aoo_send_set(t_aoo_send *x, int f1, int f2)
+{
+    int port = f1;
+    AooId id = f2;
+
+    if (id == x->x_id && port == x->x_port) {
+        return;
+    }
+
+    if (id < 0) {
+        object_error((t_object*)x, "%s: bad id %d", object_classname(x), id);
+        return;
+    }
+
+    if (port < 0) {
+        // NB: 0 is allowed (= don't listen)!
+        object_error((t_object*)x, "%s: bad port %d", object_classname(x), id);
+        return;
+    }
+
+    // always release node!
+    if (x->x_node) {
+        x->x_node->release((t_object*)x, x->x_source.get());
+    }
+
+    if (id != x->x_id) {
+        x->x_source->setId(id);
+        x->x_id = id;
+    }
+    // given the port inizialize a network node
+    if (port) {
+        x->x_node = t_node::get((t_object* )x, port, x->x_source.get(), id);
+    } else {
+        x->x_node = nullptr;
+    }
+    x->x_port = port;
+    // object_post((t_object*)x, "port %d id %d", x->x_port, x->x_id);
+}
+/**
+ * @brief alias for aoo_send_set
+ * 
+ * @param x l'oggetto t_aoo_send
+ * @param f la porta
+ */
+static void aoo_send_port(t_aoo_send *x, int f)
+{
+    aoo_send_set(x, f, x->x_id);
+}
+
+t_aoo_send::t_aoo_send(int argc, t_atom *argv)
+{
+    x_clock = clock_new(this, (method)aoo_send_tick);
+
+    // flags multichannel support
+    // while (argc && argv->a_type == A_SYM) {
+    //     auto flag = argv->a_w.w_sym->s_name;
+    //     if (*flag == '-') {
+    //         if (!strcmp(flag, "-m")) {
+    //             if (g_signal_setmultiout) {
+    //                 x_multi = true;
+    //             } else {
+    //                 pd_error(this, "%s: no multi-channel support, ignoring '-m' flag", classname(this));
+    //             }
+    //         } else {
+    //             pd_error(this, "%s: ignore unknown flag '%s",
+    //                      classname(this), flag);
+    //         }
+    //         argc--; argv++;
+    //     } else {
+    //         break;
+    //     }
+    // }
+
+    // arg #1: channels
+    int ninlets;
+    if (x_multi) {
+        // one multi-channel inlet
+        ninlets = 1;
+        // x_nchannels is used to keep track of the channel count, see "dsp" method.
+        // The creation argument sets the initial number of channels, so we can set
+        // the default format. NB: the channel count cannot be zero!
+        x_nchannels = std::max<int>(atom_getfloatarg(0, argc, argv), 1);
+    } else {
+        // NB: users may explicitly specify 0 channels for pure message streams!
+        // (In this case, the user must provide the number of "message channels"
+        // - if needed - with the "format" message.)
+        ninlets = argc > 0 ? atom_getfloat(argv) : 1;
+        if (ninlets < 0){
+            ninlets = 0;
+        } else if (ninlets > AOO_MAX_NUM_CHANNELS) {
+            // NB: in theory we can support any number of channels;
+            // this rather meant to handle patches that accidentally
+            // use the old argument order where the port would come first!
+            object_error((t_object*)this, "%s: channel count (%d) out of range",
+                     object_classname(this), ninlets);
+            ninlets = 0;
+        }
+        x_nchannels = ninlets;
+    }
+
+    // arg #2 (optional): port number
+    // NB: 0 means "don't listen"
+    int port = atom_getintarg(1, argc, argv);
+
+    // arg #3 (optional): ID
+    AooId id = atom_getintarg(2, argc, argv);
+    if (id < 0) {
+        object_error((t_object*)this, "%s: bad id % d, setting to 0", object_classname(this), id);
+        id = 0;
+    }
+    x_id = id;
+
+    // make additional inlets
+    dsp_setup((t_pxobject *)this, ninlets);	// MSP inlets: arg is # of inlets and is REQUIRED!
+
+    // channel vector
+    if (x_nchannels > 0) {
+        x_vec = std::make_unique<t_sample *[]>(x_nchannels);
+    }
+    // make event outlet
+    x_msgout = outlet_new(this, 0);
+
+    // create and initialize AooSource object
+    x_source = AooSource::create(x_id);
+
+    // set event handler
+    x_source->setEventHandler((AooEventHandler)aoo_send_handle_event, this, kAooEventModePoll);
+
+    // set default format
+    AooFormatStorage fmt;
+    format_makedefault(fmt, x_nchannels);
+    x_source->setFormat(fmt.header);
+    x_codec = gensym(fmt.header.codecName);
+
+    x_source->setBufferSize(DEFBUFSIZE * 0.001);
+    // finally we're ready to receive messages
+    aoo_send_port(this, port);
+}
+
+t_aoo_send::~t_aoo_send()
+{
+     // first stop receiving messages
+    if (x_node){
+        x_node->release((t_object *)this, x_source.get());
+    }
+
+    clock_free(x_clock);
+}
+
+void t_aoo_send::add_sink(const aoo::ip_address& addr, AooId id)
+{
+    // add sink to list; try to find peer name!
+    t_symbol *group = nullptr;
+    t_symbol *user = nullptr;
+    x_node->find_peer(addr, group, user);
+    x_sinks.push_back({addr, id, group, user});
+
+    // output message
+    t_atom msg[3];
+    if (x_node->serialize_endpoint(addr, id, 3, msg)){
+        outlet_anything(x_msgout, gensym("add"), 3, msg);
+    } else {
+        error("BUG: t_aoo_send::add_sink: serialize_endpoint");
+    }
+}
+
+const t_sink *t_aoo_send::find_sink(const aoo::ip_address& addr, AooId id) const
+{
+    for (auto& sink : x_sinks){
+        if (sink.s_address == addr && sink.s_id == id){
+            return &sink;
+        }
+    }
+    return nullptr;
+}
+
+void t_aoo_send::remove_sink(const aoo::ip_address& addr, AooId id)
+{
+    // remove the sink matching endpoint and id
+    for (auto it = x_sinks.begin(); it != x_sinks.end(); ++it){
+        if (it->s_address == addr && it->s_id == id){
+            x_sinks.erase(it);
+
+            // output message
+            t_atom msg[3];
+            if (x_node->serialize_endpoint(addr, id, 3, msg)){
+                outlet_anything(x_msgout, gensym("remove"), 3, msg);
+            } else {
+                error("BUG: aoo_send_doremovesink: serialize_endpoint");
+            }
+            return;
+        }
+    }
+    error("BUG: t_aoo_send::remove_sink");
+}
+
 
 //***********************************************************************************************
 
@@ -287,7 +356,7 @@ void ext_main(void *r)
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo.send~", (method)aoo_send_new, (method)dsp_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
+	t_class *c = class_new("aoo.send~", (method)aoo_send_new, (method)aoo_send_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
 
 	class_addmethod(c, (method)aoo_send_float,		"float",	A_FLOAT, 0);
 	class_addmethod(c, (method)aoo_send_dsp64,		"dsp64",	A_CANT, 0);
@@ -298,6 +367,8 @@ void ext_main(void *r)
 	// registers the class as an object which can be instantiated in a Max patch
 	class_register(CLASS_BOX, c);
 	aoo_send_class = c;
+
+    aoo_node_setup();
 }
 
 void *aoo_send_new(t_symbol *s, long argc, t_atom *argv)
@@ -309,15 +380,14 @@ void *aoo_send_new(t_symbol *s, long argc, t_atom *argv)
 		// use 0 if you don't need inlets
 		// aoo.send~ has no signal outlet
 		// outlet_new(x, "signal"); 		// signal outlet (note "signal" rather than NULL)
-		x->offset = 0.0;
+		// x->offset = 0.0;
 	// }
 	return (x);
 }
 
-// NOT CALLED!, we use dsp_free for a generic free function
 void aoo_send_free(t_aoo_send *x)
 {
-	;
+	x->~t_aoo_send();
 }
 
 void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
@@ -328,11 +398,12 @@ void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
 	// else {	// outlet
 	// 	sprintf(s, "I am outlet %ld", a);
 	// }
+    ;
 }
 
 void aoo_send_float(t_aoo_send *x, double f)
 {
-	x->offset = f;
+    ;
 }
 
 // registers a function for the signal chain in Max

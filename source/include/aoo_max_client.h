@@ -3,7 +3,6 @@
 #include "ext.h"			// standard Max include
 #include "ext_obex.h"		// required for new style Max object
 
-#include "aoo_max_globals.h"
 #include "aoo_max_dejitter.h"
 #include "aoo_max_node.h"
 
@@ -23,6 +22,12 @@ struct t_peer_message
     AooId user;
     AooDataType type;
     std::vector<AooByte> data;
+};
+
+struct t_group
+{
+    t_symbol *name;
+    AooId id;
 };
 
 struct t_peer
@@ -47,6 +52,11 @@ struct t_aoo_client
     t_outlet *x_stateout = nullptr;
     t_outlet *x_msgout = nullptr;
 
+    bool x_connected = false;
+    bool x_schedule = true;
+    t_float x_delay = 0; // extra message delay
+    bool x_discard = false;
+
     t_priority_queue<t_peer_message> x_queue;
 
      // replies
@@ -60,11 +70,18 @@ struct t_aoo_client
 
     const t_peer * find_peer(t_symbol *group, t_symbol *user) const;
 
+    void handle_message(AooId group, AooId user, AooNtpTime time, const AooData& msg);
+
     void dispatch_message(t_float delay, AooId group, AooId user, const AooData& msg) const;
 
-
+    // peer list
 	std::vector<t_peer> x_peers;
+    // group list
+    std::vector<t_group> x_groups;
 };
+
+void aoo_client_handle_event(t_aoo_client *x, const AooEvent *event, int32_t level);
 
 static void aoo_client_queue_tick(t_aoo_client *x);
 static void aoo_client_tick(t_aoo_client *x);
+static int peer_to_atoms(const t_peer& peer, int argc, t_atom *argv);

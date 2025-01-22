@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ext.h"			// standard Max include
-
-#include "aoo_max_globals.h"
 #include "aoo_max_common.hpp"
 
 #include "aoo_client.hpp"
@@ -10,14 +8,19 @@
 
 #include <thread>
 
+extern t_class *aoo_client_class;
+extern t_class *aoo_send_class;
+extern t_class *aoo_receive_class;
+extern t_class *aoo_node_class;
+
 ///////////////////////////// t_node ////////////////////////////////
 class t_node {
 public: 
-	static t_node * get(t_class *obj, int port, void *x = nullptr, AooId id = 0);
+	static t_node * get(t_object *obj, int port, void *x = nullptr, AooId id = 0);
 
 	virtual ~t_node() {}
 
-	virtual void release(t_class *obj, void *x = nullptr) = 0;
+	virtual void release(t_object *obj, void *x = nullptr) = 0;
 
 	virtual bool find_peer(const aoo::ip_address& addr,
                            t_symbol *& group, t_symbol *& user) const = 0;
@@ -40,7 +43,7 @@ class t_node_imp final : public t_node
 
 private:
     t_object * x_clientobj = nullptr;
-    // t_symbol *x_bindsym;
+    t_symbol *x_bindsym;
 
     AooClient::Ptr x_client;
     int32_t x_refcount = 0;
@@ -50,15 +53,15 @@ private:
     bool x_ipv4mapped = true;
 
     // threading
-    std::thread x_clientthread;
+    t_systhread x_clientthread;
 #if NETWORK_THREAD_POLL
     std::thread x_iothread;
     std::atomic<bool> x_quit{false};
 #else
-    std::thread x_sendthread;
-    std::thread x_recvthread;
+    t_systhread x_sendthread;
+    t_systhread x_recvthread;
 #endif
-    void run_client();
+    static void run_client(t_node_imp *x);
 public:
     // public methods
     t_node_imp(t_symbol *s, int port);
@@ -74,9 +77,9 @@ public:
     int serialize_endpoint(const aoo::ip_address &addr, AooId id,
                            int argc, t_atom *argv) const override;
 
-    void release(t_class *obj, void *x) override;
+    void release(t_object *obj, void *x) override;
 
-    bool add_object(t_class *obj, void *x, AooId id);
+    bool add_object(t_object *obj, void *x, AooId id);
 
     int port() const override { return x_port; }
 
@@ -88,9 +91,9 @@ public:
 #if NETWORK_THREAD_POLL
     void perform_io();
 #else
-    void send();
+    static void send(t_node_imp*);
 
-    void receive();
+    static void receive(t_node_imp*);
 #endif
 
 };
@@ -104,3 +107,5 @@ bool aoo_client_find_peer(t_aoo_client *x, const aoo::ip_address& addr,
 
 bool aoo_client_find_peer(t_aoo_client *x, t_symbol * group, t_symbol * user,
                           aoo::ip_address& addr);
+
+void aoo_node_setup(void);

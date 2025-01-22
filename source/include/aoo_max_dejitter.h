@@ -41,3 +41,4 @@ private:
 };
 
 t_dejitter * dejitter_get(); 
+uint64_t dejitter_osctime(t_dejitter *x);

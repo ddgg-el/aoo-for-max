@@ -10,15 +10,23 @@
 #include "aoo_max_common.hpp"
 #include "aoo_max_node.h"
 
-#define DEFBUFSIZE 25
+#define DEFBUFSIZE 256
+
+struct t_sink
+{
+    aoo::ip_address s_address;
+    AooId s_id;
+    t_symbol *s_group;
+    t_symbol *s_user;
+};
 
 // struct to represent the object's state
 // not a typedef struct anymore
 struct t_aoo_send {
 	t_aoo_send(int argc, t_atom *argv);
+    ~t_aoo_send();
 
 	t_pxobject		obj;			// the object itself (t_pxobject in MSP instead of t_object)
-	double			offset; 	// the value of a property of our object
 
     int32_t			x_nchannels = 0;
     void 			*x_msgout = nullptr;
@@ -29,13 +37,23 @@ struct t_aoo_send {
     AooId 			x_id = 0;
     int32_t         x_port = 0;
     t_node          *x_node = nullptr;
+    AooId x_invite_token = kAooIdInvalid;
+    bool x_auto_invite = true; // on by default
+    bool x_running = false;
+
+    std::vector<t_sink> x_sinks;
 
     t_symbol 		*x_codec = nullptr;
 
     t_clock 		*x_clock = nullptr;
     bool			x_multi = false;
 
+    void add_sink(const aoo::ip_address& addr, AooId id);
+    const t_sink *find_sink(const aoo::ip_address& addr, AooId id) const;
+    void remove_sink(const aoo::ip_address& addr, AooId id);
 };
+
+static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t);
 
 // MAX MSP method prototypes
 void *aoo_send_new(t_symbol *s, long argc, t_atom *argv);

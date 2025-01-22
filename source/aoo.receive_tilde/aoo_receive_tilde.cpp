@@ -4,6 +4,7 @@
 	original by: jeremy bernstein, jeremy@bootsquad.com
 	@ingroup examples
 */
+
 #include "aoo.h"
 #include "aoo_receive_tilde.h"
 
@@ -302,7 +303,7 @@ static void aoo_receive_set(t_aoo_receive *x, int f1, int f2)
 
     // always release node!
     if (x->x_node) {
-        x->x_node->release((t_class *)x, x->x_sink.get());
+        x->x_node->release((t_object *)x, x->x_sink.get());
     }
 
     if (id != x->x_id) {
@@ -311,7 +312,7 @@ static void aoo_receive_set(t_aoo_receive *x, int f1, int f2)
     }
 
     if (port) {
-        x->x_node = t_node::get((t_class *)x, port, x->x_sink.get(), id);
+        x->x_node = t_node::get((t_object *)x, port, x->x_sink.get(), id);
     } else {
         x->x_node = nullptr;
     }
@@ -417,7 +418,7 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
 t_aoo_receive::~t_aoo_receive()
 {
     if (x_node){
-        x_node->release((t_class *)this, x_sink.get());
+        x_node->release((t_object *)this, x_sink.get());
     }
     clock_free(x_clock);
     clock_free(x_queue_clock);

@@ -53,7 +53,7 @@ t_aoo_client::t_aoo_client(int argc, t_atom *argv)
 
     int port = argc ? atom_getfloat(argv) : 0;
 
-    x_node = port > 0 ? t_node::get((t_class *)this, port) : nullptr;
+    x_node = port > 0 ? t_node::get((t_object*)this, port) : nullptr;
 
     if (x_node){
         object_post((t_object*)this, "%s: new client on port %d",
@@ -139,5 +139,175 @@ bool aoo_client_find_peer(t_aoo_client *x, t_symbol *group, t_symbol *user, aoo:
         return true;
     } else {
         return false;
+    }
+}
+
+int peer_to_atoms(const t_peer& peer, int argc, t_atom *argv) {
+    if (argc >= 5) {
+        atom_setsym(argv, peer.group_name);
+        // don't send group ID because it might be too large for a float
+        atom_setsym(argv + 1, peer.user_name);
+        atom_setfloat(argv + 2, peer.user_id);
+        address_to_atoms(peer.address, 2, argv + 3);
+        return 5;
+    } else {
+        return 0;
+    }
+}
+
+void t_aoo_client::handle_message(AooId group, AooId user, AooNtpTime time,
+                                  const AooData& data)
+{
+    aoo::time_tag tt(time);
+    if (!tt.is_empty() && !tt.is_immediate()){
+        aoo::time_tag now = x_dejitter ? dejitter_osctime(x_dejitter) : get_osctime();
+        auto delay = aoo::time_tag::duration(now, tt) * 1000.0;
+        if (x_schedule) {
+            // NB: only add extra delay to automatically scheduled messages!
+            delay += x_delay;
+            if (delay >= 0) {
+                // put on queue and schedule on clock (using logical time)
+                auto abstime = clock_getsystimeafter(delay);
+                // reschedule if we are the next due element
+                if (x_queue.empty() || abstime < x_queue.top().time) {
+                    clock_set(x_queue_clock, abstime);
+                }
+                x_queue.emplace(t_peer_message(delay, group, user, data), abstime);
+            } else if (!x_discard) {
+                // output late message (negative delay!)
+                dispatch_message(delay, group, user, data);
+            }
+        } else {
+            // output immediately with delay (may be negative!)
+            dispatch_message(delay, group, user, data);
+        }
+    } else {
+        // send immediately
+        dispatch_message(0, group, user, data);
+    }
+}
+
+void aoo_client_handle_event(t_aoo_client *x, const AooEvent *event, int32_t level)
+{
+    switch (event->type){
+    case kAooEventPeerMessage:
+    {
+        auto& e = event->peerMessage;
+        x->handle_message(e.groupId, e.userId, e.timeStamp, e.data);
+        break;
+    }
+    case kAooEventDisconnect:
+    {
+        object_error((t_object*)x, "%s: disconnected from server", object_classname(x));
+
+        x->x_peers.clear();
+        x->x_groups.clear();
+        x->x_connected = false;
+
+        outlet_float(x->x_stateout, 0); // disconnected
+
+        break;
+    }
+    case kAooEventPeerHandshake:
+    case kAooEventPeerTimeout:
+    case kAooEventPeerJoin:
+    case kAooEventPeerLeave:
+    {
+        auto& e = event->peer;
+        auto group_name = gensym(e.groupName);
+        auto user_name = gensym(e.userName);
+        auto group_id = e.groupId;
+        auto user_id = e.userId;
+        aoo::ip_address addr((const sockaddr *)e.address.data, e.address.size);
+
+        t_atom msg[5];
+
+        switch (event->type) {
+        case kAooEventPeerHandshake:
+        {
+            atom_setsym(msg, group_name);
+            atom_setsym(msg + 1, user_name);
+            atom_setfloat(msg + 2, user_id);
+            outlet_anything(x->x_msgout, gensym("peer_handshake"), 3, msg);
+            break;
+        }
+        case kAooEventPeerTimeout:
+        {
+            atom_setsym(msg, group_name);
+            atom_setsym(msg + 1,user_name);
+            atom_setfloat(msg + 2, user_id);
+            outlet_anything(x->x_msgout, gensym("peer_timeout"), 3, msg);
+            break;
+        }
+        case kAooEventPeerJoin:
+        {
+            if (x->find_peer(group_id, user_id)) {
+                error("BUG: aoo_client: can't add peer %s|%s: already exists",
+                    group_name->s_name, user_name->s_name);
+                return;
+            }
+
+            // add peer
+            x->x_peers.emplace_back(t_peer { group_name, user_name, group_id, user_id, addr });
+            peer_to_atoms(x->x_peers.back(), 5, msg);
+
+            outlet_anything(x->x_msgout, gensym("peer_join"), 5, msg);
+
+            break;
+        }
+        case kAooEventPeerLeave:
+        {
+            for (auto it = x->x_peers.begin(); it != x->x_peers.end(); ++it) {
+                if (it->group_id == group_id && it->user_id == user_id) {
+                    peer_to_atoms(*it, 5, msg);
+
+                    // remove *before* sending the message
+                    x->x_peers.erase(it);
+
+                    outlet_anything(x->x_msgout, gensym("peer_leave"), 5, msg);
+
+                    return;
+                }
+            }
+            error("BUG: aoo_client: can't remove peer %s|%s: does not exist",
+                group_name->s_name, user_name->s_name);
+            break;
+        }
+        default:
+            break;
+        }
+
+        break; // !
+    }
+    case kAooEventPeerPing:
+    {
+        auto& e = event->peerPing;
+        t_atom msg[9];
+
+        auto peer = x->find_peer(e.group, e.user);
+        if (!peer) {
+            error("BUG: aoo_client: can't find peer %d|%d for ping event", e.group, e.user);
+            return;
+        }
+
+        auto delta1 = aoo::time_tag::duration(e.t1, e.t2) * 1000;
+        auto delta2 = aoo::time_tag::duration(e.t3, e.t4) * 1000;
+        auto total_rtt = aoo::time_tag::duration(e.t1, e.t4) * 1000;
+        auto network_rtt = total_rtt - aoo::time_tag::duration(e.t2, e.t3) * 1000;
+
+        peer_to_atoms(*peer, 5, msg);
+        atom_setfloat(msg + 5, delta1);
+        atom_setfloat(msg + 6, delta2);
+        atom_setfloat(msg + 7, network_rtt);
+        atom_setfloat(msg + 8, total_rtt);
+
+        outlet_anything(x->x_msgout, gensym("peer_ping"), 9, msg);
+
+        break;
+    }
+    default:
+        object_post((t_object*)x, "%s: unknown event type %d",
+                object_classname(x), event->type);
+        break;
     }
 }

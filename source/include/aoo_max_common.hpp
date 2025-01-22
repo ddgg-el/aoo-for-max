@@ -9,12 +9,15 @@
 #include "common/utils.hpp"
 #include "common/bit_utils.hpp"
 #include "common/priority_queue.hpp"
+#include "common/net_utils.hpp"
 
 #include "codec/aoo_pcm.h"
 #include "codec/aoo_null.h"
 #if AOO_USE_OPUS
 #include "codec/aoo_opus.h"
 #endif
+
+#define AOO_MAX_NUM_CHANNELS 256
 
 static AooNtpTime g_start_time;
 double get_elapsed_ms(AooNtpTime tt);
@@ -27,9 +30,13 @@ int datatype_element_size(AooDataType type);
 
 int data_to_atoms(const AooData& data, int argc, t_atom *argv);
 
+int address_to_atoms(const aoo::ip_address& addr, int argc, t_atom *a);
+
 int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv);
 
 double clock_getsystimeafter(double deltime);
+
+uint64_t get_osctime();
 ///////////////////////////// priority queue ////////////////////////////////
 
 template<typename T>
