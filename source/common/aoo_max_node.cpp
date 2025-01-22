@@ -273,8 +273,12 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
     return true;
 }
 
-
-// TODO: documenta
+/**
+ * @brief release the network node
+ * 
+ * @param obj the deleted external
+ * @param x an AooSource
+ */
 void t_node_imp::release(t_object *obj, void *x)
 {
     t_class * obj_class = object_class(obj);
@@ -382,6 +386,10 @@ void t_node_imp::receive(t_node_imp *x) {
 }
 #endif
 
+/**
+ * @brief Creating the aoo_node class
+ * 
+ */
 void aoo_node_setup(void)
 {
     t_class *c;
