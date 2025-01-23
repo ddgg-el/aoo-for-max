@@ -110,7 +110,13 @@ const t_peer * t_aoo_client::find_peer(AooId group, AooId user) const {
     }
     return nullptr;
 }
-
+/**
+ * @brief find a peer in the list of peers
+ * 
+ * @param group 
+ * @param user 
+ * @return const t_peer* 
+ */
 const t_peer * t_aoo_client::find_peer(t_symbol *group, t_symbol *user) const {
     for (auto& peer : x_peers) {
         if (peer.group_name == group && peer.user_name == user) {
@@ -198,7 +204,7 @@ void aoo_client_handle_event(t_aoo_client *x, const AooEvent *event, int32_t lev
     }
     case kAooEventDisconnect:
     {
-        object_error((t_object*)x, "%s: disconnected from server", object_classname(x));
+        object_error((t_object*)x, "disconnected from server");
 
         x->x_peers.clear();
         x->x_groups.clear();

@@ -177,6 +177,62 @@ int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv)
     return data_to_atoms(data, argc - 1, argv + 1) + 1;
 }
 
+bool atom_to_datatype(const t_atom &a, AooDataType& type, void *x) {
+    if (a.a_type == A_SYM) {
+        auto str = a.a_w.w_sym->s_name;
+        auto result = aoo_dataTypeFromString(str);
+        if (result != kAooDataUnspecified) {
+            type = result;
+            return true;
+        } else if (!strcmp(str, "f")) {
+            if (sizeof(t_float) == 8) {
+                type = kAooDataFloat64;
+            } else {
+                type = kAooDataFloat32;
+            }
+            return true;
+        } else {
+            object_error((t_object*)x, "%s: unknown data type '%s'", object_classname((t_object*)x), str);
+        }
+    } else {
+        object_error((t_object*)x, "%s: bad metadata type", object_classname((t_object*)x));
+    }
+    return false;
+}
+
+int atoms_to_data(AooDataType type, int argc, const t_atom *argv, AooByte *data, AooSize size) {
+    auto numbytes = argc * datatype_element_size(type);
+    if (numbytes > size) {
+        return 0;
+    }
+    auto ptr = data;
+    for (int i = 0; i < argc; ++i) {
+        auto f = atom_getfloat(argv + i);
+        switch (type) {
+        case kAooDataFloat32:
+            aoo::write_bytes<float>(f, ptr);
+            break;
+        case kAooDataFloat64:
+            aoo::write_bytes<double>(f, ptr);
+            break;
+        case kAooDataInt16:
+            aoo::write_bytes<int16_t>(f, ptr);
+            break;
+        case kAooDataInt32:
+            aoo::write_bytes<int32_t>(f, ptr);
+            break;
+        case kAooDataInt64:
+            aoo::write_bytes<int64_t>(f, ptr);
+            break;
+        default:
+            *ptr++ = (AooByte)f;
+            break;
+        }
+    }
+    assert(ptr - data <= size);
+    return numbytes;
+}
+
 // TODO: speriamo bene
 double clock_getsystimeafter(double deltime)
 {

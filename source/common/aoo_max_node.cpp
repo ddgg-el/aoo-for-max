@@ -34,7 +34,7 @@ t_node * t_node::get(t_object *obj, int port, void *x, AooId id)
             // finally create aoo node instance
             node = new t_node_imp(s, port);
         } catch (const std::exception& e) {
-            object_error((t_object*)obj, "%s: %s", object_classname(obj), e.what());
+            object_error((t_object*)obj, "%s", e.what());
             return nullptr;
         }
     }
@@ -109,13 +109,13 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
     post("start network send thread");
     err = systhread_create((method)send, this, 0, 0, 0, &x_sendthread);
     if(err != MAX_ERR_NONE){
-        object_error((t_object*)this, "could not create send thread");
+        object_error((t_object*)this, "Could not create send thread");
     }
     // start receive thread
     post("start network receive thread");
     err = systhread_create((method)receive, this, 0, 0, 0, &x_recvthread);
     if(err != MAX_ERR_NONE){
-        object_error((t_object*)this, "could not create receive thread");
+        object_error((t_object*)this, "Could not create receive thread");
     }
 #endif
 
@@ -158,7 +158,17 @@ t_node_imp::~t_node_imp()
 
     object_post(nullptr, "aoo: released node on port %d", x_port);
 }
-// given an address, find the peer group and user
+ 
+
+/**
+ * @brief given an address, ask the client find the peer group and user
+ * 
+ * @param addr 
+ * @param group 
+ * @param user 
+ * @return true 
+ * @return false 
+ */
 bool t_node_imp::find_peer(const aoo::ip_address& addr,
                            t_symbol *& group, t_symbol *& user) const {
     if (x_clientobj &&
@@ -170,7 +180,15 @@ bool t_node_imp::find_peer(const aoo::ip_address& addr,
     }
 }
 
-// TODO: documenta
+/**
+ * @brief ask the client to find a peer in the network given group and username
+ * 
+ * @param group 
+ * @param user 
+ * @param addr 
+ * @return true 
+ * @return false 
+ */
 bool t_node_imp::find_peer(t_symbol * group, t_symbol * user,
                            aoo::ip_address& addr) const {
     if (x_clientobj &&
@@ -182,7 +200,18 @@ bool t_node_imp::find_peer(t_symbol * group, t_symbol * user,
     }
 }
 
-//TODO: documenta
+/**
+ * @brief prepare the message to inform the Max user
+ * 
+ * a new endpoint has been registered or removed. Format the infos 
+ * about this endpoint to send a message via the info outlet
+ * 
+ * @param addr 
+ * @param id 
+ * @param argc 
+ * @param argv 
+ * @return int 
+ */
 int t_node_imp::serialize_endpoint(const aoo::ip_address &addr, AooId id,
                                    int argc, t_atom *argv) const {
     if (argc < 3 || !addr.valid()) {
@@ -216,8 +245,7 @@ void t_node_imp::run_client(t_node_imp *x) {
             msg = aoo_strerror(err);
         }
         critical_enter(0);
-        object_error((t_object*)x->x_clientobj, "%s: TCP error: %s",
-                 (x->x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
+        object_error((t_object*)x->x_clientobj, "TCP error: %s", msg.c_str());
         // TODO: handle error
         critical_exit(0);
     }
@@ -244,25 +272,22 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
             // start thread lazily
             t_max_err err = systhread_create((method)run_client, this, 0, 0, 0, &x_clientthread);
             if(err != MAX_ERR_NONE){
-                object_error((t_object*)obj, "could not create client thread");
+                object_error((t_object*)obj, "Could not create client thread");
             }
         } else {
-            object_error((t_object*)obj, "%s on port %d already exists!",
-                     object_classname(obj), port());
+            object_error((t_object*)obj, "on port %d already exists!", port());
             return false;
         }
     }
 
     else  if (obj_class == aoo_send_class){
         if (x_client->addSource((AooSource *)x) != kAooOk){
-            object_error((t_object*)obj, "%s with ID %d on port %d already exists!",
-                     object_classname(obj), id, port());
+            object_error((t_object*)obj, "with ID %d on port %d already exists!", id, port());
         }
     }
     else if (obj_class == aoo_receive_class){
         if (x_client->addSink((AooSink *)x) != kAooOk){
-            object_error((t_object*)obj, "%s with ID %d on port %d already exists!",
-                     object_classname(obj), id, port());
+            object_error((t_object*)obj, "with ID %d on port %d already exists!", id, port());
         }
     }
     else {
@@ -302,6 +327,27 @@ void t_node_imp::release(t_object *obj, void *x)
         delete this;
     } else if (x_refcount < 0){
         error("BUG: t_node_imp::release: negative refcount!");
+    }
+}
+/**
+ * @brief find a peer using aoo::ip_address::resolve
+ * 
+ * @param host 
+ * @param port 
+ * @param addr 
+ * @return true 
+ * @return false 
+ */
+bool t_node_imp::resolve(t_symbol *host, int port, aoo::ip_address& addr) const
+{
+    try {
+        auto result = aoo::ip_address::resolve(host->s_name, port, x_type, x_ipv4mapped);
+        assert(!result.empty());
+        addr = result.front();
+        return true;
+    } catch (const aoo::resolve_error& e) {
+        error("%s", e.what());
+        return false;
     }
 }
 
@@ -360,8 +406,7 @@ void t_node_imp::send(t_node_imp *x) {
             msg = aoo_strerror(err);
         }
         critical_enter(0);
-        object_error(x->x_clientobj, "%s: UDP send error: %s",
-                 (x->x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
+        object_error(x->x_clientobj, "UDP send error: %s", msg.c_str());
         // TODO: handle error
         critical_exit(0);
     }
@@ -378,8 +423,7 @@ void t_node_imp::receive(t_node_imp *x) {
             msg = aoo_strerror(err);
         }
         critical_enter(0);
-        object_error(x->x_clientobj, "%s: UDP receive error: %s",
-                 (x->x_clientobj ? "aoo_client" : "aoo"), msg.c_str());
+        object_error(x->x_clientobj, "UDP receive error: %s", msg.c_str());
         // TODO: handle error
         critical_exit(0);
     }

@@ -16,7 +16,7 @@ const int kAooDataStreamTime = -3; // AooEventStreamTime
 const int kAooDataStreamState = -2; // AooEventStreamState
 // NB: kAooDataUnspecified = -1
 
-
+//********************** static functions **********************
 static void aoo_receive_tick(t_aoo_receive *x)
 {
     x->x_sink->pollEvents();
@@ -291,13 +291,13 @@ static void aoo_receive_set(t_aoo_receive *x, int f1, int f2)
     }
 
     if (id < 0) {
-        object_error((t_object*)x, "%s: bad id %d", object_classname(x), id);
+        object_error((t_object*)x, "bad id %d", id);
         return;
     }
 
     if (port < 0) {
         // NB: 0 is allowed (= don't listen)!
-        object_error((t_object*)x, "%s: bad port %d", object_classname(x), id);
+        object_error((t_object*)x, "bad port %d", id);
         return;
     }
 
@@ -324,7 +324,7 @@ static void aoo_receive_port(t_aoo_receive *x, int f)
     aoo_receive_set(x, f, x->x_id);
 }
 
-// member functions
+//********************** member functions **********************
 t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_receive_tick);
@@ -338,10 +338,10 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     //             if (g_signal_setmultiout) {
     //                 x_multi = true;
     //             } else {
-    //                 pd_error(this, "%s: no multi-channel support, ignoring '-m' flag", classname(this));
+    //                 object_error(this, "%s: no multi-channel support, ignoring '-m' flag", classname(this));
     //             }
     //         } else {
-    //             pd_error(this, "%s: ignore unknown flag '%s",
+    //             object_error(this, "%s: ignore unknown flag '%s",
     //                      classname(this), flag);
     //         }
     //         argc--; argv++;
@@ -365,8 +365,7 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
             // NB: in theory we can support any number of channels;
             // this rather meant to handle patches that accidentally
             // use the old argument order where the port would come first!
-            object_error((t_object*)this, "%s: channel count (%d) out of range",
-                     object_classname(this), noutlets);
+            object_error((t_object*)this, "channel count (%d) out of range", noutlets);
             noutlets = 0;
         }
         x_nchannels = noutlets;
@@ -379,7 +378,7 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     // arg #3 (optional): ID
     AooId id = atom_getfloatarg(2, argc, argv);
     if (id < 0) {
-        object_error((t_object*)this, "%s: bad id % d, setting to 0", object_classname(this), id);
+        object_error((t_object*)this, "bad id % d, setting to 0", id);
         id = 0;
     }
     x_id = id;
@@ -468,8 +467,160 @@ void t_aoo_receive::dispatch_stream_message(const AooStreamMessage& msg, const a
     }
 }
 
+bool t_aoo_receive::check(const char *name) const
+{
+    if (x_node){
+        return true;
+    } else {
+        object_error((t_object*)this, "'%s' failed: no socket!", name);
+        return false;
+    }
+}
 
+bool t_aoo_receive::check(int argc, t_atom *argv, int minargs, const char *name) const
+{
+    if (!check(name)) return false;
 
+    if (argc < minargs){
+        object_error((t_object*)this, "too few arguments for '%s' message", name);
+        return false;
+    }
+
+    return true;
+}
+
+bool t_aoo_receive::get_source_arg(int argc, t_atom *argv,
+                                   aoo::ip_address& addr, AooId& id, bool check) const
+{
+    if (!x_node) {
+        object_error((t_object*)this, "no socket!");
+        return false;
+    }
+    if (argc < 3){
+        object_error((t_object*)this, "too few arguments for source");
+        return false;
+    }
+    // first try peer (group|user)
+    if (argv[1].a_type == A_SYM) {
+        t_symbol *group = atom_getsym(argv);
+        t_symbol *user = atom_getsym(argv + 1);
+        id = atom_getfloat(argv + 2);
+        // first search source list, in case the client has been disconnected
+        for (auto& s : x_sources) {
+            if (s.s_group == group && s.s_user == user && s.s_id == id) {
+                addr = s.s_address;
+                return true;
+            }
+        }
+        if (!check) {
+            // not yet in list -> try to get from client
+            if (x_node->find_peer(group, user, addr)) {
+                return true;
+            }
+        }
+        object_error((t_object*)this, "couldn't find source %s|%s %d", group->s_name, user->s_name, id);
+        return false;
+    } else {
+        // otherwise try host|port
+        t_symbol *host = atom_getsym(argv);
+        int port = atom_getfloat(argv + 1);
+        id = atom_getfloat(argv + 2);
+        if (x_node->resolve(host, port, addr)) {
+            if (check) {
+                // try to find in list
+                for (auto& s : x_sources) {
+                    if (s.s_address == addr && s.s_id == id) {
+                        return true;
+                    }
+                }
+                object_error((t_object*)this, "couldn't find source %s %d %d", host->s_name, port, id);
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            object_error((t_object*)this, "couldn't resolve source hostname '%s'", host->s_name);
+            return false;
+        }
+    }
+}
+
+//********************** object methods **********************
+static void aoo_receive_ping(t_aoo_receive *x, double f)
+{
+    x->x_sink->setPingInterval(f * 0.001);
+}
+static void aoo_receive_invite(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (!x->check(argc, argv, 3, "invite")) return;
+
+    aoo::ip_address addr;
+    AooId id = 0;
+    if (x->get_source_arg(argc, argv, addr, id, false)) {
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+
+        if (argc > 3) {
+            // with metadata
+            AooData metadata;
+            if (!atom_to_datatype(argv[3], metadata.type, x)) {
+                return;
+            }
+            argc -= 4; argv += 4;
+            if (!argc) {
+                object_error((t_object*)x, "metadata must not be empty");
+                return;
+            }
+            auto size = argc * datatype_element_size(metadata.type);
+            auto data = (AooByte *)alloca(size);
+            atoms_to_data(metadata.type, argc, argv, data, size);
+            metadata.size = size;
+            metadata.data = data;
+
+            x->x_sink->inviteSource(ep, &metadata);
+        } else {
+            x->x_sink->inviteSource(ep, nullptr);
+        }
+        // notify send thread
+        x->x_node->notify();
+    }
+}
+static void aoo_receive_uninvite(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (!x->check("uninvite")) return;
+
+    if (!argc){
+        x->x_sink->uninviteAll();
+        return;
+    }
+
+    if (argc < 3){
+        object_error((t_object*)x, "too few arguments for 'uninvite' message");
+        return;
+    }
+
+    aoo::ip_address addr;
+    AooId id = 0;
+    if (x->get_source_arg(argc, argv, addr, id, true)){
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        x->x_sink->uninviteSource(ep);
+        // notify send thread
+        x->x_node->notify();
+    }
+}
+static void aoo_receive_source_list(t_aoo_receive *x)
+{
+    if (!x->check("source_list")) return;
+
+    for (auto& src : x->x_sources)
+    {
+        t_atom msg[3];
+        if (x->x_node->serialize_endpoint(src.s_address, src.s_id, 3, msg)) {
+            outlet_anything(x->x_msgout, gensym("source"), 3, msg);
+        } else {
+            error("BUG: aoo_receive_source_list: serialize_endpoint");
+        }
+    }
+}
 //***********************************************************************************************
 
 extern "C" void ext_main(void *r)
@@ -480,9 +631,13 @@ extern "C" void ext_main(void *r)
 
 	t_class *c = class_new("aoo.receive~", (method)aoo_receive_new, (method)aoo_receive_free, (long)sizeof(t_aoo_receive), 0L, A_GIMME, 0);
 
-
 	class_addmethod(c, (method)aoo_receive_dsp64,	"dsp64",	A_CANT, 0);
 	class_addmethod(c, (method)aoo_receive_assist,	"assist",	A_CANT, 0);
+
+    class_addmethod(c, (method)aoo_receive_ping,"ping", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_invite, "invite", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_receive_uninvite,"uninvite", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_receive_source_list, "source_list", 0);
 
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);
@@ -525,8 +680,14 @@ void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 // registers a function for the signal chain in Max
 void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
-	post("my sample rate is: %f", samplerate);
-	// post(count);
+    int32_t nchannels = x->x_nchannels;
+    
+    if (maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate) {
+        x->x_sink->setup(nchannels, samplerate, maxvectorsize, kAooFixedBlockSize);
+        x->x_blocksize = maxvectorsize;
+        x->x_samplerate = samplerate;
+    }
+    
 
 	// instead of calling dsp_add(), we send the "dsp_add64" message to the object representing the dsp chain
 	// the arguments passed are:
@@ -544,13 +705,30 @@ void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double s
 // this is the 64-bit perform method audio vectors
 void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
-	t_double *inL = ins[0];		// we get audio for each inlet of the object from the **ins argument
-	t_double *outL = outs[0];	// we get audio for each outlet of the object from the **outs argument
 	int n = sampleframes;
 
-	// this perform method simply copies the input to the output, offsetting the value
-	while (n--)
-		*outL++ = *inL++;
+    if(x->x_node) {
+        auto err = x->x_sink->process(outs, (int32_t)sampleframes, get_osctime(), (AooStreamMessageHandler)aoo_receive_handle_stream_message, x);
+        if(err != kAooErrorIdle){
+            x->x_node->notify();
+        }
+
+        if(x->x_sink->eventsAvailable()){
+            post("EVENTI AVAILABLEE");
+            clock_delay(x->x_clock, 0);
+        }
+    }
+    else {
+        for (int i = 0; i < numouts; ++i)
+        {
+            for (int j = 0; j < sampleframes; ++j)
+            {
+                outs[i][j] = 0;
+            }
+        }
+        
+        
+    }
 }
 
 

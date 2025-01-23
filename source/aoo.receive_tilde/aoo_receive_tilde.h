@@ -36,7 +36,8 @@ struct t_aoo_receive {
 	t_outlet *x_msgout = nullptr;
 	
 	int32_t x_nchannels = 0;
-    int32_t x_samplerate = 0;
+    long x_samplerate = 0;
+    long x_blocksize = 0; 
 	std::unique_ptr<t_sample *[]> x_vec;
 
 	t_clock *x_clock = nullptr;
@@ -56,7 +57,9 @@ struct t_aoo_receive {
 	~t_aoo_receive();
 	
     void dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id);
-	
+    bool check(const char *name) const;
+	bool check(int argc, t_atom *argv, int minargs, const char *name) const;
+    bool get_source_arg(int argc, t_atom *argv, aoo::ip_address& addr, AooId& id, bool check) const;
 } ;
 
 // MAX MSP method prototypes

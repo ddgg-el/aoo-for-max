@@ -89,8 +89,7 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
                 x->add_sink(addr, ep.id);
             } else {
                 // the sink might have been added concurrently by the user (very unlikely)
-                object_post((t_object*)x, "%s: sink %s %d %d already added",
-                        object_classname(x), addr.name(), addr.port(), ep.id);
+                object_post((t_object*)x, "sink %s %d %d already added", addr.name(), addr.port(), ep.id);
             }
             break;
         }
@@ -100,8 +99,7 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
                 x->remove_sink(addr, ep.id);
             } else {
                 // the sink might have been removed concurrently by the user (very unlikely)
-                object_post((t_object *)x, "%s: sink %s %d %d already removed",
-                        object_classname(x), addr.name(), addr.port(), ep.id);
+                object_post((t_object *)x, "sink %s %d %d already removed", addr.name(), addr.port(), ep.id);
             }
             break;
         }
@@ -139,8 +137,7 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
         break; // !
     }
     default:
-        object_post((t_object*)x, "%s: unknown event type (%d)",
-                object_classname(x), event->type);
+        object_post((t_object*)x, "unknown event type (%d)", event->type);
         break;
     }
 }
@@ -161,13 +158,13 @@ static void aoo_send_set(t_aoo_send *x, int f1, int f2)
     }
 
     if (id < 0) {
-        object_error((t_object*)x, "%s: bad id %d", object_classname(x), id);
+        object_error((t_object*)x, "bad id %d", id);
         return;
     }
 
     if (port < 0) {
         // NB: 0 is allowed (= don't listen)!
-        object_error((t_object*)x, "%s: bad port %d", object_classname(x), id);
+        object_error((t_object*)x, "bad port %d", id);
         return;
     }
 
@@ -199,7 +196,12 @@ static void aoo_send_port(t_aoo_send *x, int f)
 {
     aoo_send_set(x, f, x->x_id);
 }
-
+/**
+ * @brief Construct a new t aoo send::t aoo send object
+ * 
+ * @param argc 
+ * @param argv num channels (inlets) - port - id
+ */
 t_aoo_send::t_aoo_send(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_send_tick);
@@ -244,8 +246,7 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
             // NB: in theory we can support any number of channels;
             // this rather meant to handle patches that accidentally
             // use the old argument order where the port would come first!
-            object_error((t_object*)this, "%s: channel count (%d) out of range",
-                     object_classname(this), ninlets);
+            object_error((t_object*)this, "channel count (%d) out of range", ninlets);
             ninlets = 0;
         }
         x_nchannels = ninlets;
@@ -258,7 +259,7 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
     // arg #3 (optional): ID
     AooId id = atom_getintarg(2, argc, argv);
     if (id < 0) {
-        object_error((t_object*)this, "%s: bad id % d, setting to 0", object_classname(this), id);
+        object_error((t_object*)this, "bad id % d, setting to 0", id);
         id = 0;
     }
     x_id = id;
@@ -289,7 +290,10 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
     // finally we're ready to receive messages
     aoo_send_port(this, port);
 }
-
+/**
+ * @brief Destroy the t aoo send::t aoo send object and release the network node
+ * 
+ */
 t_aoo_send::~t_aoo_send()
 {
      // first stop receiving messages
@@ -299,7 +303,17 @@ t_aoo_send::~t_aoo_send()
 
     clock_free(x_clock);
 }
-
+/**
+ * @brief add a sink in the list of sinks available
+ * 
+ * The function is called from aoo_send_add into which
+ * an endpoint is created in the network. At this point 
+ * this function updates the x_sink register of the aoo.send~
+ * instance and informs the Max user in case of success
+ * 
+ * @param addr 
+ * @param id 
+ */
 void t_aoo_send::add_sink(const aoo::ip_address& addr, AooId id)
 {
     // add sink to list; try to find peer name!
@@ -316,7 +330,13 @@ void t_aoo_send::add_sink(const aoo::ip_address& addr, AooId id)
         error("BUG: t_aoo_send::add_sink: serialize_endpoint");
     }
 }
-
+/**
+ * @brief check if the sink is registered in the x_sinks vector
+ * 
+ * @param addr 
+ * @param id 
+ * @return const t_sink* 
+ */
 const t_sink *t_aoo_send::find_sink(const aoo::ip_address& addr, AooId id) const
 {
     for (auto& sink : x_sinks){
@@ -326,7 +346,12 @@ const t_sink *t_aoo_send::find_sink(const aoo::ip_address& addr, AooId id) const
     }
     return nullptr;
 }
-
+/**
+ * @brief remove a sink from the x_sink vector
+ * 
+ * @param addr 
+ * @param id 
+ */
 void t_aoo_send::remove_sink(const aoo::ip_address& addr, AooId id)
 {
     // remove the sink matching endpoint and id
@@ -346,8 +371,291 @@ void t_aoo_send::remove_sink(const aoo::ip_address& addr, AooId id)
     }
     error("BUG: t_aoo_send::remove_sink");
 }
+/**
+ * @brief check if the object has a node registered
+ * 
+ * @param name 
+ * @return true 
+ * @return false 
+ */
+bool t_aoo_send::check(const char *name) const
+{
+    if (x_node){
+        return true;
+    } else {
+        object_error((t_object*)this, "'%s' failed: no socket!", name);
+        return false;
+    }
+}
+/**
+ * @brief check if the "add" message is properly formatted
+ * 
+ * @param argc 
+ * @param argv 
+ * @param minargs 
+ * @param name 
+ * @return true 
+ * @return false 
+ */
+bool t_aoo_send::check(int argc, t_atom *argv, int minargs, const char *name) const
+{
+    if (!check(name)) return false;
 
+    if (argc < minargs){
+        object_error((t_object*)this, "too few arguments for '%s' message", name);
+        return false;
+    }
 
+    return true;
+}
+/**
+ * @brief Find a peer in x_sinks by group and user or by ip and port
+ * 
+ * @param argc 
+ * @param argv the message "add" from the user
+ * @param addr an ip address
+ * @param id an id
+ * @param check 
+ * @return true 
+ * @return false 
+ */
+bool t_aoo_send::get_sink_arg(int argc, t_atom *argv,
+                              aoo::ip_address& addr, AooId& id, bool check) const
+{
+    // if there is no registered node - STOP
+    if (!x_node) {
+        object_error((t_object*)this, "no socket!");
+        return false;
+    }
+    // if the message in not properly formatted - STOP
+    if (argc < 3){
+        object_error((t_object*)this, "too few arguments for sink");
+        return false;
+    }
+    // first try peer (group|user)
+    if (argv[1].a_type == A_SYM) {
+        t_symbol *group = atom_getsym(argv);
+        t_symbol *user = atom_getsym(argv + 1);
+        id = atom_getfloat(argv + 2);
+        // first search sink list, in case the client has been disconnected
+        for (auto& s : x_sinks) {
+            if (s.s_group == group && s.s_user == user && s.s_id == id) {
+                addr = s.s_address;
+                return true;
+            }
+        }
+        if (!check) {
+            // not yet in list -> try to get from client
+            if (x_node->find_peer(group, user, addr)) {
+                return true;
+            }
+        }
+        object_error((t_object*)this, "couldn't find sink %s|%s %d", group->s_name, user->s_name, id);
+        return false;
+    } else {
+        // otherwise try host|port
+        t_symbol *host = atom_getsym(argv);
+        int port = atom_getfloat(argv + 1);
+        id = atom_getfloat(argv + 2);
+        if (x_node->resolve(host, port, addr)) {
+            if (check) {
+                // try to find in list
+                for (auto& s : x_sinks) {
+                    if (s.s_address == addr && s.s_id == id) {
+                        return true;
+                    }
+                }
+                object_error((t_object*)this, "couldn't find sink %s %d %d", host->s_name, port, id);
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            object_error((t_object*)this, "couldn't resolve sink hostname '%s'", host->s_name);
+            return false;
+        }
+    }
+}
+/**
+ * @brief remove all sinks in the network
+ * 
+ */
+void t_aoo_send::remove_all()
+{
+    x_source->removeAll();
+
+    int numsinks = x_sinks.size();
+    if (!numsinks){
+        return;
+    }
+
+    // temporary copies (for reentrancy)
+    t_sink *sinks = (t_sink *)alloca(sizeof(t_sink) * numsinks);
+    std::copy(x_sinks.begin(), x_sinks.end(), sinks);
+
+    x_sinks.clear();
+
+    // output messages
+    for (int i = 0; i < numsinks; ++i){
+        t_atom msg[3];
+        if (x_node->serialize_endpoint(sinks[i].s_address, sinks[i].s_id, 3, msg)){
+            outlet_anything(x_msgout, gensym("remove"), 3, msg);
+        } else {
+            error("BUG: aoo_send_doremoveall: serialize_endpoint");
+        }
+    }
+}
+//********************** object methods **********************
+/**
+ * @brief Connect to a node
+ * 
+ * @param x the object
+ * @param s 
+ * @param argc 
+ * @param argv 
+ */
+static void aoo_send_add(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    // check that the add message is properly formatted
+    if (!x->check(argc, argv, 3, "add")) return;
+
+    aoo::ip_address addr;
+    AooId id;
+    if (x->get_sink_arg(argc, argv, addr, id, false)){
+        // check if sink exists
+        if (x->find_sink(addr, id)) {
+            if (argv[1].a_type == A_SYM){
+                // group + user
+                auto group = atom_getsym(argv)->s_name;
+                auto user = atom_getsym(argv + 1)->s_name;
+                object_error((t_object*)x, "sink %s|%s %d already added!", group, user, id);
+            } else {
+                // host + port
+                auto host = atom_getsym(argv)->s_name;
+                object_error((t_object*)x, "sink %s %d %d already added!", host, addr.port(), id);
+            }
+            return;
+        }
+        // if not in x_sinks create one (an endpoint)
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        // it should be possible to add another bool (0/1) argument to the add message 
+        bool active = argc > 3 ? atom_getfloat(argv + 3) : true;
+        // add a sink to the network
+        x->x_source->addSink(ep, active);
+
+#if 0
+        // not yet implemented
+        if (argc > 4) {
+            int channel = atom_getfloat(argv + 4);
+            x->x_source->setSinkChannelOffset(ep, channel);
+        }
+        if (argc > 5) {
+            int channel = atom_getfloat(argv + 5);
+            x->x_source->setSinkChannelOffset(ep, channel);
+        }
+#endif
+
+        x->add_sink(addr, id);
+
+        // print message (use actual IP address)
+        object_post((t_object*)x, "added sink %d %d", addr.name(), addr.port(), id);
+    }
+}
+/**
+ * @brief disconnect from a node
+ * 
+ * @param x the object
+ * @param s 
+ * @param argc arg count
+ * @param argv the message containing the info of the node to remove
+ */
+static void aoo_send_remove(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    // check if the object has a node
+    if (!x->check("remove")) return;
+    // if the message is just "remove" remove
+    if (!argc){
+        x->remove_all();
+        return;
+    }
+
+    if (argc < 3){
+        object_error((t_object*)x, "too few arguments for 'remove' message");
+        return;
+    }
+
+    aoo::ip_address addr;
+    AooId id;
+    if (x->get_sink_arg(argc, argv, addr, id, true)) {
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        x->x_source->removeSink(ep);
+
+        x->remove_sink(addr, id);
+
+        object_post((t_object*)x, "removed sink %d %d %d", addr.name(), addr.port(), id);
+    }
+}
+
+static void aoo_send_start(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    int32_t offset = (gettime()- x->x_logicaltime) * 0.001 * (int32_t)x->x_samplerate;
+    // in case "start" is sent while DSP is off...
+    if (offset >= (int32_t)x->x_blocksize) {
+        offset = 0;
+    }
+    if (argc > 0) {
+        // with metadata
+        AooData metadata;
+        if (!atom_to_datatype(*argv, metadata.type, x)) {
+            return;
+        }
+        argc--; argv++;
+        if (!argc) {
+            object_error((t_object*)x, "metadata must not be empty");
+            return;
+        }
+        auto size = argc * datatype_element_size(metadata.type);
+        auto data = (AooByte *)alloca(size);
+        atoms_to_data(metadata.type, argc, argv, data, size);
+        metadata.size = size;
+        metadata.data = data;
+        // start the stream
+        x->x_source->startStream(offset, &metadata);
+    } else {
+        // start the stream
+        x->x_source->startStream(offset, nullptr);
+        object_post((t_object*)x, "Stream Started");
+    }
+    x->x_running = true;
+}
+static void aoo_send_stop(t_aoo_send *x)
+{
+    int32_t offset = (gettime()-x->x_logicaltime) * 0.001 * (int32_t)x->x_samplerate;
+    // in case "stop" is sent while DSP is off...
+    if (offset >= (int32_t)x->x_blocksize) {
+        offset = 0;
+    }
+    x->x_source->stopStream(offset);
+    object_post((t_object*)x, "Stream Stopped");
+    x->x_running = false;
+}
+static void aoo_send_ping(t_aoo_send *x, double f)
+{
+    x->x_source->setPingInterval(f * 0.001);
+}
+static void aoo_send_sink_list(t_aoo_send *x)
+{
+    if (!x->check("sink_list")) return;
+
+    for (auto& sink : x->x_sinks){
+        t_atom msg[3];
+        if (x->x_node->serialize_endpoint(sink.s_address, sink.s_id, 3, msg)){
+            outlet_anything(x->x_msgout, gensym("sink"), 3, msg);
+        } else {
+            error("BUG: t_node::serialize_endpoint");
+        }
+    }
+}
 //***********************************************************************************************
 
 void ext_main(void *r)
@@ -358,10 +666,17 @@ void ext_main(void *r)
 
 	t_class *c = class_new("aoo.send~", (method)aoo_send_new, (method)aoo_send_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
 
-	class_addmethod(c, (method)aoo_send_float,		"float",	A_FLOAT, 0);
 	class_addmethod(c, (method)aoo_send_dsp64,		"dsp64",	A_CANT, 0);
 	class_addmethod(c, (method)aoo_send_assist,	"assist",	A_CANT, 0);
 
+    class_addmethod(c, (method)aoo_send_add, "add", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_remove,"remove", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_start, "start", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_stop, "stop", 0);
+
+    class_addmethod(c, (method)aoo_send_ping,"ping", A_FLOAT, 0);
+
+    class_addmethod(c, (method)aoo_send_sink_list, "sink_list", 0);
 	// initializes class dsp methods for audio processing
 	class_dspinit(c);
 	// registers the class as an object which can be instantiated in a Max patch
@@ -401,18 +716,16 @@ void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
     ;
 }
 
-void aoo_send_float(t_aoo_send *x, double f)
-{
-    ;
-}
-
 // registers a function for the signal chain in Max
 void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
-	// post("Channels: %d", x->x_nchannels);
-    // post("Id: %d", x->x_id);
-    // post("Codec: %s", x->x_codec->s_name);
-	// post(count);
+    int32_t nchannels = x->x_nchannels;    
+	
+    if(maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate){
+        x->x_source->setup(nchannels, samplerate, (int32_t) maxvectorsize, kAooFixedBlockSize);
+        x->x_blocksize = maxvectorsize;
+        x->x_samplerate = samplerate;
+    }
 
 	// instead of calling dsp_add(), we send the "dsp_add64" message to the object representing the dsp chain
 	// the arguments passed are:
@@ -429,6 +742,29 @@ void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double sampler
 // this is the 64-bit perform method audio vectors
 void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
+    static_assert(sizeof(t_sample) == sizeof(AooSample), "AooSample size must match t_sample");
+
+    if(x->x_node){
+        auto err = x->x_source->process(ins, (int32_t)sampleframes, get_osctime());
+        
+        if(err == kAooErrorOverflow){
+            object_error((t_object*)x, "send buffer overflow. Try to manually increase "
+                        "the send buffer size with the 'buffersize' method.");
+        }
+
+        if(err != kAooErrorIdle){
+            x->x_node->notify();
+        }
+
+        if(x->x_source->eventsAvailable()){
+            post("AVAILABLEE");
+            clock_delay(x->x_clock, 0);
+        }
+
+        x->x_logicaltime = gettime();
+
+    }
+
 	// t_double *inL = ins[0];		// we get audio for each inlet of the object from the **ins argument
 	// t_double *outL = outs[0];	// we get audio for each outlet of the object from the **outs argument
 	// int n = sampleframes;

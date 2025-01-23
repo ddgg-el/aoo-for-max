@@ -36,6 +36,10 @@ int stream_message_to_atoms(const AooStreamMessage& msg, int argc, t_atom *argv)
 
 double clock_getsystimeafter(double deltime);
 
+bool atom_to_datatype(const t_atom &a, AooDataType& type, void *x);
+
+int atoms_to_data(AooDataType type, int argc, const t_atom *argv, AooByte *data, AooSize size);
+
 uint64_t get_osctime();
 ///////////////////////////// priority queue ////////////////////////////////
 
