@@ -118,7 +118,6 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
             atom_setfloat(msg + 5, network_rtt);
             atom_setfloat(msg + 6, total_rtt);
             atom_setfloat(msg + 7, e.packetLoss);
-
             outlet_anything(x->x_msgout, gensym("ping"), 8, msg);
 
             break;
@@ -647,6 +646,15 @@ static void aoo_send_sink_list(t_aoo_send *x)
 {
     if (!x->check("sink_list")) return;
 
+    if(x->x_sinks.empty()){
+        t_atom msg[1];
+        t_symbol* text = gensym("empty");
+        atom_setsym(msg, text);
+        outlet_anything(x->x_msgout, gensym("sink_list"), 1, msg);
+        object_post((t_object*)x, "no sinks registered");
+        return;
+    }
+
     for (auto& sink : x->x_sinks){
         t_atom msg[3];
         if (x->x_node->serialize_endpoint(sink.s_address, sink.s_id, 3, msg)){
@@ -682,6 +690,41 @@ void ext_main(void *r)
 	// registers the class as an object which can be instantiated in a Max patch
 	class_register(CLASS_BOX, c);
 	aoo_send_class = c;
+
+    ///////////////////////////////////////////
+    AooError err = aoo_initialize(NULL);
+    // TODO: handle error
+    // if(err == kAooErrorNone){
+    //     post("aoo_initialized");
+    // }
+
+    if (auto [ok, msg] = aoo::check_ntp_server(); ok){
+        // post("Client", msg.c_str());
+    } else {
+        error("NTP server", msg.c_str());
+    }
+
+    g_start_time = aoo::time_tag::now();
+
+#ifdef PD_HAVE_MULTICHANNEL
+    // runtime check for multichannel support:
+#ifdef _WIN32
+    // get a handle to the module containing the Pd API functions.
+    // NB: GetModuleHandle("pd.dll") does not cover all cases.
+    HMODULE module;
+    if (GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            (LPCSTR)&pd_typedmess, &module)) {
+        g_signal_setmultiout = (t_signal_setmultiout)(void *)GetProcAddress(
+            module, "signal_setmultiout");
+    }
+#else
+    // search recursively, starting from the main program
+    g_signal_setmultiout = (t_signal_setmultiout)dlsym(
+        dlopen(nullptr, RTLD_NOW), "signal_setmultiout");
+#endif
+#endif // PD_HAVE_MULTICHANNEL
+///////////////////////////////////////////
 
     aoo_node_setup();
 }
@@ -720,8 +763,8 @@ void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
 void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
     int32_t nchannels = x->x_nchannels;    
-	
     if(maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate){
+	    object_post((t_object*)x, "aoo_send_dsp64: %d %f %ld %ld", nchannels, samplerate, maxvectorsize, flags);
         x->x_source->setup(nchannels, samplerate, (int32_t) maxvectorsize, kAooFixedBlockSize);
         x->x_blocksize = maxvectorsize;
         x->x_samplerate = samplerate;
@@ -745,7 +788,8 @@ void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numin
     static_assert(sizeof(t_sample) == sizeof(AooSample), "AooSample size must match t_sample");
 
     if(x->x_node){
-        auto err = x->x_source->process(ins, (int32_t)sampleframes, get_osctime());
+        AooNtpTime time = get_osctime();
+        auto err = x->x_source->process(ins, (int32_t)sampleframes, time);
         
         if(err == kAooErrorOverflow){
             object_error((t_object*)x, "send buffer overflow. Try to manually increase "
@@ -757,7 +801,6 @@ void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numin
         }
 
         if(x->x_source->eventsAvailable()){
-            post("AVAILABLEE");
             clock_delay(x->x_clock, 0);
         }
 
@@ -770,8 +813,8 @@ void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numin
 	// int n = sampleframes;
 
 	// // this perform method simply copies the input to the output, offsetting the value
-	// while (n--)
+	// while (sampleframes--)
 	// 	// *outL++ = x->offset;
-	// 	*outL++ = *inL++ + x->offset;
+		// *outs++ = *ins++;
 }
 

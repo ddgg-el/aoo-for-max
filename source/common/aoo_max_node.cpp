@@ -106,13 +106,11 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
 #else
     t_max_err err;
     // start send thread
-    post("start network send thread");
     err = systhread_create((method)send, this, 0, 0, 0, &x_sendthread);
     if(err != MAX_ERR_NONE){
         object_error((t_object*)this, "Could not create send thread");
     }
     // start receive thread
-    post("start network receive thread");
     err = systhread_create((method)receive, this, 0, 0, 0, &x_recvthread);
     if(err != MAX_ERR_NONE){
         object_error((t_object*)this, "Could not create receive thread");

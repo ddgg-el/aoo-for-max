@@ -26,7 +26,7 @@ static void aoo_receive_queue_tick(t_aoo_receive *x)
 {
     auto& queue = x->x_queue;
     auto now = gettime();
-	post("daje");
+
     while (!queue.empty()){
         if (queue.top().time <= now) {
             auto& m = queue.top().data;
@@ -46,7 +46,9 @@ static void aoo_receive_queue_tick(t_aoo_receive *x)
 
 static void aoo_receive_handle_stream_message(t_aoo_receive *x, const AooStreamMessage *msg, const AooEndpoint *ep)
 {
+    // FIXME: casting
     auto delay = (double)msg->sampleOffset / (double)x->x_samplerate * 1000.0;
+    // object_post((t_object*)x, "delay: %d", delay);
     if (delay > 0) {
         // put on queue and schedule on clock (using logical time)
         auto abstime = clock_getsystimeafter(delay);
@@ -157,7 +159,6 @@ static void aoo_receive_handle_event(t_aoo_receive *x, const AooEvent *event, in
             atom_setfloat(msg + 4, delta2);
             atom_setfloat(msg + 5, network_rtt);
             atom_setfloat(msg + 6, total_rtt);
-
             outlet_anything(x->x_msgout, gensym("ping"), 7, msg);
 
             break;
@@ -429,11 +430,11 @@ void t_aoo_receive::dispatch_stream_message(const AooStreamMessage& msg, const a
     auto size = 5 + (msg.size / datatype_element_size(msg.type));
 	// un'array dove verrà copiato il messaggio da mandare all'outlet
     auto vec = (t_atom *)alloca(sizeof(t_atom) * size);
-	// TODO  
-    // if (!x_node->serialize_endpoint(address, id, 3, vec)) {
-    //     error("bug: dispatch_stream_message: serialize_endpoint");
-    //     return;
-    // }
+
+    if (!x_node->serialize_endpoint(address, id, 3, vec)) {
+        error("bug: dispatch_stream_message: serialize_endpoint");
+        return;
+    }
 	// comunica attraverso l'outlet lo stato della connesione (credo)
     if (msg.type == kAooDataStreamState) {
 
@@ -578,6 +579,7 @@ static void aoo_receive_invite(t_aoo_receive *x, t_symbol *s, int argc, t_atom *
 
             x->x_sink->inviteSource(ep, &metadata);
         } else {
+            post("inviting");
             x->x_sink->inviteSource(ep, nullptr);
         }
         // notify send thread
@@ -611,6 +613,15 @@ static void aoo_receive_source_list(t_aoo_receive *x)
 {
     if (!x->check("source_list")) return;
 
+     if(x->x_sources.empty()){
+        t_atom msg[1];
+        t_symbol* text = gensym("empty");
+        atom_setsym(msg, text);
+        outlet_anything(x->x_msgout, gensym("source_list"), 1, msg);
+        object_post((t_object*)x, "no sources registered");
+        return;
+    }
+
     for (auto& src : x->x_sources)
     {
         t_atom msg[3];
@@ -621,6 +632,7 @@ static void aoo_receive_source_list(t_aoo_receive *x)
         }
     }
 }
+static void aoo_receive_bang(t_aoo_receive *x);
 //***********************************************************************************************
 
 extern "C" void ext_main(void *r)
@@ -639,9 +651,50 @@ extern "C" void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_uninvite,"uninvite", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_source_list, "source_list", 0);
 
+    class_addmethod(c, (method)aoo_receive_bang, "bang", 0);
+
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);
 	aoo_receive_class = c;
+///////////////////////////////////////////
+    AooError err = aoo_initialize(NULL);
+    // TODO: handle error
+    // if(err != kAooErrorNone){
+    //     error("aoo not initialized");
+    //     return;
+    // } else {
+    //     post("aoo initialized!");
+    // }
+    
+
+    if (auto [ok, msg] = aoo::check_ntp_server(); ok){
+        // post("NTP receive server");
+    } else {
+        error("%s", msg.c_str());
+    }
+
+    g_start_time = aoo::time_tag::now();
+
+#ifdef PD_HAVE_MULTICHANNEL
+    // runtime check for multichannel support:
+#ifdef _WIN32
+    // get a handle to the module containing the Pd API functions.
+    // NB: GetModuleHandle("pd.dll") does not cover all cases.
+    HMODULE module;
+    if (GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            (LPCSTR)&pd_typedmess, &module)) {
+        g_signal_setmultiout = (t_signal_setmultiout)(void *)GetProcAddress(
+            module, "signal_setmultiout");
+    }
+#else
+    // search recursively, starting from the main program
+    g_signal_setmultiout = (t_signal_setmultiout)dlsym(
+        dlopen(nullptr, RTLD_NOW), "signal_setmultiout");
+#endif
+#endif // PD_HAVE_MULTICHANNEL
+///////////////////////////////////////////
+
     aoo_node_setup();
 
 }
@@ -664,6 +717,11 @@ void aoo_receive_free(t_aoo_receive *x)
     x->~t_aoo_receive();
 }
 
+static void aoo_receive_bang(t_aoo_receive *x)
+{
+    
+    ;
+}
 
 void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 {
@@ -676,13 +734,13 @@ void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
     ;
 }
 
-
 // registers a function for the signal chain in Max
 void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
     int32_t nchannels = x->x_nchannels;
     
     if (maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate) {
+        object_post((t_object*)x, "blocksize %ld -> %ld, samplerate %f -> %f", x->x_blocksize, maxvectorsize, x->x_samplerate, samplerate);
         x->x_sink->setup(nchannels, samplerate, maxvectorsize, kAooFixedBlockSize);
         x->x_blocksize = maxvectorsize;
         x->x_samplerate = samplerate;
@@ -701,20 +759,19 @@ void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double s
 	object_method(dsp64, gensym("dsp_add64"), x, aoo_receive_perform64, 0, NULL);
 }
 
-
 // this is the 64-bit perform method audio vectors
 void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
 	int n = sampleframes;
 
     if(x->x_node) {
-        auto err = x->x_sink->process(outs, (int32_t)sampleframes, get_osctime(), (AooStreamMessageHandler)aoo_receive_handle_stream_message, x);
+        AooNtpTime time = get_osctime();
+        auto err = x->x_sink->process(outs, (int32_t)sampleframes, time, (AooStreamMessageHandler)aoo_receive_handle_stream_message, x);
         if(err != kAooErrorIdle){
             x->x_node->notify();
         }
 
         if(x->x_sink->eventsAvailable()){
-            post("EVENTI AVAILABLEE");
             clock_delay(x->x_clock, 0);
         }
     }
@@ -723,11 +780,9 @@ void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long
         {
             for (int j = 0; j < sampleframes; ++j)
             {
-                outs[i][j] = 0;
+                outs[i][j] = 0.5;
             }
         }
-        
-        
     }
 }
 
