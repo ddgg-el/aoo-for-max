@@ -40,6 +40,10 @@ struct t_aoo_send {
     AooId x_invite_token = kAooIdInvalid;
     bool x_auto_invite = true; // on by default
     bool x_running = false;
+    double x_logicaltime = 0;
+    double x_samplerate = 0;
+    long x_blocksize = 0;
+
 
     std::vector<t_sink> x_sinks;
 
@@ -51,6 +55,10 @@ struct t_aoo_send {
     void add_sink(const aoo::ip_address& addr, AooId id);
     const t_sink *find_sink(const aoo::ip_address& addr, AooId id) const;
     void remove_sink(const aoo::ip_address& addr, AooId id);
+    bool check(const char *name) const;
+    bool check(int argc, t_atom *argv, int minargs, const char *name) const;
+    bool get_sink_arg(int argc, t_atom *argv, aoo::ip_address& addr, AooId& id, bool check) const;
+    void remove_all();
 };
 
 static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t);

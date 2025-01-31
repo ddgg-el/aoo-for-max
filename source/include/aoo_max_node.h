@@ -36,6 +36,8 @@ public:
 	virtual int port() const = 0;
 
 	virtual void notify() = 0;
+
+    virtual bool resolve(t_symbol *host, int port, aoo::ip_address& addr) const = 0;
 };
 
 class t_node_imp final : public t_node
@@ -86,6 +88,8 @@ public:
     AooClient * client() override { return x_client.get(); }
 
      void notify() override { x_client->notify(); }
+
+     bool resolve(t_symbol *host, int port, aoo::ip_address& addr) const override;
 
 
 #if NETWORK_THREAD_POLL
