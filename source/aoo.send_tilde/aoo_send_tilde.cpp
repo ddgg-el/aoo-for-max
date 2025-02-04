@@ -191,8 +191,9 @@ static void aoo_send_set(t_aoo_send *x, int f1, int f2)
  * @param x l'oggetto t_aoo_send
  * @param f la porta
  */
-static void aoo_send_port(t_aoo_send *x, int f)
+static void aoo_send_port(t_aoo_send *x, double f)
 {
+    // post("Valore di f: %f", f);
     aoo_send_set(x, f, x->x_id);
 }
 /**
@@ -664,6 +665,120 @@ static void aoo_send_sink_list(t_aoo_send *x)
         }
     }
 }
+static void aoo_send_sink_channel(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (!x->check(argc, argv, 4, "sink_channel")) return;
+
+    aoo::ip_address addr;
+    AooId id;
+    if (x->get_sink_arg(argc, argv, addr, id, true)){
+        int32_t chn = atom_getfloat(argv + 3);
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        x->x_source->setSinkChannelOffset(ep, chn);
+    }
+}
+static void aoo_send_auto_invite(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv) {
+    t_float f = atom_getfloat(argv);
+    // post("Valore di f: %f", f);
+    x->x_auto_invite = f != 0;
+    // post("Valore di x_auto_invite: %d", x->x_auto_invite);
+}
+static void aoo_send_invite(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (!x->check(argc, argv, 3, "invite")) return;
+
+    aoo::ip_address addr;
+    AooId id;
+    if (x->get_sink_arg(argc, argv, addr, id, true)) {
+        bool accept = argc > 3 ? atom_getfloat(argv + 3) : true; // default: true
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        x->x_source->handleInvite(ep, x->x_invite_token, accept);
+    }
+}
+static void aoo_send_uninvite(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (!x->check(argc, argv, 3, "uninvite")) return;
+
+    aoo::ip_address addr;
+    AooId id;
+    if (x->get_sink_arg(argc, argv, addr, id, true)){
+        bool accept = argc > 3 ? atom_getfloat(argv + 3) : true; // default: true
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        x->x_source->handleUninvite(ep, x->x_invite_token, accept);
+    }
+}
+static void aoo_send_active(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (!x->check(argc, argv, 4, "active")) return;
+
+    aoo::ip_address addr;
+    AooId id;
+    if (x->get_sink_arg(argc, argv, addr, id, true)){
+        AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+        bool active = atom_getfloat(argv + 3);
+        x->x_source->activate(ep, active);
+    }
+}
+static void aoo_send_packetsize(t_aoo_send *x, double f)
+{
+    // post("Valore di f: %f", f);
+    x->x_source->setPacketSize(f);
+}
+static void aoo_send_buffersize(t_aoo_send *x, double f)
+{
+    // post("Valore di f: %f", f);
+    x->x_source->setBufferSize(f * 0.001);
+}
+static void aoo_send_reset(t_aoo_send *x)
+{
+    x->x_source->reset();
+}
+static void aoo_send_resend(t_aoo_send *x, double f)
+{
+    x->x_source->setResendBufferSize(f * 0.001);
+}
+static void aoo_send_redundancy(t_aoo_send *x, double f)
+{
+    x->x_source->setRedundancy(f);
+}
+static void aoo_send_resample_method(t_aoo_send *x, t_symbol *s)
+{
+    AooResampleMethod method;
+    std::string_view name = s->s_name;
+    if (name == "hold") {
+        method = kAooResampleHold;
+    } else if (name == "linear") {
+        method = kAooResampleLinear;
+    } else if (name == "cubic") {
+        method = kAooResampleCubic;
+    } else {
+        object_error((t_object*)x, "%s: bad resample method '%s'", name.data());
+        return;
+    }
+    if (x->x_source->setResampleMethod(method) != kAooOk) {
+        object_error((t_object*)x, "%s: resample method '%s' not supported",
+                  name.data());
+    }
+}
+static void aoo_send_dynamic_resampling(t_aoo_send *x, double f)
+{
+    x->x_source->setDynamicResampling(f);
+}
+static void aoo_send_dll_bandwidth(t_aoo_send *x, double f)
+{
+    x->x_source->setDllBandwidth(f);
+}
+static void aoo_send_binary(t_aoo_send *x, double f)
+{
+    x->x_source->setBinaryFormat(f);
+}
+static void aoo_send_stream_time(t_aoo_send *x, double f)
+{
+    x->x_source->setStreamTimeSendInterval(f * 0.001);
+}
+
+
+
 //***********************************************************************************************
 
 void ext_main(void *r)
@@ -681,11 +796,27 @@ void ext_main(void *r)
     class_addmethod(c, (method)aoo_send_remove,"remove", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_start, "start", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_stop, "stop", 0);
-
+    class_addmethod(c, (method)aoo_send_sink_channel, "sink_channel", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_auto_invite, "auto_invite", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_invite, "invite", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_uninvite, "uninvite", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_active, "active", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_send_port,"port", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_packetsize,"packetsize", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_send_ping,"ping", A_FLOAT, 0);
-
+    class_addmethod(c, (method)aoo_send_buffersize,"buffersize", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_reset, "reset", 0);
+    class_addmethod(c, (method)aoo_send_resend,"resend", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_send_sink_list, "sink_list", 0);
-	// initializes class dsp methods for audio processing
+
+    class_addmethod(c, (method)aoo_send_redundancy,"redundancy", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_resample_method,"resample_method", A_SYM, 0);
+    class_addmethod(c, (method)aoo_send_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_binary,"binary", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_stream_time,"stream_time", A_FLOAT, 0);
+
+    // initializes class dsp methods for audio processing
 	class_dspinit(c);
 	// registers the class as an object which can be instantiated in a Max patch
 	class_register(CLASS_BOX, c);
@@ -785,11 +916,14 @@ void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double sampler
 // this is the 64-bit perform method audio vectors
 void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
+    
     static_assert(sizeof(t_sample) == sizeof(AooSample), "AooSample size must match t_sample");
+    
 
     if(x->x_node){
         AooNtpTime time = get_osctime();
-        auto err = x->x_source->process(ins, (int32_t)sampleframes, time);
+        auto err = x->x_source->process((AooSample**)ins, (int32_t)sampleframes, time);
+        
         
         if(err == kAooErrorOverflow){
             object_error((t_object*)x, "send buffer overflow. Try to manually increase "

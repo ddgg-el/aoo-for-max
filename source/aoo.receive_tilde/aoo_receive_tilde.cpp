@@ -320,7 +320,7 @@ static void aoo_receive_set(t_aoo_receive *x, int f1, int f2)
     x->x_port = port;
 }
 // Vedi sopra
-static void aoo_receive_port(t_aoo_receive *x, int f)
+static void aoo_receive_port(t_aoo_receive *x, double f)
 {
     aoo_receive_set(x, f, x->x_id);
 }
@@ -634,6 +634,107 @@ static void aoo_receive_source_list(t_aoo_receive *x)
     }
 }
 static void aoo_receive_bang(t_aoo_receive *x);
+static void aoo_receive_latency(t_aoo_receive *x, double f)
+{
+        // post("Valore di f: %f", f);
+        x->x_sink->setLatency(f * 0.001);
+}
+static void aoo_receive_fill_ratio(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv){
+    aoo::ip_address addr;
+    AooId id = 0;
+    if (argc > 0) {
+        if (!x->get_source_arg(argc, argv, addr, id, true)) {
+            return;
+        }
+    } else {
+        // just get the first source (if not empty)
+        if (!x->x_sources.empty()) {
+            auto& src = x->x_sources.front();
+            addr = src.s_address;
+            id = src.s_id;
+        } else {
+            object_error((t_object*)x, "%s: no sources");
+            
+        }
+    }
+
+    double ratio = 0;
+    AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+    x->x_sink->getBufferFillRatio(ep, ratio);
+
+    t_atom msg[4];
+    if (x->x_node->serialize_endpoint(addr, id, 3, msg)){
+        atom_setfloat(msg + 3, ratio);
+        outlet_anything(x->x_msgout, gensym("fill_ratio"), 4, msg);
+    }
+}
+static void aoo_receive_packetsize(t_aoo_receive *x, double f)
+{
+    // post("Valore di f: %f", f);
+    x->x_sink->setPacketSize(f);
+}
+static void aoo_receive_buffersize(t_aoo_receive *x, double f)
+{
+    // post("Valore di f: %f", f);
+    x->x_sink->setBufferSize(f * 0.001);
+}
+static void aoo_receive_reset(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv)
+{
+    if (argc){
+        // reset specific source
+        aoo::ip_address addr;
+        AooId id = 0;
+        if (x->get_source_arg(argc, argv, addr, id, true)) {
+            AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+            x->x_sink->resetSource(ep);
+        }
+    } else {
+        // reset all sources
+        x->x_sink->reset();
+    }
+}
+static void aoo_receive_resend(t_aoo_receive *x, double f)
+{
+    x->x_sink->setResendData(f != 0);
+}
+static void aoo_receive_resend_limit(t_aoo_receive *x, double f)
+{
+    x->x_sink->setResendLimit(f);
+}
+static void aoo_receive_resend_interval(t_aoo_receive *x, double f)
+{
+    x->x_sink->setResendInterval(f * 0.001);
+}
+static void aoo_receive_resample_method(t_aoo_receive *x, t_symbol *s)
+{
+    AooResampleMethod method;
+    std::string_view name = s->s_name;
+    if (name == "hold") {
+        method = kAooResampleHold;
+    } else if (name == "linear") {
+        method = kAooResampleLinear;
+    } else if (name == "cubic") {
+        method = kAooResampleCubic;
+    } else {
+        object_error((t_object*)x, "%s: bad resample method '%s'",
+                  name.data());
+        return;
+    }
+    if (x->x_sink->setResampleMethod(method) != kAooOk) {
+        object_error((t_object*)x, "%s: resample method '%s' not supported",
+                  name.data());
+    }
+}
+static void aoo_receive_dynamic_resampling(t_aoo_receive *x, double f)
+{
+    x->x_sink->setDynamicResampling(f);
+}
+static void aoo_receive_dll_bandwidth(t_aoo_receive *x, double f)
+{
+    x->x_sink->setDllBandwidth(f);
+}
+
+
 //***********************************************************************************************
 
 extern "C" void ext_main(void *r)
@@ -651,8 +752,19 @@ extern "C" void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_invite, "invite", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_uninvite,"uninvite", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_source_list, "source_list", 0);
-
+    class_addmethod(c, (method)aoo_receive_latency,"latency", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_port,"port", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_fill_ratio,"fill_ratio", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_receive_packetsize,"packetsize", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_buffersize,"buffersize", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_bang, "bang", 0);
+    class_addmethod(c, (method)aoo_receive_reset,"reset", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_receive_resend,"resend", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_resend_limit,"resend_limit", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_resend_interval,"resend_interval", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_resample_method,"resample_method", A_SYM, 0);
+    class_addmethod(c, (method)aoo_receive_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
 
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);
@@ -767,7 +879,7 @@ void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long
 
     if(x->x_node) {
         AooNtpTime time = get_osctime();
-        auto err = x->x_sink->process(outs, (int32_t)sampleframes, time, (AooStreamMessageHandler)aoo_receive_handle_stream_message, x);
+        auto err = x->x_sink->process((AooSample**)outs, (int32_t)sampleframes, time, (AooStreamMessageHandler)aoo_receive_handle_stream_message, x); 
         if(err != kAooErrorIdle){
             x->x_node->notify();
         }
