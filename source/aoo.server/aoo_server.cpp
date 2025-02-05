@@ -286,7 +286,9 @@ void aoo_server_free(t_aoo_server *x)
 
 void *aoo_server_new(t_symbol *s, long argc, t_atom *argv)
 {
-	t_aoo_server *x = NULL;
-	x = (t_aoo_server *)object_alloc(aoo_server_class);
+	t_aoo_server *x = (t_aoo_server *)object_alloc(aoo_server_class);
+	if (x) {
+		new (x) t_aoo_server(argc, argv);
+	}
 	return (x);
 }
