@@ -1,6 +1,6 @@
 #include "aoo_max_dejitter.h"
 
-t_class *dejitter_class;
+t_class *aoo_dejitter_class;
 
 t_dejitter::t_dejitter()
     : d_refcount(1), d_last_osctime(0), d_osctime_adjusted(0), d_last_big_delta(0)
@@ -91,6 +91,14 @@ void dejitter_release(t_dejitter *x) {
 
 uint64_t dejitter_osctime(t_dejitter *x) {
     return x->osctime();
+}
+
+void aoo_dejitter_setup(void)
+{
+    t_class *c;
+    c = class_new("aoo_jitter", 0, 0, sizeof(t_dejitter), 0L, A_NOTHING, 0);
+    class_register(CLASS_NOBOX, c);
+    aoo_dejitter_class = c;
 }
 
 // void ext_main(void *r){

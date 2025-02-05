@@ -11,6 +11,8 @@
 #define DEJITTER_CHECK 1 // extra checks
 #define DEJITTER_DEBUG 0 // debug dejitter algorithm
 
+extern t_class *aoo_dejitter__class;
+
 struct t_dejitter {
     static constexpr const char *bindsym = "aoo dejitter";
 
@@ -42,3 +44,5 @@ private:
 
 t_dejitter * dejitter_get(); 
 uint64_t dejitter_osctime(t_dejitter *x);
+
+void aoo_dejitter_setup(void);
