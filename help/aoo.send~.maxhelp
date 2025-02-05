@@ -834,6 +834,7 @@
 						"tags" : "",
 						"style" : "",
 						"subpatcher_template" : "",
+						"visible" : 1,
 						"boxes" : [ 							{
 								"box" : 								{
 									"id" : "obj-44",
@@ -957,8 +958,8 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 137.0, 238.5, 57.0, 22.0 ],
-									"text" : "list_sinks"
+									"patching_rect" : [ 137.0, 238.5, 51.0, 22.0 ],
+									"text" : "sink_list"
 								}
 
 							}
@@ -1025,20 +1026,8 @@
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 150.0, 124.0, 150.0, 20.0 ],
+									"patching_rect" : [ 257.0, 124.0, 150.0, 20.0 ],
 									"text" : "set sink channel onset"
-								}
-
-							}
-, 							{
-								"box" : 								{
-									"id" : "obj-12",
-									"maxclass" : "number",
-									"numinlets" : 1,
-									"numoutlets" : 2,
-									"outlettype" : [ "", "bang" ],
-									"parameter_enable" : 0,
-									"patching_rect" : [ 67.0, 94.0, 50.0, 22.0 ]
 								}
 
 							}
@@ -1049,8 +1038,8 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 67.0, 124.0, 79.0, 22.0 ],
-									"text" : "sink_channel"
+									"patching_rect" : [ 67.0, 124.0, 179.0, 22.0 ],
+									"text" : "sink_channel localhost 9081 1 1"
 								}
 
 							}
@@ -1080,13 +1069,6 @@
 							}
  ],
 						"lines" : [ 							{
-								"patchline" : 								{
-									"destination" : [ "obj-8", 0 ],
-									"source" : [ "obj-12", 0 ]
-								}
-
-							}
-, 							{
 								"patchline" : 								{
 									"destination" : [ "obj-44", 0 ],
 									"source" : [ "obj-18", 0 ]
@@ -1378,8 +1360,9 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 20.0, 456.0, 59.0, 62.0 ],
-					"text" : "format pcm 2. 64. 48000. 4."
+					"patching_rect" : [ 20.0, 456.0, 59.0, 35.0 ],
+					"text" : "sink ::1 9081. 1."
+
 				}
 
 			}

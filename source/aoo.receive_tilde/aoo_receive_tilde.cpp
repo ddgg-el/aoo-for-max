@@ -424,7 +424,8 @@ t_aoo_receive::~t_aoo_receive()
     clock_free(x_queue_clock);
 }
 
-void t_aoo_receive::dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id) {
+void t_aoo_receive::dispatch_stream_message(const AooStreamMessage& msg, const aoo::ip_address& address, AooId id) 
+{
     // 5 extra atoms for endpoint (host, port, ID) + message (channel, type)
     // NB: in case of "fake" stream messages, we just over-allocate.
     auto size = 5 + (msg.size / datatype_element_size(msg.type));
