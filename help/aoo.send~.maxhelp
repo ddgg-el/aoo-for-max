@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 96.0, 162.0, 485.0, 544.0 ],
+		"rect" : [ 58.0, 183.0, 485.0, 544.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -1373,13 +1373,13 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-3",
-					"linecount" : 2,
+					"linecount" : 4,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 20.0, 456.0, 59.0, 35.0 ],
-					"text" : "add ::1 9081. 1."
+					"patching_rect" : [ 20.0, 456.0, 59.0, 62.0 ],
+					"text" : "format pcm 2. 64. 48000. 4."
 				}
 
 			}

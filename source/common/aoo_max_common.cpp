@@ -233,6 +233,102 @@ int atoms_to_data(AooDataType type, int argc, const t_atom *argv, AooByte *data,
     return numbytes;
 }
 
+static int32_t format_getparam(void *x, int argc, t_atom *argv, int which, const char *name, int32_t def)
+{
+    if (argc > which){
+        if (argv[which].a_type == A_FLOAT){
+            return argv[which].a_w.w_float;
+        }
+    #if 1
+        t_symbol *s = atom_getsym(argv + which);
+        if (s != gensym("_")){
+            object_error((t_object*)x, "%s: bad %s argument (%s), using %d", name, s->s_name, def);
+        }
+    #endif
+    }
+    return def;
+}
+
+bool format_parse(t_object *x, AooFormatStorage &f, int argc, t_atom *argv, int maxnumchannels)
+{
+    t_symbol *codec = atom_getsymarg(0, argc, argv);
+
+
+    if (codec == gensym(kAooCodecNull)){
+        // null <channels> <bloxcksize> <samplerate>
+        auto numchannels = format_getparam(x, argc, argv, 1, "channels", 1);
+        auto blocksize = format_getparam(x, argc, argv, 2, "blocksize", 64);
+        auto samplerate = format_getparam(x, argc, argv, 3, "samplerate", sys_getsr());
+
+        AooFormatNull_init((AooFormatNull *)&f.header, numchannels, samplerate, blocksize);
+    } else if (codec == gensym(kAooCodecPcm)){
+        // pcm <channels> <blocksize> <samplerate> <bitdepth>
+        auto numchannels = format_getparam(x, argc, argv, 1, "channels", maxnumchannels);
+        auto blocksize = format_getparam(x, argc, argv, 2, "blocksize", 64);
+        auto samplerate = format_getparam(x, argc, argv, 3, "samplerate", sys_getsr());
+
+        auto nbits = format_getparam(x, argc, argv, 4, "bitdepth", 4);
+        AooPcmBitDepth bitdepth;
+        switch (nbits){
+        case 1:
+            bitdepth =  kAooPcmInt8;
+            break;
+        case 2:
+            bitdepth = kAooPcmInt16;
+            break;
+        case 3:
+            bitdepth = kAooPcmInt24;
+            break;
+        case 4:
+            bitdepth = kAooPcmFloat32;
+            break;
+        case 8:
+            bitdepth = kAooPcmFloat64;
+            break;
+        default:
+            object_error(x, "%s: bad bitdepth argument %d", nbits);
+            return false;
+        }
+
+        AooFormatPcm_init((AooFormatPcm *)&f.header, numchannels, samplerate, blocksize, bitdepth);
+    }
+#if AOO_USE_OPUS
+    else if (codec == gensym(kAooCodecOpus)){
+        // opus <channels> <blocksize> <samplerate> <application>
+        opus_int32 numchannels = format_getparam(x, argc, argv, 1, "channels", maxnumchannels);
+        opus_int32 blocksize = format_getparam(x, argc, argv, 2, "blocksize", 480); // 10ms
+        opus_int32 samplerate = format_getparam(x, argc, argv, 3, "samplerate", 48000);
+
+        // application type ("auto", "audio", "voip", "lowdelay"
+        opus_int32 applicationType;
+        if (argc > 4){
+            std::string_view type = atom_getsym(argv + 4)->s_name;
+            if (type == "_" || type == "audio") {
+                applicationType = OPUS_APPLICATION_AUDIO;
+            } else if (type == "voip"){
+                applicationType = OPUS_APPLICATION_VOIP;
+            } else if (type == "lowdelay") {
+                applicationType = OPUS_APPLICATION_RESTRICTED_LOWDELAY;
+            } else {
+                object_error(x,"%s: unsupported application type '%s'",
+                         type.data());
+                return false;
+            }
+        } else {
+            applicationType = OPUS_APPLICATION_AUDIO;
+        }
+
+        AooFormatOpus_init((AooFormatOpus *)&f.header, numchannels,
+                           samplerate, blocksize, applicationType);
+    }
+#endif
+    else {
+        object_error(x, "%s: unknown codec '%s'", codec->s_name);
+        return false;
+    }
+    return true;
+}
+
 // TODO: speriamo bene
 double clock_getsystimeafter(double deltime)
 {
