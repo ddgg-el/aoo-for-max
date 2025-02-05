@@ -733,8 +733,56 @@ static void aoo_receive_dll_bandwidth(t_aoo_receive *x, double f)
 {
     x->x_sink->setDllBandwidth(f);
 }
+// <ip> <port> <id> <codec> <option> [<value>]
+static void aoo_receive_codec_set(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv){
+    if (!x->check(argc, argv, 6, "codec_set")) return;
+#if 0
+    aoo::ip_address addr;
+    AooId id = 0;
+    if (!x->get_source_arg(argc, argv, addr, id, true)) {
+        return;
+    }
+    AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+#endif
+    auto codec = atom_getsym(argv + 3);
+    auto opt = atom_getsym(argv + 4);
+    // no codec options yet
+    object_error((t_object*)x,"%s: unknown parameter '%s' for codec '%s'",
+             opt->s_name, codec->s_name);
+}
+// <ip> <port> <id> <codec> <option>
+// replies with <ip> <port> <id> <codec> <option> <value>
+static void aoo_receive_codec_get(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv) {
+    if (!x->check(argc, argv, 5, "codec_get")) return;
+#if 0
+    aoo::ip_address addr;
+    AooId id = 0;
+    if (!x->get_source_arg(argc, argv, addr, id, true)) {
+        return;
+    }
+    AooEndpoint ep { addr.address(), (AooAddrSize)addr.length(), id };
+#endif
+    auto codec = atom_getsym(argv + 3);
+    auto opt = atom_getsym(argv + 4);
+#if 0
+    t_atom msg[6];
+    std::copy(argv, argv + 5, msg);
+#endif
+    // no codec options yet
+    object_error((t_object*)x, "%s: unknown parameter '%s' for codec '%s'",
+             opt->s_name, codec->s_name);
+    return;
+}
 
-
+// there is no method for 'real_samplerate' in pd exthernal?
+static void aoo_receive_real_samplerate(t_aoo_receive *x)
+{
+    AooSampleRate sr;
+    x->x_sink->getRealSampleRate(sr);
+    t_atom msg;
+    atom_setfloat(&msg, sr);
+    outlet_anything(x->x_msgout, gensym("real_samplerate"), 1, &msg);
+}
 //***********************************************************************************************
 
 extern "C" void ext_main(void *r)
@@ -765,6 +813,9 @@ extern "C" void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_resample_method,"resample_method", A_SYM, 0);
     class_addmethod(c, (method)aoo_receive_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_codec_set,"codec_set", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_receive_codec_get,"codec_get", A_GIMME, 0);
+    class_addmethod(c, (method)aoo_receive_real_samplerate, "real_samplerate", 0);
 
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);

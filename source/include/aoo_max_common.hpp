@@ -40,6 +40,9 @@ bool atom_to_datatype(const t_atom &a, AooDataType& type, void *x);
 
 int atoms_to_data(AooDataType type, int argc, const t_atom *argv, AooByte *data, AooSize size);
 
+
+bool format_parse(t_object *x, AooFormatStorage &f, int argc, t_atom *argv, int maxnumchannels);
+
 uint64_t get_osctime();
 ///////////////////////////// priority queue ////////////////////////////////
 
