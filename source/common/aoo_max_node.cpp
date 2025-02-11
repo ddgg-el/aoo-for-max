@@ -91,7 +91,10 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
     // success
     x_client = std::move(client);
     // post("t_node_imp::t_node_imp %s", *x_bindsym);
-    object_new(CLASS_NOBOX, x_bindsym, this);
+    if(aoo_node_class){
+        object_new(CLASS_NOBOX, x_bindsym, this);
+    }
+
 
 #if NETWORK_THREAD_POLL
     // start network I/O thread

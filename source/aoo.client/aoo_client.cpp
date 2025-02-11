@@ -39,7 +39,7 @@ void ext_main(void *r)
 
 	class_addmethod(c, (method)aoo_client_assist,			"assist",		A_CANT, 0);
 
-	class_register(CLASS_BOX, c); /* CLASS_NOBOX */
+	class_register(CLASS_BOX, c);
 	aoo_client_class = c;
 
 	///////////////////////////////////////////
@@ -59,7 +59,6 @@ void ext_main(void *r)
     }
 
     g_start_time = aoo::time_tag::now();
-	aoo_dejitter_setup();
 
 #ifdef PD_HAVE_MULTICHANNEL
     // runtime check for multichannel support:
@@ -80,6 +79,8 @@ void ext_main(void *r)
 #endif
 #endif // PD_HAVE_MULTICHANNEL
 ///////////////////////////////////////////
+    aoo_node_setup();
+    aoo_dejitter_setup();  
 }
 
 void aoo_client_assist(t_aoo_client *x, void *b, long m, long a, char *s)
@@ -95,7 +96,7 @@ void aoo_client_assist(t_aoo_client *x, void *b, long m, long a, char *s)
 
 void aoo_client_free(t_aoo_client *x)
 {
-	;
+	x->~t_aoo_client();
 }
 
 

@@ -42,28 +42,29 @@ struct t_peer
 ////////////////////////// object struct
 struct t_aoo_client
 {
-	t_aoo_client(int argc, t_atom *argv);
-	t_dejitter *x_dejitter;
 	t_object	ob;			// the object itself (must be first)
+	t_dejitter *x_dejitter;
     t_node *x_node = nullptr;
-
+    
     t_clock *x_clock = nullptr;
     t_clock *x_queue_clock = nullptr;
     t_outlet *x_stateout = nullptr;
     t_outlet *x_msgout = nullptr;
-
+    
     bool x_connected = false;
     bool x_schedule = true;
     t_float x_delay = 0; // extra message delay
     bool x_discard = false;
-
+    
     t_priority_queue<t_peer_message> x_queue;
-
-     // replies
+    
+    // replies
     using t_reply = std::function<void()>;
     std::vector<t_reply> replies_;
     aoo::sync::mutex reply_mutex_;
-
+    
+	t_aoo_client(int argc, t_atom *argv);
+    ~t_aoo_client();
 	const t_peer * find_peer(const aoo::ip_address& addr) const;
 
     const t_peer * find_peer(AooId group, AooId user) const;

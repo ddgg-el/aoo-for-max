@@ -56,13 +56,28 @@ t_aoo_client::t_aoo_client(int argc, t_atom *argv)
     x_node = port > 0 ? t_node::get((t_object*)this, port) : nullptr;
 
     if (x_node){
-        object_post((t_object*)this, "%s: new client on port %d",
-                object_classname(this), port);
+        object_post((t_object*)this, "new client on port %d", port);
         // start clock
         clock_delay(x_clock, AOO_CLIENT_POLL_INTERVAL);
     }
 }
 
+t_aoo_client::~t_aoo_client()
+{
+    if (x_node){
+        if (x_connected){
+            x_node->client()->disconnect(0, 0);
+        }
+        x_node->release((t_object *)this);
+    }
+
+    // ignore pending requests (doesn't leak)
+    if (x_dejitter) {
+        dejitter_release(x_dejitter);
+    }
+    clock_free(x_clock);
+    clock_free(x_queue_clock);
+}
 // handle incoming peer message
 void t_aoo_client::dispatch_message(t_float delay, AooId group, AooId user,
                                     const AooData& msg) const

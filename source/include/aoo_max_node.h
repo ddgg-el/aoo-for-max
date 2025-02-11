@@ -11,7 +11,7 @@
 extern t_class *aoo_client_class;
 extern t_class *aoo_send_class;
 extern t_class *aoo_receive_class;
-extern t_class *aoo_node_class;
+// extern t_class *aoo_node_class;
 
 ///////////////////////////// t_node ////////////////////////////////
 class t_node {
@@ -46,7 +46,6 @@ class t_node_imp final : public t_node
 private:
     t_object * x_clientobj = nullptr;
     t_symbol *x_bindsym;
-
     AooClient::Ptr x_client;
     int32_t x_refcount = 0;
     int x_port = 0;
@@ -67,7 +66,6 @@ private:
 public:
     // public methods
     t_node_imp(t_symbol *s, int port);
-
     ~t_node_imp();
 
     bool find_peer(const aoo::ip_address& addr,

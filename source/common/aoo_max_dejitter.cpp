@@ -1,17 +1,16 @@
 #include "aoo_max_dejitter.h"
 
-t_class *aoo_dejitter_class;
+t_class *aoo_dejitter_class = nullptr;
 
 t_dejitter::t_dejitter()
-    : d_refcount(1), d_last_osctime(0), d_osctime_adjusted(0), d_last_big_delta(0)
-{
+    : d_header(aoo_dejitter_class), d_refcount(1)
+{   
     d_clock = clock_new(this, (method)tick);
-    // Bind the object to a symbol in Max/MSP
-    object_attach_byptr_register(this, this, gensym(bindsym));
+    clock_delay(d_clock, 0);
 }
 
 t_dejitter::~t_dejitter(){
-    // pd_unbind(&d_header, gensym(bindsym));
+    object_unregister(this);
     clock_free(d_clock);
 }
 
@@ -71,11 +70,15 @@ void t_dejitter::update()
 }
 
 t_dejitter * dejitter_get() {
-    auto x = (t_dejitter *)class_findbyname(CLASS_NOBOX, (t_symbol*)(t_dejitter::bindsym));
+    t_symbol* bindsym = gensym("aoo_dejitter");
+    t_dejitter *x = (t_dejitter *)object_findregistered(aoo_dejitter_class->c_sym, bindsym);
     if (x) {
         x->d_refcount++;
     } else {
-        x = new t_dejitter();
+        // finally create aoo dejitter instance
+        object_new(CLASS_NOBOX, bindsym, t_dejitter::bindsym);
+        x = (t_dejitter*)object_findregistered(aoo_dejitter_class->c_sym, bindsym);
+
     }
     return x;
 }
@@ -96,10 +99,24 @@ uint64_t dejitter_osctime(t_dejitter *x) {
 void aoo_dejitter_setup(void)
 {
     t_class *c;
-    c = class_new("aoo_jitter", 0, 0, sizeof(t_dejitter), 0L, A_NOTHING, 0);
+    c = class_new("aoo_dejitter", (method)aoo_dejitter_new, (method)aoo_dejitter_free, sizeof(t_dejitter), 0L, A_NOTHING, 0);
     class_register(CLASS_NOBOX, c);
+    
     aoo_dejitter_class = c;
 }
+
+void *aoo_dejitter_new(t_symbol *s, long argc, t_atom *argv)
+{
+    t_dejitter *x = (t_dejitter*)object_alloc(aoo_dejitter_class);
+    new (x) t_dejitter();
+    return (x);
+}
+
+void aoo_dejitter_free(t_dejitter *x)
+{
+    x->~t_dejitter();
+}
+
 
 // void ext_main(void *r){
 //     t_class *c;

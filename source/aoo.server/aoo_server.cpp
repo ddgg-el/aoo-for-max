@@ -251,7 +251,7 @@ void ext_main(void *r)
 	class_addmethod(aoo_server_class, (method)aoo_server_relay, "relay", A_FLOAT, 0);
 
 
-	class_register(CLASS_BOX, c); /* CLASS_NOBOX */
+	class_register(CLASS_BOX, c);
 	aoo_server_class = c;
 
 	///////////////////////////////////////////
@@ -282,7 +282,6 @@ void aoo_server_free(t_aoo_server *x)
 {
 	 x->~t_aoo_server();
 }
-
 
 void *aoo_server_new(t_symbol *s, long argc, t_atom *argv)
 {
