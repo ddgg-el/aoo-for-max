@@ -8,6 +8,7 @@ t_dejitter::t_dejitter()
     t_symbol *namespace_sym = aoo_dejitter_class->c_sym;
     t_symbol *name_sym = gensym(t_dejitter::bindsym);
     object_register(namespace_sym, name_sym, this);
+    // TODO: clock in samples
     d_clock = clock_new(this, (method)tick);
     clock_delay(d_clock, 0);
 }

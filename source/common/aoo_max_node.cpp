@@ -25,10 +25,8 @@ t_node * t_node::get(t_object *obj, int port, void *x, AooId id)
     // find or create node
     auto y = (t_node_proxy *)object_findregistered(aoo_node_proxy_class->c_sym, s);
     if (y) {
-        post("FOUND NODE");
         node = y->x_node;
     } else {
-        post("CREATING NODE %s", s->s_name);
         try {
             // finally create aoo node instance            
             object_new(CLASS_NOBOX, aoo_node_proxy_class->c_sym, s, port);
@@ -264,7 +262,6 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
     if (obj_class->c_sym == gensym("aoo.client")){
         // aoo_client
         if (!x_clientobj){
-            // TODO: verifica!
             x_clientobj = (t_object*)obj;
             // start thread lazily
             t_max_err err = systhread_create((method)run_client, this, 0, 0, 0, &x_clientthread);
@@ -326,7 +323,6 @@ void t_node_imp::release(t_object *obj, void *x)
     } else if (x_refcount < 0){
         error("BUG: t_node_imp::release: negative refcount!");
     }
-    post("REFCOUNT %d", x_refcount);
 }
 
 /**
