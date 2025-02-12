@@ -7,8 +7,9 @@
 #include "aoo_sink.hpp"
 #include "common/net_utils.hpp"
 
-#include "aoo_max_node.h"
+#include "aoo_max_common.hpp"
 
+// t_class *aoo_receive_class;
 
 struct t_source
 {

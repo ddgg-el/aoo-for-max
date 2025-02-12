@@ -4,10 +4,7 @@
 #include "common/log.hpp"
 #include "common/sync.hpp"
 
-t_class *aoo_client_class = nullptr;
-t_class *aoo_send_class = nullptr;
-t_class *aoo_receive_class = nullptr;
-t_class *aoo_node_class = nullptr;
+t_class *aoo_node_proxy_class = nullptr;
 
 /**
  * @brief find or create a node that can be assigned to an object
@@ -26,13 +23,17 @@ t_node * t_node::get(t_object *obj, int port, void *x, AooId id)
     snprintf(buf, sizeof(buf), "aoo_node %d", port);
     t_symbol *s = gensym(buf);
     // find or create node
-    auto y = (t_node_imp *)object_findregistered(aoo_node_class->c_sym, s);
+    auto y = (t_node_proxy *)object_findregistered(aoo_node_proxy_class->c_sym, s);
     if (y) {
-        node = y;
+        post("FOUND NODE");
+        node = y->x_node;
     } else {
+        post("CREATING NODE %s", s->s_name);
         try {
-            // finally create aoo node instance
-            node = new t_node_imp(s, port);
+            // finally create aoo node instance            
+            object_new(CLASS_NOBOX, aoo_node_proxy_class->c_sym, s, port);
+            auto proxy = (t_node_proxy *)object_findregistered(aoo_node_proxy_class->c_sym, s);
+            node = proxy->x_node;
         } catch (const std::exception& e) {
             object_error((t_object*)obj, "%s", e.what());
             return nullptr;
@@ -54,10 +55,10 @@ t_node * t_node::get(t_object *obj, int port, void *x, AooId id)
  * @param port 
  */
 // instantiate a node | a node is a wrapper around an AooClient
-t_node_imp::t_node_imp(t_symbol *s, int port)
-    : x_bindsym(s), x_port(port)
+t_node_imp::t_node_imp(t_symbol *s, int port, t_node_proxy* obj)
+    : x_obj(obj), x_bindsym(s), x_port(port)
 {
-    LOG_DEBUG("create AooClient on port " << port);
+    post("create AooClient on port %d", port);
     auto client = AooClient::create();
 
     client->setEventHandler([](void *user, const AooEvent *event, AooThreadLevel level) {
@@ -90,10 +91,7 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
 
     // success
     x_client = std::move(client);
-    // post("t_node_imp::t_node_imp %s", *x_bindsym);
-    if(aoo_node_class){
-        object_new(CLASS_NOBOX, x_bindsym, this);
-    }
+        
 
 
 #if NETWORK_THREAD_POLL
@@ -120,15 +118,14 @@ t_node_imp::t_node_imp(t_symbol *s, int port)
     }
 #endif
 
-
+    object_register(aoo_node_proxy_class->c_sym, x_bindsym, obj);
     object_post(nullptr, "aoo: new node on port %d", port);
 }
 
 // TODO: documenta
 t_node_imp::~t_node_imp()
 {
-    object_unregister(this);
-    
+    object_unregister(x_obj);
     // pd_unbind(&x_proxy.x_pd, x_bindsym);
     unsigned int c_ret;
     unsigned int s_ret;
@@ -160,7 +157,6 @@ t_node_imp::~t_node_imp()
     object_post(nullptr, "aoo: released node on port %d", x_port);
 }
  
-
 /**
  * @brief given an address, ask the client find the peer group and user
  * 
@@ -265,7 +261,7 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
 {
     t_class * obj_class = object_class(obj);
 
-    if (obj_class == aoo_client_class){
+    if (obj_class->c_sym == gensym("aoo.client")){
         // aoo_client
         if (!x_clientobj){
             // TODO: verifica!
@@ -281,12 +277,12 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
         }
     }
 
-    else  if (obj_class == aoo_send_class){
+    else  if (obj_class->c_sym == gensym("aoo.send~")){
         if (x_client->addSource((AooSource *)x) != kAooOk){
             object_error((t_object*)obj, "with ID %d on port %d already exists!", id, port());
         }
     }
-    else if (obj_class == aoo_receive_class){
+    else if (obj_class->c_sym == gensym("aoo.receive~")){
         if (x_client->addSink((AooSink *)x) != kAooOk){
             object_error((t_object*)obj, "with ID %d on port %d already exists!", id, port());
         }
@@ -308,14 +304,14 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
 void t_node_imp::release(t_object *obj, void *x)
 {
     t_class * obj_class = object_class(obj);
-    if (obj_class == aoo_client_class){
+    if (obj_class->c_sym == gensym("aoo.client")){
         // client
         x_clientobj = nullptr;
     }
-    else if (obj_class == aoo_send_class){
+    else if (obj_class->c_sym == gensym("aoo.send~")){
         x_client->removeSource((AooSource *)x);
     } 
-    else if (obj_class == aoo_receive_class){
+    else if (obj_class->c_sym == gensym("aoo.receive~")){
         x_client->removeSink((AooSink *)x);
     }
     else {
@@ -325,11 +321,14 @@ void t_node_imp::release(t_object *obj, void *x)
 
     if (--x_refcount == 0){
         // last instance
-        delete this;
+        object_free(this->x_obj);
+
     } else if (x_refcount < 0){
         error("BUG: t_node_imp::release: negative refcount!");
     }
+    post("REFCOUNT %d", x_refcount);
 }
+
 /**
  * @brief find a peer using aoo::ip_address::resolve
  * 
@@ -438,10 +437,26 @@ void t_node_imp::receive(t_node_imp *x) {
 void aoo_node_setup(void)
 {
     t_class *c;
-    c = class_new("aoo_node", 0, 0, sizeof(t_node_imp), 0L, A_NOTHING, 0);
+    c = class_new("aoo_node", (method)aoo_node_new, (method)aoo_node_free, sizeof(t_node_proxy), 0L, A_NOTHING, 0);
     class_register(CLASS_NOBOX, c);
-    aoo_node_class = c;
+    aoo_node_proxy_class = c;
 
+}
+
+void *aoo_node_new(t_symbol *s, int port)
+{
+    t_node_imp* node;
+    t_node_proxy *x = (t_node_proxy*)object_alloc(aoo_node_proxy_class);
+    node = new t_node_imp(s, port, x);
+    x->x_node = node;
+    // object_register(aoo_node_proxy_class->c_sym, s, x);
+
+    return (x);
+}
+
+void aoo_node_free(t_node_proxy *x)
+{
+    x->x_node->~t_node_imp();
 }
 
 /*////////////////////// aoo node //////////////////*/

@@ -14,8 +14,45 @@
 #include "codec/aoo_pcm.h"
 #include "codec/aoo_null.h"
 #if AOO_USE_OPUS
+
 #include "codec/aoo_opus.h"
 #endif
+
+///////////////////////////// priority queue ////////////////////////////////
+
+template<typename T>
+struct t_queue_item {
+    template<typename U>
+    t_queue_item(U&& _data, double _time)
+        : data(std::forward<U>(_data)), time(_time) {}
+    T data;
+    double time;
+};
+
+template<typename T>
+bool operator> (const t_queue_item<T>& a, const t_queue_item<T>& b) {
+    return a.time > b.time;
+}
+
+template<typename T>
+using t_priority_queue = aoo::priority_queue<t_queue_item<T>, std::greater<t_queue_item<T>>>;
+
+
+class t_dejitter;
+class t_node;
+struct t_aoo_send;
+struct t_aoo_receive;
+struct t_aoo_client;
+
+static t_class *aoo_send_class = nullptr;
+static t_class *aoo_receive_class = nullptr;
+static t_class *aoo_client_class = nullptr;
+
+#include "aoo_max_dejitter.h"
+#include "aoo_max_node.h"
+#include "aoo_max_client.h"
+#include "aoo_send_tilde.h"
+#include "aoo_receive_tilde.h"
 
 #define AOO_MAX_NUM_CHANNELS 256
 
@@ -44,22 +81,4 @@ int atoms_to_data(AooDataType type, int argc, const t_atom *argv, AooByte *data,
 bool format_parse(t_object *x, AooFormatStorage &f, int argc, t_atom *argv, int maxnumchannels);
 
 uint64_t get_osctime();
-///////////////////////////// priority queue ////////////////////////////////
-
-template<typename T>
-struct t_queue_item {
-    template<typename U>
-    t_queue_item(U&& _data, double _time)
-        : data(std::forward<U>(_data)), time(_time) {}
-    T data;
-    double time;
-};
-
-template<typename T>
-bool operator> (const t_queue_item<T>& a, const t_queue_item<T>& b) {
-    return a.time > b.time;
-}
-
-template<typename T>
-using t_priority_queue = aoo::priority_queue<t_queue_item<T>, std::greater<t_queue_item<T>>>;
 

@@ -3,14 +3,14 @@
 #include "ext.h"			// standard Max include
 #include "ext_obex.h"		// required for new style Max object
 
-#include "aoo_max_dejitter.h"
-#include "aoo_max_node.h"
-
 #include "aoo.h"
 #include "common/net_utils.hpp"
 #include "common/sync.hpp"
 
 #define AOO_CLIENT_POLL_INTERVAL 2
+
+// t_class *aoo_client_class;
+
 
 struct t_peer_message
 {
@@ -86,3 +86,7 @@ void aoo_client_handle_event(t_aoo_client *x, const AooEvent *event, int32_t lev
 static void aoo_client_queue_tick(t_aoo_client *x);
 static void aoo_client_tick(t_aoo_client *x);
 static int peer_to_atoms(const t_peer& peer, int argc, t_atom *argv);
+
+void *aoo_client_new(t_symbol *s, long argc, t_atom *argv);
+void aoo_client_free(t_aoo_client *x);
+void aoo_client_assist(t_aoo_client *x, void *b, long m, long a, char *s);

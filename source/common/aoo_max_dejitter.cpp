@@ -3,8 +3,11 @@
 t_class *aoo_dejitter_class = nullptr;
 
 t_dejitter::t_dejitter()
-    : d_header(aoo_dejitter_class), d_refcount(1)
+    : d_refcount(1)
 {   
+    t_symbol *namespace_sym = aoo_dejitter_class->c_sym;
+    t_symbol *name_sym = gensym(t_dejitter::bindsym);
+    object_register(namespace_sym, name_sym, this);
     d_clock = clock_new(this, (method)tick);
     clock_delay(d_clock, 0);
 }
@@ -70,23 +73,25 @@ void t_dejitter::update()
 }
 
 t_dejitter * dejitter_get() {
-    t_symbol* bindsym = gensym("aoo_dejitter");
-    t_dejitter *x = (t_dejitter *)object_findregistered(aoo_dejitter_class->c_sym, bindsym);
+    t_symbol* namespace_sym = aoo_dejitter_class->c_sym;
+    t_symbol* name_sym = gensym(t_dejitter::bindsym);
+    t_dejitter *x = (t_dejitter *)object_findregistered(namespace_sym, name_sym);
     if (x) {
         x->d_refcount++;
     } else {
         // finally create aoo dejitter instance
-        object_new(CLASS_NOBOX, bindsym, t_dejitter::bindsym);
-        x = (t_dejitter*)object_findregistered(aoo_dejitter_class->c_sym, bindsym);
+        object_new(CLASS_NOBOX, namespace_sym, name_sym);
+        x = (t_dejitter*)object_findregistered(namespace_sym, name_sym);
 
     }
+    
     return x;
 }
 
 void dejitter_release(t_dejitter *x) {
     if (--x->d_refcount == 0) {
         // last instance
-        delete x;
+        object_free(x);
     } else if (x->d_refcount < 0) {
         error("BUG: dejitter_release: negative refcount!");
     }

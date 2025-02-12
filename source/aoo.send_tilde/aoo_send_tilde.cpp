@@ -298,7 +298,7 @@ t_aoo_send::~t_aoo_send()
 {
      // first stop receiving messages
     if (x_node){
-        x_node->release((t_object *)this, x_source.get());
+        x_node->release((t_object*)this, x_source.get());
     }
 
     clock_free(x_clock);

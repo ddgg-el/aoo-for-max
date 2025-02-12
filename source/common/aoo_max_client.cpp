@@ -1,4 +1,4 @@
-#include "aoo_max_client.h"
+#include "aoo_max_common.hpp"
 
 static void aoo_client_queue_tick(t_aoo_client *x)
 {
@@ -68,7 +68,7 @@ t_aoo_client::~t_aoo_client()
         if (x_connected){
             x_node->client()->disconnect(0, 0);
         }
-        x_node->release((t_object *)this);
+        x_node->release((t_object*)this);
     }
 
     // ignore pending requests (doesn't leak)

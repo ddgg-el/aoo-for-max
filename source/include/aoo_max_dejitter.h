@@ -7,8 +7,6 @@
 // #include "aoo_max_common.hpp"
 #include "common/time.hpp"
 
-extern t_class *aoo_dejitter_class;
-
 #define DEJITTER_TOLERANCE 0.1 // jitter tolerance in percent
 #define DEJITTER_MAXDELTA 0.02 // max. expected jitter in seconds
 #define DEJITTER_CHECK 1 // extra checks
@@ -17,7 +15,7 @@ extern t_class *aoo_dejitter_class;
 class t_dejitter {
 public:
     t_object obj;
-    static constexpr const char *bindsym = "aoo dejitter";
+    static constexpr const char *bindsym = "aoo_dejitter";
 
 
     t_dejitter();
@@ -26,7 +24,6 @@ public:
     aoo::time_tag osctime() const {
         return d_osctime_adjusted;
     }
-    t_class* d_header;
     int d_refcount;        // Reference count
 private:
     t_clock *d_clock;          // Pointer to a Max clock object

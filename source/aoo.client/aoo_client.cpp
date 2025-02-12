@@ -5,7 +5,7 @@
 
 	@ingroup	examples
 */
-#include "aoo_client.h"
+#include "aoo_max_common.hpp"
 
 /*
 t_aoo_client::t_aoo_client(int argc, t_atom *argv)
