@@ -816,6 +816,10 @@ static void aoo_send_format(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
         }
     }
 }
+static void aoo_send_id(t_aoo_send *x, double f)
+{
+    aoo_send_set(x, x->x_port, f);
+}
 
 #if AOO_USE_OPUS
 static bool get_opus_bitrate(t_aoo_send *x, t_atom *a) {
@@ -1032,6 +1036,7 @@ void ext_main(void *r)
     class_addmethod(c, (method)aoo_send_uninvite, "uninvite", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_active, "active", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_port,"port", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_send_id,"id", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_send_packetsize,"packetsize", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_send_ping,"ping", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_send_buffersize,"buffersize", A_FLOAT, 0);

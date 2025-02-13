@@ -42,6 +42,9 @@ struct t_peer
 ////////////////////////// object struct
 struct t_aoo_client
 {
+    t_aoo_client(int argc, t_atom *argv);
+    ~t_aoo_client();
+
 	t_object	ob;			// the object itself (must be first)
 	t_dejitter *x_dejitter;
     t_node *x_node = nullptr;
@@ -51,10 +54,18 @@ struct t_aoo_client
     t_outlet *x_stateout = nullptr;
     t_outlet *x_msgout = nullptr;
     
+    // for OSC messages
+    // TODO controllare
+    // t_dejitter *x_dejitter = nullptr;    //!!!
+    t_float x_offset = -1; // immediately
+    t_float x_delay = 0; // extra message delay    
     bool x_connected = false;
     bool x_schedule = true;
-    t_float x_delay = 0; // extra message delay
     bool x_discard = false;
+    bool x_reliable = false;
+    bool x_target = true;
+    AooId x_target_group = kAooIdInvalid; // broadcast
+    AooId x_target_user = kAooIdInvalid; // broadcast
     
     t_priority_queue<t_peer_message> x_queue;
     
@@ -63,18 +74,37 @@ struct t_aoo_client
     std::vector<t_reply> replies_;
     aoo::sync::mutex reply_mutex_;
     
-	t_aoo_client(int argc, t_atom *argv);
-    ~t_aoo_client();
+    
 	const t_peer * find_peer(const aoo::ip_address& addr) const;
 
     const t_peer * find_peer(AooId group, AooId user) const;
 
     const t_peer * find_peer(t_symbol *group, t_symbol *user) const;
 
+    const t_group * find_group(t_symbol *name) const;
+
+    const t_group *find_group(AooId id) const;
+
+    bool check(const char *name) const;
+
+    bool check(int argc, t_atom *argv, int minargs, const char *name) const;
+
     void handle_message(AooId group, AooId user, AooNtpTime time, const AooData& msg);
 
     void dispatch_message(t_float delay, AooId group, AooId user, const AooData& msg) const;
+    
+    void send_message(int argc, t_atom *argv, AooId group, AooId user);
 
+    // TODO controllare
+    // // replies
+    // using t_reply = std::function<void()>;
+    // std::vector<t_reply> replies_;
+    // aoo::sync::mutex reply_mutex_;
+
+    void push_reply(t_reply reply){
+        aoo::sync::scoped_lock<aoo::sync::mutex> lock(reply_mutex_);
+        replies_.push_back(std::move(reply));
+    }    
     // peer list
 	std::vector<t_peer> x_peers;
     // group list

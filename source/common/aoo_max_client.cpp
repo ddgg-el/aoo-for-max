@@ -108,6 +108,69 @@ void t_aoo_client::dispatch_message(t_float delay, AooId group, AooId user,
     }
 }
 
+// send OSC messages to peers
+void t_aoo_client::send_message(int argc, t_atom *argv, AooId group, AooId user)
+{
+    if (argc < 2) {
+        object_error((t_object*)this, "%s: message needs type + arguments");
+        return;
+    }
+    if (!x_connected){
+        object_error((t_object*)this, "%s: not connected");
+        return;
+    }
+
+    AooDataType type;
+    if (!atom_to_datatype(*argv, type, this)) {
+        return;
+    }
+    argv++; argc--;
+
+    aoo::time_tag time;
+    if (x_offset >= 0) {
+        // make timetag relative to current OSC time
+        aoo::time_tag now = x_dejitter ? dejitter_osctime(x_dejitter) : get_osctime();
+        time = now + aoo::time_tag::from_seconds(x_offset * 0.001);
+    } else {
+        // use empty timetag to save space
+#if 0
+        time = aoo::time_tag::immediate();
+#endif
+    }
+
+    int count = datatype_element_size(type) * argc;
+    auto buf = (AooByte *)alloca(count);
+    atoms_to_data(type, argc, argv, buf, count);
+
+    AooData data { type, buf, (AooSize)count };
+
+    AooFlag flags = x_reliable ? kAooMessageReliable : 0;
+    x_node->client()->sendMessage(group, user, data, time.value(), flags);
+}
+
+bool t_aoo_client::check(const char *name) const
+{
+    if (x_node){
+        return true;
+    } else {
+        object_error((t_object*)this, "%s: '%s' failed: no socket!", name);
+        return false;
+    }
+}
+
+bool t_aoo_client::check(int argc, t_atom *argv, int minargs, const char *name) const
+{
+    if (!check(name)) return false;
+
+    if (argc < minargs){
+        object_error((t_object*)this, "%s: too few arguments for '%s' message",  name);
+        return false;
+    }
+
+    return true;
+}
+
+
 const t_peer * t_aoo_client::find_peer(const aoo::ip_address& addr) const {
     for (auto& peer : x_peers) {
         if (peer.address == addr) {
@@ -141,6 +204,23 @@ const t_peer * t_aoo_client::find_peer(t_symbol *group, t_symbol *user) const {
     return nullptr;
 }
 
+const t_group * t_aoo_client::find_group(t_symbol *name) const {
+    for (auto& group : x_groups) {
+        if (group.name == name) {
+            return &group;
+        }
+    }
+    return nullptr;
+}
+
+const t_group * t_aoo_client::find_group(AooId id) const {
+    for (auto& group : x_groups) {
+        if (group.id == id) {
+            return &group;
+        }
+    }
+    return nullptr;
+}
 // for t_node
 bool aoo_client_find_peer(t_aoo_client *x, const aoo::ip_address& addr,t_symbol *& group, t_symbol *& user)
 {
