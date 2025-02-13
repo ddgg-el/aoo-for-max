@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 58.0, 183.0, 485.0, 544.0 ],
+		"rect" : [ 267.0, 167.0, 485.0, 544.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -38,6 +38,30 @@
 		"style" : "",
 		"subpatcher_template" : "",
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-15",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 392.0, 496.0, 67.0, 22.0 ],
+					"text" : "aoo.client"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-62",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 324.0, 496.0, 65.0, 22.0 ],
+					"text" : "aoo.server"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-43",
 					"linecount" : 2,
@@ -101,7 +125,7 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 309.0, 502.0, 63.0, 20.0 ],
+					"patching_rect" : [ 172.0, 496.0, 63.0, 20.0 ],
 					"text" : "see also"
 				}
 
@@ -113,7 +137,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "signal", "" ],
-					"patching_rect" : [ 374.0, 502.0, 78.0, 22.0 ],
+					"patching_rect" : [ 240.0, 496.0, 78.0, 22.0 ],
 					"text" : "aoo.receive~"
 				}
 
@@ -127,7 +151,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 6.0, 14.0, 89.0, 21.0 ],
-					"text" : "aoo_send~:",
+					"text" : "aoo.send~:",
 					"textjustification" : 1
 				}
 
@@ -834,7 +858,6 @@
 						"tags" : "",
 						"style" : "",
 						"subpatcher_template" : "",
-						"visible" : 1,
 						"boxes" : [ 							{
 								"box" : 								{
 									"id" : "obj-44",
@@ -1276,7 +1299,7 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 180.0, 92.0, 103.0, 20.0 ],
+					"patching_rect" : [ 178.0, 91.0, 103.0, 20.0 ],
 					"text" : "remove AOO sink"
 				}
 
@@ -1360,9 +1383,8 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 20.0, 456.0, 59.0, 35.0 ],
+					"patching_rect" : [ 20.0, 456.0, 45.0, 62.0 ],
 					"text" : "sink ::1 9081. 1."
-
 				}
 
 			}
@@ -1471,6 +1493,14 @@
 			}
 , 			{
 				"name" : "aoo.receive~.mxo",
+				"type" : "iLaX"
+			}
+, 			{
+				"name" : "aoo.server.mxo",
+				"type" : "iLaX"
+			}
+, 			{
+				"name" : "aoo.client.mxo",
 				"type" : "iLaX"
 			}
  ],
