@@ -8,10 +8,16 @@
 
 #include <thread>
 
-extern t_class *aoo_client_class;
-extern t_class *aoo_send_class;
-extern t_class *aoo_receive_class;
-extern t_class *aoo_node_class;
+
+// extern t_class *aoo_node_class;
+
+class t_node_imp;
+
+struct t_node_proxy
+{
+    t_object obj;
+    t_node_imp *x_node;
+};
 
 ///////////////////////////// t_node ////////////////////////////////
 class t_node {
@@ -44,11 +50,11 @@ class t_node_imp final : public t_node
 {
 
 private:
+    t_node_proxy *x_obj;
     t_object * x_clientobj = nullptr;
-    t_symbol *x_bindsym;
-
     AooClient::Ptr x_client;
     int32_t x_refcount = 0;
+    t_symbol *x_bindsym;
     int x_port = 0;
 
     aoo::ip_address::ip_type x_type = aoo::ip_address::Unspec;
@@ -66,8 +72,7 @@ private:
     static void run_client(t_node_imp *x);
 public:
     // public methods
-    t_node_imp(t_symbol *s, int port);
-
+    t_node_imp(t_symbol *s, int port, t_node_proxy *obj);
     ~t_node_imp();
 
     bool find_peer(const aoo::ip_address& addr,
@@ -82,6 +87,7 @@ public:
     void release(t_object *obj, void *x) override;
 
     bool add_object(t_object *obj, void *x, AooId id);
+    bool add_object(t_aoo_receive *obj, void*x, AooId id);
 
     int port() const override { return x_port; }
 
@@ -113,3 +119,5 @@ bool aoo_client_find_peer(t_aoo_client *x, t_symbol * group, t_symbol * user,
                           aoo::ip_address& addr);
 
 void aoo_node_setup(void);
+void* aoo_node_new(t_symbol *s, int port);
+void aoo_node_free(t_node_proxy *x);

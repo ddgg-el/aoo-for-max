@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 676.0, 117.0, 649.0, 652.0 ],
+		"rect" : [ 100.0, 100.0, 649.0, 652.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -39,6 +39,30 @@
 		"subpatcher_template" : "",
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-3",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 548.0, 583.0, 65.0, 22.0 ],
+					"text" : "aoo.server"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-2",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "" ],
+					"patching_rect" : [ 479.0, 583.0, 60.0, 22.0 ],
+					"text" : "aoo.client"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"fontface" : 1,
 					"fontsize" : 13.0,
 					"id" : "obj-53",
@@ -46,7 +70,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 21.0, 27.0, 98.0, 21.0 ],
-					"text" : "aoo_receive~:",
+					"text" : "aoo.receive~:",
 					"textjustification" : 1
 				}
 
@@ -69,7 +93,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 472.0, 582.0, 65.0, 22.0 ],
+					"patching_rect" : [ 409.0, 583.0, 65.0, 22.0 ],
 					"text" : "aoo.send~"
 				}
 
@@ -80,7 +104,7 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 411.0, 583.0, 55.0, 20.0 ],
+					"patching_rect" : [ 348.0, 584.0, 55.0, 20.0 ],
 					"text" : "see also"
 				}
 
@@ -370,7 +394,6 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 133.0, 227.0, 126.0, 22.0 ],
-									"presentation_linecount" : 5,
 									"text" : "reset localhost 9080 1"
 								}
 
@@ -1244,6 +1267,14 @@
 			}
 , 			{
 				"name" : "aoo.send~.mxo",
+				"type" : "iLaX"
+			}
+, 			{
+				"name" : "aoo.client.mxo",
+				"type" : "iLaX"
+			}
+, 			{
+				"name" : "aoo.server.mxo",
 				"type" : "iLaX"
 			}
  ],

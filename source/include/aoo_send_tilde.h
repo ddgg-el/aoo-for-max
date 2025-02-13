@@ -8,9 +8,10 @@
 #include "aoo_source.hpp"
 
 #include "aoo_max_common.hpp"
-#include "aoo_max_node.h"
 
 #define DEFBUFSIZE 256
+
+
 
 struct t_sink
 {

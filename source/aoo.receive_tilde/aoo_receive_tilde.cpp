@@ -304,7 +304,7 @@ static void aoo_receive_set(t_aoo_receive *x, int f1, int f2)
 
     // always release node!
     if (x->x_node) {
-        x->x_node->release((t_object *)x, x->x_sink.get());
+        x->x_node->release((t_object*)x, x->x_sink.get());
     }
 
     if (id != x->x_id) {
@@ -418,7 +418,7 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
 t_aoo_receive::~t_aoo_receive()
 {
     if (x_node){
-        x_node->release((t_object *)this, x_sink.get());
+        x_node->release((t_object*)this, x_sink.get());
     }
     clock_free(x_clock);
     clock_free(x_queue_clock);
@@ -773,7 +773,10 @@ static void aoo_receive_codec_get(t_aoo_receive *x, t_symbol *s, int argc, t_ato
              opt->s_name, codec->s_name);
     return;
 }
-
+static void aoo_receive_id(t_aoo_receive *x, double f)
+{
+    aoo_receive_set(x, x->x_port, f);
+}
 // there is no method for 'real_samplerate' in pd exthernal?
 static void aoo_receive_real_samplerate(t_aoo_receive *x)
 {
@@ -802,6 +805,7 @@ extern "C" void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_source_list, "source_list", 0);
     class_addmethod(c, (method)aoo_receive_latency,"latency", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_port,"port", A_FLOAT, 0);
+    class_addmethod(c, (method)aoo_receive_id,"id", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_fill_ratio,"fill_ratio", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_packetsize,"packetsize", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_buffersize,"buffersize", A_FLOAT, 0);
