@@ -7,6 +7,8 @@
 #include "common/net_utils.hpp"
 #include "common/sync.hpp"
 
+#include <functional>
+
 #define AOO_CLIENT_POLL_INTERVAL 2
 
 // t_class *aoo_client_class;
