@@ -4,3 +4,4 @@ backup/
 externals/
 studi/
 *.bak
+dist/

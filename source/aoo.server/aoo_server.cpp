@@ -4,7 +4,7 @@
 	@ingroup	network
 */
 #include "ext_critical.h"
-#include "aoo_server.h"
+#include "aoo_max_server.h"
 
 
 
@@ -265,6 +265,7 @@ void ext_main(void *r)
     // }
 
     if (auto [ok, msg] = aoo::check_ntp_server(); ok){
+        ;
         // post("NTP receive server");
     } else {
         error("%s", msg.c_str());
