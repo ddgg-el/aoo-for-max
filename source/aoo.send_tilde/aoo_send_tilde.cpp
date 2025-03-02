@@ -1122,13 +1122,16 @@ void aoo_send_free(t_aoo_send *x)
 
 void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
 {
-	// if (m == ASSIST_INLET) { //inlet
-	// 	sprintf(s, "I am inlet %ld", a);
-	// }
-	// else {	// outlet
-	// 	sprintf(s, "I am outlet %ld", a);
-	// }
-    ;
+	if (m == ASSIST_INLET) { //inlet
+        if(a == 0) {	// inlet 0 
+            sprintf(s, "(message/signal) Stream Audio Ch %ld", a+1);
+        } else {
+            sprintf(s, "(signal) Stream Audio Ch %ld", a+1);
+        }
+	}
+	else {	// outlet
+		sprintf(s, "(message) Event output", a);
+	}
 }
 
 // registers a function for the signal chain in Max

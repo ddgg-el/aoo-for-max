@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
+
+<c74object name="aoo.receive~" module="msp" category="Aoo">
+<digest>
+	Receive an Aoo stream
+</digest>
+<description>
+	Receive an Aoo audio stream from one or more Aoo sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a>
+</description>
+<!-- METADATA-->
+<metadatalist>
+	<metadata name="author" type="text">Davide Gagliardi and Francesca Seggioli</metadata>
+	<metadata name="tag">Audio</metadata>
+</metadatalist>
+<!-- ARGUMENTS-->
+<objarglist>
+	<objarg name="channels" type="int">
+		<digest>number of channels</digest>
+		<description>Number of channels to stream</description>
+	</objarg>
+	<objarg name="port" type="int">
+		<digest>Network receive port number</digest>
+		<description>Network receive port number</description>
+	</objarg>
+	<objarg name="id" type="int" optional="1">
+		<digest>Client id</digest>
+	</objarg>
+</objarglist>
+<!-- MESSAGES-->
+<methodlist>
+	<method name="invite" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="id" optional='1' type="int"/>
+		</arglist>
+		<digest>invite a source</digest>
+		<description>Invite a network source in order to receive a stream from a peer</description>
+	</method>
+	<method name="uninvite" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="id" optional='1' type="int"/>
+		</arglist>
+		<digest>uninvite a source</digest>
+		<description>Remove a source to stop receiving a stream from a peer</description>
+	</method>
+</methodlist>
+<!--SEEALSO-->
+<seealsolist>
+	<seealso name="aoo.send~"/>
+	<seealso name="aoo.client"/>
+	<seealso name="aoo.server"/>
+</seealsolist>
+</c74object>

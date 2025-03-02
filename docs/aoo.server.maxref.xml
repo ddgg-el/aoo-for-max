@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
+
+<c74object name="aoo.server" module="msp" category="Aoo">
+<digest>
+	An AooServer
+</digest>
+<description>
+	Use this object to host an AOO server for a local network or the public internet. 
+</description>
+<discussion>
+<p>It serves two main functions:</p>
+	<ol>
+		<li>group/user management, so that peers may contact each other by group and user name instead of IP and port.</li>
+		<li>UDP hole punching to establish peer-to-peer connections over the public internet.</li>
+	</ol> 
+	<p>If you want to connect clients over the public internet, your server machine must be publicly accessible and the given port number must be known by all clients.</p>
+	<p>for more information about the project check the <a href="https://aoo.iem.sh/">Audio over OSC Library</a> website</p>
+</discussion>
+<!-- METADATA-->
+<metadatalist>
+	<metadata name="author" type="text">Davide Gagliardi and Francesca Seggioli</metadata>
+	<metadata name="tag">Utility</metadata>
+</metadatalist>
+<!-- ARGUMENTS-->
+<objarglist>
+	<objarg name="port" type="int">
+		<digest>Network receive port number</digest>
+		<description>Network receive port number</description>
+	</objarg>
+</objarglist>
+<!--SEEALSO-->
+<seealsolist>
+	<seealso name="aoo.send~"/>
+	<seealso name="aoo.receive~"/>
+	<seealso name="aoo.client"/>
+</seealsolist>
+</c74object>

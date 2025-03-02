@@ -893,13 +893,17 @@ static void aoo_receive_bang(t_aoo_receive *x)
 
 void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 {
-	// if (m == ASSIST_INLET) { //inlet
-	// 	sprintf(s, "I am inlet %ld", a);
-	// }
-	// else {	// outlet
-	// 	sprintf(s, "I am outlet %ld", a);
-	// }
-    ;
+    int32_t n_chans = x->x_nchannels;
+	if (m == ASSIST_INLET) { //inlet
+		sprintf(s, "(message) Message");
+	}
+	else {	// outlet
+        if(a == n_chans){
+            sprintf(s, "(message) Event output");
+        } else {
+            sprintf(s, "(signal) Stream Ch %ld", a+1);
+        }
+	}
 }
 
 // registers a function for the signal chain in Max

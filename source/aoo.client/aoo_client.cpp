@@ -494,13 +494,17 @@ void ext_main(void *r)
 
 void aoo_client_assist(t_aoo_client *x, void *b, long m, long a, char *s)
 {
-	// if (m == ASSIST_INLET) { // inlet
-	// 	sprintf(s, "I am inlet %ld", a);
-	// }
-	// else {	// outlet
-	// 	sprintf(s, "I am outlet %ld", a);
-	// }
-    ;
+	if (m == ASSIST_INLET) { // inlet
+		sprintf(s, "(message) Messages");
+	}
+	else {	// outlet
+        if(a == 0){
+            sprintf(s, "(message) Events");
+        } 
+        else {
+            sprintf(s, "(int) Connection status 0/1");
+        }
+	}
 }
 
 void aoo_client_free(t_aoo_client *x)
