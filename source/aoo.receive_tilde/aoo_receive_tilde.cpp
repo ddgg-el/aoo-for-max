@@ -633,7 +633,6 @@ static void aoo_receive_source_list(t_aoo_receive *x)
         }
     }
 }
-static void aoo_receive_bang(t_aoo_receive *x);
 static void aoo_receive_latency(t_aoo_receive *x, double f)
 {
         // post("Valore di f: %f", f);
@@ -809,7 +808,6 @@ extern "C" void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_fill_ratio,"fill_ratio", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_packetsize,"packetsize", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_buffersize,"buffersize", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_bang, "bang", 0);
     class_addmethod(c, (method)aoo_receive_reset,"reset", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_resend,"resend", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_resend_limit,"resend_limit", A_FLOAT, 0);
@@ -883,12 +881,6 @@ void *aoo_receive_new(t_symbol *s, long argc, t_atom *argv)
 void aoo_receive_free(t_aoo_receive *x)
 {
     x->~t_aoo_receive();
-}
-
-static void aoo_receive_bang(t_aoo_receive *x)
-{
-    
-    ;
 }
 
 void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)

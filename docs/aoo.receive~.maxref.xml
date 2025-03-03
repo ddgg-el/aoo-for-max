@@ -29,6 +29,67 @@
 </objarglist>
 <!-- MESSAGES-->
 <methodlist>
+	<method name="buffersize" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int" units='ms' />
+		</arglist>
+		<digest>Set send buffer size in ms (default: 25 ms)</digest>
+		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
+	</method>
+	<method name="codec_get" type="message">
+		<arglist>
+			<arg name="data" optional='0' type="string" />
+		</arglist>
+		<digest>Get opus codec settings. Use only when setting <m>format</m>='opus'</digest>
+		<description>
+			<p>Get opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
+			<ul>
+				<li>bitrate</li>
+				<li>complexity</li>
+				<li>signal</li>
+			</ul>
+		</description>
+	</method>
+	<method name="codec_set" type="message">
+		<arglist>
+			<arg name="data" optional='0' type="string" />
+		</arglist>
+		<digest>Set opus codec settings. Use only when setting <m>format</m>='opus'</digest>
+		<description>
+			<p>Set opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
+			<ul>
+				<li>bitrate</li>
+				<li>complexity</li>
+				<li>signal</li>
+			</ul>
+		</description>
+	</method>
+	<method name="dll_bandwidth" type="message">
+		<arglist>
+			<arg name="bandwidth" optional='0' type="float" />
+		</arglist>
+		<digest>Set DLL filter bandwidth (default: 0.0001). Used for dynamic resampling</digest>
+	</method>
+	<method name="dynamic_resampling" type="message">
+		<digest>Enable/disable dynamic resampling</digest>
+		<description>
+			<p>Dynamic resampling attempts to mitigate timing differences between different machines caused by internal clock drift.</p>
+			<p>A DLL filter estimates the effective sample rate on both sides and the audio data is resampled accordingly. The behavior can be fine-tuned with AooSource::setDllBandWidth().</p>
+			<p>See the paper "Using a DLL to filter time" by Fons Adriaensen.</p>
+		</description>
+	</method>
+	<method name="fill_ratio" type="message">
+		<arglist>
+			<arg name="ratio" optional='0' type="float" />
+		</arglist>
+		<digest>Get the current buffer fill ratio (0.0: empty, 1.0: full).</digest>
+	</method>
+	<method name="id" type="message">
+		<arglist>
+			<arg name="id" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the source ID</digest>
+	</method>
 	<method name="invite" type="message">
 		<arglist>
 			<arg name="address" optional='0' type="symbol"/>
@@ -38,14 +99,97 @@
 		<digest>invite a source</digest>
 		<description>Invite a network source in order to receive a stream from a peer</description>
 	</method>
+	<method name="latency" type="message">
+		<arglist>
+			<arg name="latency" optional='0' type="int"/>
+		</arglist>
+		<digest>Set the latency (in seconds)</digest>
+		<description>
+			<p>Set the latency (in seconds)</p>
+			<p>If a new stream is started, processing is delayed for the specified time resp. until we have received the corresponding number of blocks. This gives a buffer for compensating network and audio jitter.</p>
+     		<p>For local networks small latencies of 5-20 ms should work; for unreliable/unpredictable networks you might need to increase it significantly if you want to avoid dropouts.</p>
+	 		<p>Higher latencies also allow for missing packets to be resent (if enabled). You can effectively create 'reliable' streams over unstable connections.</p>
+	 		<p>Some codecs, such as Opus, offer packet loss concealment, so you can use very low latencies and still get acceptable results.</p>
+		</description>
+	</method>
+	<method name="packetsize" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int"/>
+		</arglist>
+		<digest>Maximum UDP packet size (default: 512 bytes)</digest>
+	</method>
+	<method name="ping" type="message">
+		<arglist>
+			<arg name="interval" optional='0' type="int" units="ms" />
+		</arglist>
+		<digest>Set ping interval in ms (default: 1000 ms)</digest>
+	</method>
+	<method name="port" type="message">
+		<arglist>
+			<arg name="port" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the source listening port</digest>
+	</method>
+	<method name="real_samplerate" type="message">
+		<digest>Get the "real" samplerate as measured by the DLL filter</digest>
+	</method>
+	<method name="resample_method" type="message">
+		<arglist>
+			<arg name="method" optional='0' type="int" />
+		</arglist>
+		<digest>Set resample method</digest>
+		<description>
+			<p>Set resample method. Possible values are:</p>
+			<ul>
+				<li>0: sample and hold</li>
+				<li>1: linear interpolation</li>
+				<li>2: cubic interpolation</li>
+			</ul>
+		</description>
+	</method>
+	<method name="resend" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int" />
+		</arglist>
+		<digest>Set the resend buffer size (in seconds)</digest>
+		<description>
+			<p>Set the resend buffer size (in seconds). </p>
+			<p>The source keeps the last N seconds of audio in a buffer, so it can resend parts of it if requested by the sink (because of packet loss).</p>
+			<p>If set to 0.0, resending is disabled.</p>
+		</description>
+	</method>
+	<method name="resend_interval" type="message">
+		<arglist>
+			<arg name="interval" optional='0' type="int" />
+		</arglist>
+		<digest>Set resend interval (in seconds)</digest>
+		<description>
+			<p>Set resend interval (in seconds). This is the interval between individual resend attempts for a specific frame. Since there is always a certain roundtrip delay between source and sink, it makes sense to wait between resend attempts to not spam the network with redundant messages.</p>
+		</description>
+	</method>
+	<method name="resend_limit" type="message">
+		<arglist>
+			<arg name="limit" optional='0' type="int" />
+		</arglist>
+		<digest>Set the resend limit</digest>
+		<description>
+			<p>Set the resend limit. This is the max. number of *blocks* to request in a single process call.</p>
+		</description>
+	</method>
+	<method name="reset" type="message">
+		<digest>Reset the sink</digest>
+	</method>
+	<method name="source_list" type="message">
+		<digest>List all sources</digest>
+		<description>Get the list of the connected sources</description>
+	</method>
 	<method name="uninvite" type="message">
 		<arglist>
 			<arg name="address" optional='0' type="symbol"/>
 			<arg name="port" optional='0' type="int"/>
 			<arg name="id" optional='1' type="int"/>
 		</arglist>
-		<digest>uninvite a source</digest>
-		<description>Remove a source to stop receiving a stream from a peer</description>
+		<digest>Uninvite a source</digest>
 	</method>
 </methodlist>
 <!--SEEALSO-->
