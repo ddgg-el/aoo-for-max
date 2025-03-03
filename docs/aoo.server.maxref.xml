@@ -29,6 +29,21 @@
 		<description>Network receive port number</description>
 	</objarg>
 </objarglist>
+<!-- MESSAGES-->
+<methodlist>
+	<method name="port" type="message">
+		<arglist>
+			<arg name="port" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the client listening port</digest>
+	</method>
+	<method name="relay" type="message">
+		<arglist>
+			<arg name="relay" optional='0' type="int"/>
+		</arglist>
+		<digest>Enabled/disable internal relay (0/1).</digest>
+	</method>
+</methodlist>
 <!--SEEALSO-->
 <seealsolist>
 	<seealso name="aoo.send~"/>
