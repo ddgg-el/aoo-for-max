@@ -32,17 +32,103 @@
 </objarglist>
 <!-- MESSAGES-->
 <methodlist>
+	<method name="binary" type="message">
+		<arglist>
+			<arg name="enable" optional='0' type="int" />
+		</arglist>
+		<digest>Enable/disable binary message format. 'on' by default</digest>
+		<description>Enable/disable binary message format. <i>On</i> by default. Use a more compact (and faster) binary format for certain messages</description>
+	</method>
+	<method name="broadcast" type="message">
+		<arglist>
+			<arg name="message" optional='0' type="any" />
+		</arglist>
+		<digest>Send a message to all peers</digest>
+	</method>
 	<method name="connect" type="message">
 		<arglist>
 			<arg name="address" optional='0' type="symbol"/>
 			<arg name="port" optional='0' type="int"/>
 		</arglist>
-		<digest>Connect to the AOO server</digest>
-		<description>Connect to the AOO server with the given hostname/IP address and port number. Outputs 1 on success or 0 on failure.</description>
+		<digest>Connect to an AOO server</digest>
+		<description>Connect to an AOO server with the given hostname/IP address and port number. Outputs 1 on success or 0 on failure.</description>
+	</method>
+	<method name="dejitter" type="message">
+		<arglist>
+			<arg name="dejitter" optional='0' type="int"/>
+		</arglist>
+		<digest>Add/Remove a dejitter to the client (0/1).</digest>
 	</method>
 	<method name="disconnect" type="message">
 		<digest>Disconnect from the server.</digest>
-		<description>Disconnect from the server.</description>
+	</method>
+	<method name="group_join" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+			<arg name="username" optional='0' type="string"/>
+		</arglist>
+		<digest>Join a group on a server.</digest>
+	</method>
+	<method name="group_leave" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+		</arglist>
+		<digest>Leave a group on a server.</digest>
+	</method>
+	<method name="packetsize" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int"/>
+		</arglist>
+		<digest>Maximum UDP packet size (default: 512 bytes)</digest>
+	</method>
+	<method name="peer_list" type="message">
+		<digest>List all connected peers</digest>
+	</method>
+	<method name="port" type="message">
+		<arglist>
+			<arg name="port" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the client listening port</digest>
+	</method>
+	<method name="send" type="message">
+		<arglist>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to the current target (see <m>target</m>). More efficient than <m>broadcast</m> <m>send_group</m> <m>send_peer</m>.</digest>
+	</method>
+	<method name="send_group" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to a group.</digest>
+	</method>
+	<method name="send_peer" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+			<arg name="user" optional='0' type="string"/>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to a peer by specifying a group and a username.</digest>
+	</method>
+	<method name="send_peer" type="message">
+		<arglist>
+			<arg name="ip" optional='0' type="string"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to a peer by specifying an IP address and a port.</digest>
+	</method>
+	<method name="target" type="message">
+		<arglist>
+			<arg name="group" optional='1' type="string"/>
+			<arg name="user" optional='1' type="int"/>
+		</arglist>
+		<digest>Set a target to send message to. If empty broadcast the message</digest>
 	</method>
 </methodlist>
 <!--SEEALSO-->

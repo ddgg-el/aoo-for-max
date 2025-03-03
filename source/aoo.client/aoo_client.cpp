@@ -120,22 +120,27 @@ static void aoo_client_send(t_aoo_client *x, t_symbol *s, int argc, t_atom *argv
         x->send_message(argc, argv, x->x_target_group, x->x_target_user);
     }
 }
+// TODO: check implementation
 static void aoo_client_offset(t_aoo_client *x, double f)
 {
     x->x_offset = f;
 }
+// TODO: check implementation
 static void aoo_client_delay(t_aoo_client *x, double f)
 {
     x->x_delay = f;
 }
+// TODO: check implementation
 static void aoo_client_schedule(t_aoo_client *x, double f)
 {
     x->x_schedule = (f != 0);
 }
+// TODO: check implementation
 static void aoo_client_discard_late(t_aoo_client *x, double f)
 {
     x->x_discard = (f != 0);
 }
+// TODO: check implementation
 static void aoo_client_reliable(t_aoo_client *x, double f)
 {
     x->x_reliable = (f != 0);
@@ -192,6 +197,7 @@ static void aoo_client_port(t_aoo_client *x, double f)
         x->x_node = 0;
     }
 }
+// TODO: reference
 static void aoo_client_sim_packet_loss(t_aoo_client *x, double f)
 {
     if (!x->check("sim_packet_loss"))
@@ -205,6 +211,7 @@ static void aoo_client_sim_packet_loss(t_aoo_client *x, double f)
                      aoo_strerror(e));
     }
 }
+// TODO: reference
 static void aoo_client_sim_packet_reorder(t_aoo_client *x, double f)
 {
     if (!x->check("sim_packet_reorder"))
@@ -218,6 +225,7 @@ static void aoo_client_sim_packet_reorder(t_aoo_client *x, double f)
                      aoo_strerror(e));
     }
 }
+// TODO: reference
 static void aoo_client_sim_packet_jitter(t_aoo_client *x, double f)
 {
     if (!x->check("sim_packet_jitter"))

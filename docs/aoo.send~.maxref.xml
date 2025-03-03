@@ -212,7 +212,6 @@
 	</method>
 	<method name="sink_list" type="message">
 		<digest>List all sinks</digest>
-		<description>Get the list of the connected sinks</description>
 	</method>
 	<method name="start" type="message">
 		<digest>Start the stream</digest>
