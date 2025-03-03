@@ -3,10 +3,11 @@
 
 <c74object name="aoo.send~" module="msp" category="Aoo">
 <digest>
-	Send an Aoo stream
+	Send an Aoo stream to an <o>aoo.receive~</o> object
 </digest>
 <description>
-	Send an Aoo audio stream to one or more Aoo sinks using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a>
+	<p>Send an Aoo audio stream to one or more Aoo sinks (<o>aoo.receive~</o>) using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a></p>
+	<p>We might also refer to this object as a <b>Source</b> in an Aoo network</p>
 </description>
 <!-- METADATA-->
 <metadatalist>
@@ -30,13 +31,216 @@
 </objarglist>
 <!-- MESSAGES-->
 <methodlist>
+	<method name="active" type="message">
+		<arglist>
+			<arg name="active" optional='0' type="int"/>
+		</arglist>
+		<digest>(De)activate the given sink (0/1)</digest>
+	</method>
+	<method name="add" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="id" optional='0' type="int"/>
+		</arglist>
+		<digest>Add a destination to stream to</digest>
+		<description>Add a sink to the list of streaming destination. To receive the stream you should create an <o>aoo.receive~</o> object</description>
+	</method>
+	<method name="auto_invite" type="message">
+		<arglist>
+			<arg name="true/false" optional='0' type="int"/>
+		</arglist>
+		<digest>Automatically accept (un)invitations (default: on)</digest>
+	</method>
+	<method name="binary" type="message">
+		<arglist>
+			<arg name="enable" optional='0' type="int" />
+		</arglist>
+		<digest>Enable/disable binary message format. 'on' by default</digest>
+		<description>Enable/disable binary message format. <i>On</i> by default. Use a more compact (and faster) binary format for certain messages</description>
+	</method>
+	<method name="buffersize" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int" units='ms' />
+		</arglist>
+		<digest>Set send buffer size in ms (default: 25 ms)</digest>
+		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
+	</method>
+	<method name="codec_get" type="message">
+		<arglist>
+			<arg name="data" optional='0' type="string" />
+		</arglist>
+		<digest>Get opus codec settings. Use only when setting <m>format</m>='opus'</digest>
+		<description>
+			<p>Get opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
+			<ul>
+				<li>bitrate</li>
+				<li>complexity</li>
+				<li>signal</li>
+			</ul>
+		</description>
+	</method>
+	<method name="codec_set" type="message">
+		<arglist>
+			<arg name="data" optional='0' type="string" />
+		</arglist>
+		<digest>Set opus codec settings. Use only when setting <m>format</m>='opus'</digest>
+		<description>
+			<p>Set opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
+			<ul>
+				<li>bitrate</li>
+				<li>complexity</li>
+				<li>signal</li>
+			</ul>
+		</description>
+	</method>
+	<method name="dll_bandwidth" type="message">
+		<arglist>
+			<arg name="bandwidth" optional='0' type="float" />
+		</arglist>
+		<digest>Set DLL filter bandwidth (default: 0.0001). Used for dynamic resampling</digest>
+	</method>
+	<method name="dynamic_resampling" type="message">
+		<digest>Enable/disable dynamic resampling</digest>
+		<description>
+			<p>Dynamic resampling attempts to mitigate timing differences between different machines caused by internal clock drift.</p>
+			<p>A DLL filter estimates the effective sample rate on both sides and the audio data is resampled accordingly. The behavior can be fine-tuned with AooSource::setDllBandWidth().</p>
+			<p>See the paper "Using a DLL to filter time" by Fons Adriaensen.</p>
+		</description>
+	</method>
+	<method name="format" type="message">
+		<arglist>
+			<arg name="format" optional='0' type="string" />
+		</arglist>
+		<digest>Set the audio format. Possible values are: 'pcm' or 'opus'</digest>
+		<description>
+			<p>Set the audio format. Possible values are:</p>
+			<ul>
+				<li>pcm</li>
+				<li>opus</li>
+			</ul>
+		</description>
+	</method>
+	<method name="id" type="message">
+		<arglist>
+			<arg name="id" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the source ID</digest>
+	</method>
+	<method name="invite" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="id" optional='0' type="int"/>
+		</arglist>
+		<digest>Manually accept invitation</digest>
+		<description>Manually accept invitation. This only works if <m>auto_invite</m> is off</description>
+	</method>
+	<method name="packetsize" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int"/>
+		</arglist>
+		<digest>Maximum UDP packet size (default: 512 bytes)</digest>
+	</method>
+	<method name="ping" type="message">
+		<arglist>
+			<arg name="interval" optional='0' type="int" units="ms" />
+		</arglist>
+		<digest>Set ping interval in ms (default: 1000 ms)</digest>
+	</method>
+	<method name="port" type="message">
+		<arglist>
+			<arg name="port" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the source listening port</digest>
+	</method>
+	<method name="real_samplerate" type="message">
+		<digest>Get the "real" samplerate as measured by the DLL filter</digest>
+	</method>
+	<method name="redundancy" type="message">
+		<digest>Set redundancy</digest>
+		<description>
+		The number of times each frames is sent (default = 1). This is a primitive strategy to cope with possible packet loss, but it can be counterproductive: packet loss is often the result of network contention and sending more data would only make it worse.
+		</description>
+	</method>
+	<method name="remove" type="message">
+		<arglist>
+			<arg name="address" optional='1' type="symbol"/>
+			<arg name="port" optional='1' type="int"/>
+			<arg name="id" optional='1' type="int"/>
+		</arglist>
+		<digest>Remove one or all the destinations from the list of sinks</digest>
+		<description>When no argument is specifified this method removes ALL the sinks previously registered by the object </description>
+	</method>
+	<method name="resample_method" type="message">
+		<arglist>
+			<arg name="method" optional='0' type="int" />
+		</arglist>
+		<digest>Set resample method</digest>
+		<description>
+			<p>Set resample method. Possible values are:</p>
+			<ul>
+				<li>0: sample and hold</li>
+				<li>1: linear interpolation</li>
+				<li>2: cubic interpolation</li>
+			</ul>
+		</description>
+	</method>
+	<method name="resend" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int" />
+		</arglist>
+		<digest>Set the resend buffer size (in seconds)</digest>
+		<description>
+			<p>Set the resend buffer size (in seconds). </p>
+			<p>The source keeps the last N seconds of audio in a buffer, so it can resend parts of it if requested by the sink (because of packet loss).</p>
+			<p>If set to 0.0, resending is disabled.</p>
+		</description>
+	</method>
+	<method name="reset" type="message">
+		<digest>Reset the source</digest>
+	</method>
+	<method name="sink_channel" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="id" optional='0' type="int"/>
+			<arg name="offset" optional='0' type="int"/>
+		</arglist>
+		<digest>Set sink channel offset</digest>
+		<description>Add a channel offset to the <o>aoo.receive~</o> output channels</description>
+	</method>
+	<method name="sink_list" type="message">
+		<digest>List all sinks</digest>
+		<description>Get the list of the connected sinks</description>
+	</method>
 	<method name="start" type="message">
 		<digest>Start the stream</digest>
-		<description>Start streaming the signal to a aoo.receive~ object</description>
+		<description>Start streaming the signal to an aoo.receive~ object</description>
 	</method>
 	<method name="stop" type="message">
 		<digest>Stop the stream</digest>
 		<description>Stop streaming the signal</description>
+	</method>
+	<method name="stream_time" type="message">
+		<arglist>
+			<arg name="time" optional='0' type="float" />
+		</arglist>
+		<digest>Stream time send interval (in seconds)</digest>
+		<description>
+			<p>Stream time send interval (in seconds)</p>
+			<p>The source may periodically send timestamps for more accurate stream time measurement. Set to 0 to disable.</p>
+			<p>Note: This is only relevant in conjuction with dynamic resampling; otherwise the stream time can be inferred from the sequence number.</p>
+		</description>
+	</method>
+	<method name="uninvite" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="id" optional='0' type="int"/>
+		</arglist>
+		<digest>Manually accept uninvitation</digest>
+		<description>Manually accept uninvitation. This only works if <m>auto_invite</m> is off</description>
 	</method>
 </methodlist>
 <!--SEEALSO-->

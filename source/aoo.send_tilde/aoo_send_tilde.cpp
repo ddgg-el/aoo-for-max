@@ -707,6 +707,7 @@ static void aoo_send_uninvite(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv
         x->x_source->handleUninvite(ep, x->x_invite_token, accept);
     }
 }
+// TODO: reference
 static void aoo_send_active(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
 {
     if (!x->check(argc, argv, 4, "active")) return;

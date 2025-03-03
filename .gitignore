@@ -5,3 +5,4 @@ externals/
 studi/
 *.bak
 dist/
+multichanneltest*
