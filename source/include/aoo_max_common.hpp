@@ -56,10 +56,6 @@ static t_class *aoo_client_class = nullptr;
 
 #define AOO_MAX_NUM_CHANNELS 256
 
-#ifndef MAX_HAVE_MULTICHANNEL
-#define MAX_HAVE_MULTICHANNEL 1
-#endif
-
 static AooNtpTime g_start_time;
 double get_elapsed_ms(AooNtpTime tt);
 
