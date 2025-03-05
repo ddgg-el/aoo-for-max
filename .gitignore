@@ -6,3 +6,9 @@ studi/
 *.bak
 dist/
 multichanneltest*
+
+aoo_template/
+aoo_template_tilde/
+test_tilde/
+
+init/
