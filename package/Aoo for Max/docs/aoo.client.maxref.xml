@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
+
+<c74object name="aoo.client" module="msp" category="Aoo">
+<digest>
+	An AooClient
+</digest>
+<description>
+	Facilitates communication between several peers in a network.
+</description>
+<discussion>
+	<p>The AOO client first connects to an AOO server. For the internet, the server has to be publicly accessable. For local networks, the server may be private, i.e. run on a user's machine.</p>
+	<p>Once the client has joined a group, it receives a list of all existing peers in that group and is notified whenever a peer joins/leaves the group.</p>
+	<p>Peers may send each other messages over the internet, which wouldn't be possible otherwise because of NAT and firewalls. For more info see <a href='https://en.wikipedia.org/wiki/UDP_hole_punching'>https://en.wikipedia.org/wiki/UDP_hole_punching</a>.</p>
+	<p>A peer is referenced by its group and user name, so that &lt;group&gt; &lt;user&gt; effectively replaces &lt;host&gt; &lt;port&gt; in all relevant methods and events for [aoo_send~] and [aoo_receive~].</p>
+	<p>All AOO objects on the same port share the same peer list.</p>
+	<p>In addition, peers also have a user ID, IP address and port number. The user ID is a unique number for each user in a group.</p>
+	<p>TIP: the user ID helps to faciliate ad hoc peer-to-peer audio streaming. The client would pick <o>aoo.receive~</o> objects for each peer and use the peer's user ID as the sink ID. The peer would in turn use its *own* user ID for its <o>aoo.send~</o> object.</p>
+	<p>for more information about the project check the <a href="https://aoo.iem.sh/">Audio over OSC Library</a> website</p>
+</discussion>
+<!-- METADATA-->
+<metadatalist>
+	<metadata name="author" type="text">Davide Gagliardi and Francesca Seggioli</metadata>
+	<metadata name="tag">Utility</metadata>
+</metadatalist>
+<!-- ARGUMENTS-->
+<objarglist>
+	<objarg name="port" type="int">
+		<digest>Network receive port number</digest>
+		<description>Network receive port number</description>
+	</objarg>
+</objarglist>
+<!-- MESSAGES-->
+<methodlist>
+	<method name="binary" type="message">
+		<arglist>
+			<arg name="enable" optional='0' type="int" />
+		</arglist>
+		<digest>Enable/disable binary message format. 'on' by default</digest>
+		<description>Enable/disable binary message format. <i>On</i> by default. Use a more compact (and faster) binary format for certain messages</description>
+	</method>
+	<method name="broadcast" type="message">
+		<arglist>
+			<arg name="message" optional='0' type="any" />
+		</arglist>
+		<digest>Send a message to all peers</digest>
+	</method>
+	<method name="connect" type="message">
+		<arglist>
+			<arg name="address" optional='0' type="symbol"/>
+			<arg name="port" optional='0' type="int"/>
+		</arglist>
+		<digest>Connect to an AOO server</digest>
+		<description>Connect to an AOO server with the given hostname/IP address and port number. Outputs 1 on success or 0 on failure.</description>
+	</method>
+	<method name="dejitter" type="message">
+		<arglist>
+			<arg name="dejitter" optional='0' type="int"/>
+		</arglist>
+		<digest>Add/Remove a dejitter to the client (0/1).</digest>
+	</method>
+	<method name="disconnect" type="message">
+		<digest>Disconnect from the server.</digest>
+	</method>
+	<method name="group_join" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+			<arg name="username" optional='0' type="string"/>
+		</arglist>
+		<digest>Join a group on a server.</digest>
+	</method>
+	<method name="group_leave" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+		</arglist>
+		<digest>Leave a group on a server.</digest>
+	</method>
+	<method name="packetsize" type="message">
+		<arglist>
+			<arg name="size" optional='0' type="int"/>
+		</arglist>
+		<digest>Maximum UDP packet size (default: 512 bytes)</digest>
+	</method>
+	<method name="peer_list" type="message">
+		<digest>List all connected peers</digest>
+	</method>
+	<method name="port" type="message">
+		<arglist>
+			<arg name="port" optional='0' type="int"/>
+		</arglist>
+		<digest>Change the client listening port</digest>
+	</method>
+	<method name="send" type="message">
+		<arglist>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to the current target (see <m>target</m>). More efficient than <m>broadcast</m> <m>send_group</m> <m>send_peer</m>.</digest>
+	</method>
+	<method name="send_group" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to a group.</digest>
+	</method>
+	<method name="send_peer" type="message">
+		<arglist>
+			<arg name="group" optional='0' type="string"/>
+			<arg name="user" optional='0' type="string"/>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to a peer by specifying a group and a username.</digest>
+	</method>
+	<method name="send_peer" type="message">
+		<arglist>
+			<arg name="ip" optional='0' type="string"/>
+			<arg name="port" optional='0' type="int"/>
+			<arg name="type" optional='0' type="any"/>
+			<arg name="message" optional='0' type="any"/>
+		</arglist>
+		<digest>Send a message to a peer by specifying an IP address and a port.</digest>
+	</method>
+	<method name="target" type="message">
+		<arglist>
+			<arg name="group" optional='1' type="string"/>
+			<arg name="user" optional='1' type="int"/>
+		</arglist>
+		<digest>Set a target to send message to. If empty broadcast the message</digest>
+	</method>
+</methodlist>
+<!--SEEALSO-->
+<seealsolist>
+	<seealso name="aoo.send~"/>
+	<seealso name="aoo.receive~"/>
+	<seealso name="aoo.server"/>
+</seealsolist>
+</c74object>

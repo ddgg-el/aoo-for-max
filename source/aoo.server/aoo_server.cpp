@@ -6,7 +6,7 @@
 #include "ext_critical.h"
 #include "aoo_max_server.h"
 
-
+// TODO: implement get client list
 
 void t_aoo_server::close() 
 {

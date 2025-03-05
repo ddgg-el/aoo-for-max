@@ -1,0 +1,12 @@
+{
+	"name": "Aoo for Max",
+	"displayname": "Aoo",
+	"version": "1.0.0",
+	"authors": ["Davide Gagliardi", "Francesca Seggioli"],
+	"description": "Max external for the Aoo Library",
+	"tags": ["audio", "network", "osc", "DSP"],
+	"website": "https://aoo.iem.sh/",
+	"extensible": 0,
+	"max_version_min": "8.0",
+	"homepatcher": "Aoo Overview.maxpat" 
+}

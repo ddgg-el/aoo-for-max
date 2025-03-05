@@ -10,7 +10,7 @@ message(STATUS "Project: ${PROJECT_NAME}")
 # Max-SDK directories and settings
 set(MAX_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/max-sdk-base" CACHE STRING "Max SDK Base folder")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
-set(C74_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/externals")
+set(C74_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/package/Aoo for Max/externals")
 
 message(STATUS "Max SDK directory: ${MAX_SDK_DIR}")
 message(STATUS "OSX Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}\n")
