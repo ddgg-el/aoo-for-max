@@ -3,9 +3,10 @@ build/
 backup/
 externals/
 studi/
-*.bak
 dist/
-multichanneltest*
+
+*.bak
+*.zip
 
 aoo_template/
 aoo_template_tilde/
