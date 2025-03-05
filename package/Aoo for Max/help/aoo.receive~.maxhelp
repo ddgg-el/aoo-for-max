@@ -197,7 +197,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 10.0, 10.0, 506.0, 97.0 ]
+									"patching_rect" : [ 10.0, 10.0, 506.0, 110.0 ]
 								}
 
 							}
@@ -393,7 +393,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 375.5, 492.5, 69.0, 76.0 ],
+									"patching_rect" : [ 375.5, 492.5, 72.0, 76.0 ],
 									"text" : "::1 9080. 1. 3947566184.748954 3947566184.778115"
 								}
 
@@ -1388,8 +1388,8 @@
 		"lines" : [  ],
 		"dependency_cache" : [ 			{
 				"name" : "aoo.aoolink.maxpat",
-				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/patchers",
-				"patcherrelativepath" : "../patchers",
+				"bootpath" : "~/Documents/Max 8/Packages/Aoo for Max/patchers",
+				"patcherrelativepath" : "../../../../../../../../../Max 8/Packages/Aoo for Max/patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
@@ -1399,15 +1399,15 @@
 			}
 , 			{
 				"name" : "aoo.meta.maxpat",
-				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/patchers",
-				"patcherrelativepath" : "../patchers",
+				"bootpath" : "~/Documents/Max 8/Packages/Aoo for Max/patchers",
+				"patcherrelativepath" : "../../../../../../../../../Max 8/Packages/Aoo for Max/patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "aoo.overview.maxpat",
-				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/patchers",
-				"patcherrelativepath" : "../patchers",
+				"bootpath" : "~/Documents/Max 8/Packages/Aoo for Max/patchers",
+				"patcherrelativepath" : "../../../../../../../../../Max 8/Packages/Aoo for Max/patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
