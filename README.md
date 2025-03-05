@@ -1,51 +1,68 @@
 Aoo for Max8
 ===========
 
-### Sviluppo
+### Overview
+This repository contains the source code for the `Aoo for Max` package. There is no need to manually build your project. To download a ready to use package please visit the Release page.
 
-Il progetto dipende da [aoo](https://aoo.iem.sh/) e dalla [max-sdk-base](https://github.com/Cycling74/max-sdk-base) che sono inclusi come sottomoduli del progetto. 
+The externals has been test on Max8.2 running on MacOS 12.7.6 and Windows11. Presumably they should also work with more modern releases.
 
-Clona la cartella con:
+#### Folder structure
+```
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── aoo
+├── max-sdk-base
+├── package
+│   └── Aoo for Max <----
+├── package-info.json
+└── source
+```
+The `source` folder contains the source file for each external while the `package` contains the ready to install Max package folder into which the externals will be compiled.
+
+### Installation
+Manually copy the downlaoded `Aoo for Max` folder into your Max `Packages` folder or add it to the Max `Options > File Preferences...`
+When building from source you will find this folder inside the  `package` repo subfolder
+
+---
+
+### Develop
+The project depends on the [aoo](https://aoo.iem.sh/) library and on the [max-sdk-base](https://github.com/Cycling74/max-sdk-base) which are included as submodules in this repository
+
+Clone the repo with:
 ```bash
 git clone https://github.com/ddgg-el/aoo-for-max8.git
-git submodule init
-git submodule update
-```
-
-Qualora di volesse implementare il codec `OPUS` e `portaudio` (dipendenze di `aoo`) è possibile aggiungerli alla cartella del progetto a posteriori con il comando
-```bash
 git submodule update --init --recursive
 ```
 
-**IMPORTANTE**
-Modifica il file `aoo/include/aoo_types.h:100`
+**IMPORTANT**
+Since Max samples are `double`, as for today you manually have to modify the file `aoo/include/aoo_types.h:100`
 ```c++
-typedef double AooSample; // <---- manca il ;
+typedef double AooSample; // <---- missing ;
 ------------------------^
 ```
+Otherwise the project will not compile
 
-#### Per iniziare
-Duplica e rinomina la cartella `source/aoo_template`. Rinomina e modifica il file `simplemsp~.c` usando il nome dell'oggetto sul quale si vuole lavorare. 
-
-Inoltre è utile lavorare su un `branch` separato che verrà poi combinato con `main`.
-
-#### Configurazione Intellisense VSCODE:
+#### VSCODE Intellisense Configuration (optional):
 ```json
 "includePath": [
 	"${default}",
 	"${workspaceFolder}/",
-	"${workspaceFolder}/aoo/include",
 	"${workspaceFolder}/aoo",
+	"${workspaceFolder}/aoo/include",
+	"${workspaceFolder}/aoo/aoo/src",
+	"${workspaceFolder}/aoo/deps/oscpack",
 	"${workspaceFolder}/aoo/deps/opus/include",
-    "${workspaceFolder}/aoo/deps/portaudio/include",
+	"${workspaceFolder}/aoo/deps/portaudio/include",
 	"${workspaceFolder}/source/include",
-	"${workspaceFolder}/max-sdk-base/c74support/**/"
-	// Percorso alla sorgente di pd che potrebbe essere diverso in funzione della versione di Pd installata
+	"${workspaceFolder}/max-sdk-base/c74support/**/",
+	// Path to Pd folder pd which could be different from yours
 	"/Applications/Pd-0.54-1.app/Contents/Resources/src/"
 ],
 ```
 
 ### Build instruction
+From the project's root folder
 ```bash
 $ mkidr build
 $ cd build
@@ -53,15 +70,12 @@ $ cmake ..
 $ cmake --build . -j${nproc}
 ```
 
-Gli externals compilati verranno installati nella cartella `externals`
+The compiled externals will be installed in `package/Aoo for Max/externals`
 
-### Verifica
-Per verificare che gli oggetti funzionino bisogna aggiungere la cartella `externals` al Path di Max
-
-### Riferimenti
-
-Per gli externals di PD
-[https://github.com/pure-data/externals-howto/](https://github.com/pure-data/externals-howto/)
+### Reference for Developers
 
 Max SDK
 [https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html](https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html)
+
+Aoo
+[https://aoo.iem.sh/docs/](https://aoo.iem.sh/docs/)
