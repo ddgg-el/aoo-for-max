@@ -2,3 +2,14 @@ build/
 .vscode/
 backup/
 externals/
+studi/
+dist/
+
+*.bak
+*.zip
+
+aoo_template/
+aoo_template_tilde/
+test_tilde/
+
+init/

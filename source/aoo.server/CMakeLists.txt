@@ -1,4 +1,4 @@
-include(${MAX_SDK_DIR}/script/max-pretarget.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-pretarget.cmake)
 
 ## Max externals minimum compile 10.11 Aoo minimum compile 10.13
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
@@ -17,8 +17,7 @@ file(GLOB PROJECT_SRC
 	 "*.c"
      "*.cpp"
 )
-
-add_library(
+add_library( 
 	${PROJECT_NAME} 
 	MODULE
 	${PROJECT_SRC}
@@ -26,5 +25,5 @@ add_library(
 
 target_link_libraries(${PROJECT_NAME} PRIVATE aoo_max_common)
 
-include(${MAX_SDK_DIR}/script/max-posttarget.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-posttarget.cmake)
 message("\n")

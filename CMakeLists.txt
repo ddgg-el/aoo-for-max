@@ -8,11 +8,11 @@ message(STATUS "Project: ${PROJECT_NAME}")
 ################################################################
 
 # Max-SDK directories and settings
-set(MAX_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Max SDK Base folder")
+set(MAX_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/max-sdk-base" CACHE STRING "Max SDK Base folder")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
-set(C74_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/externals")
+set(C74_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/package/Aoo for Max/externals")
 
-message(STATUS "Max include directory: ${MAX_INCLUDE_DIR}")
+message(STATUS "Max SDK directory: ${MAX_SDK_DIR}")
 message(STATUS "OSX Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}\n")
 
 ################################################################
@@ -22,7 +22,6 @@ option(AOO_USE_OPUS "use Opus codec" OFF)
 set(AOO_SAMPLE_SIZE 64 CACHE STRING "Audio sample size" )
 
 add_subdirectory(aoo EXCLUDE_FROM_ALL)
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/source/include )
 
 ################################################################
 
@@ -37,19 +36,25 @@ MACRO(SUBDIRLIST result curdir)
   SET(${result} ${dirlist})
 ENDMACRO()
 
+# include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/source/include )
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/common)
+
 # Generate a project for every folder in the "source/" folder
 SUBDIRLIST(PROJECT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/source)
 foreach (project_dir ${PROJECT_DIRS})
 	set(project_path ${CMAKE_CURRENT_SOURCE_DIR}/source/${project_dir})
   if (EXISTS "${project_path}/CMakeLists.txt")
    # Non compilare aoo_template
-    if(NOT "${project_dir}" STREQUAL "aoo_template")
+    if(NOT "${project_dir}" STREQUAL "aoo_template_tilde" AND NOT "${project_dir}" STREQUAL "aoo_template" AND NOT "${project_dir}" STREQUAL "common")
       string(REGEX REPLACE "_tilde" "~" EXTERN_PROJECT_NAME_DEFAULT "${project_dir}")
-      message("*** Generating: ${EXTERN_PROJECT_NAME_DEFAULT} ***\n")
+      message("*** Generating: ${EXTERN_PROJECT_NAME_DEFAULT} ***")
       add_subdirectory(${project_path})
     endif ()
   endif ()
 endforeach ()
+
+# message("\n********************************\n")
+
 
 ################################################################
 
