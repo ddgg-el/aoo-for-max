@@ -14,7 +14,7 @@ The externals has been test on Max8.2 running on MacOS 12.7.6 and Windows11. Pre
 ├── aoo
 ├── max-sdk-base
 ├── package
-│   └── Aoo for Max <----
+│   └── Aoo for Max <---- the Max8 package
 ├── package-info.json
 └── source
 ```
@@ -56,7 +56,7 @@ Otherwise the project will not compile
 	"${workspaceFolder}/aoo/deps/portaudio/include",
 	"${workspaceFolder}/source/include",
 	"${workspaceFolder}/max-sdk-base/c74support/**/",
-	// Path to Pd folder pd which could be different from yours
+	// Path to Pd folder which could be different from yours
 	"/Applications/Pd-0.54-1.app/Contents/Resources/src/"
 ],
 ```
