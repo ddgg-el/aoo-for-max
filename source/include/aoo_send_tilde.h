@@ -45,6 +45,8 @@ struct t_aoo_send {
     double x_samplerate = 0;
     long x_blocksize = 0;
 
+    bool x_valid = true; // if the object is not properly constructed 
+
 
     std::vector<t_sink> x_sinks;
 
@@ -68,6 +70,5 @@ static void aoo_send_handle_event(t_aoo_send *x, const AooEvent *event, int32_t)
 void *aoo_send_new(t_symbol *s, long argc, t_atom *argv);
 void aoo_send_free(t_aoo_send *x);
 void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s);
-void aoo_send_float(t_aoo_send *x, double f);
 void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
 void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam);

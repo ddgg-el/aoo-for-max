@@ -331,25 +331,29 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     x_clock = clock_new(this, (method)aoo_receive_tick);
     x_queue_clock = clock_new(this, (method)aoo_receive_queue_tick);
 
-    // // flags
-    // while (argc && argv->a_type == A_SYM) {
-    //     auto flag = argv->a_w.w_sym->s_name;
-    //     if (*flag == '-') {
-    //         if (!strcmp(flag, "-m")) {
-    //             if (g_signal_setmultiout) {
-    //                 x_multi = true;
-    //             } else {
-    //                 object_error(this, "%s: no multi-channel support, ignoring '-m' flag", classname(this));
-    //             }
-    //         } else {
-    //             object_error(this, "%s: ignore unknown flag '%s",
-    //                      classname(this), flag);
-    //         }
-    //         argc--; argv++;
-    //     } else {
-    //         break;
-    //     }
-    // }
+    long offset = attr_args_offset(argc, argv);
+
+    if((argv+offset)->a_type == A_SYM)
+	{
+        auto multiflag = atom_getsym(argv+offset)->s_name;
+		if(!strcmp(multiflag, "@multichannel")){
+            if(offset < 1){
+                object_error((t_object*)this, "Missing argument <channels>");
+                x_valid = false;
+                return;
+            }
+#ifdef MAX_HAVE_MULTICHANNEL
+		    x_multi = true;
+#else
+            object_error((t_object*)this, "Object compiled without multichannel support");
+            x_valid = false;
+            return;
+#endif
+		} else {
+			object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);	
+		}
+		
+	}
 
     // arg #1: channels
     int noutlets;
@@ -367,7 +371,8 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
             // this rather meant to handle patches that accidentally
             // use the old argument order where the port would come first!
             object_error((t_object*)this, "channel count (%d) out of range", noutlets);
-            noutlets = 0;
+            x_valid = false;
+            return;
         }
         x_nchannels = noutlets;
     }
@@ -391,9 +396,22 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     x_msgout = outlet_new(this, 0);
 
     // make signal outlets
+ #ifdef MAX_HAVE_MULTICHANNEL
+    if(x_multi){
+        outlet_new(this, "multichannelsignal");
+        ob.z_misc |= Z_NO_INPLACE;
+    } else {
+        for (int i = 0; i < noutlets; ++i){
+            outlet_new(this, "signal");
+        }
+    }
+#else
+    // make additional inlets
     for (int i = 0; i < noutlets; ++i){
         outlet_new(this, "signal");
     }
+#endif
+    // TODO: not needed?
     // channel vector
     if (x_nchannels > 0) {
         x_vec = std::make_unique<t_sample *[]>(x_nchannels);
@@ -819,6 +837,11 @@ extern "C" void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_codec_get,"codec_get", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_real_samplerate, "real_samplerate", 0);
 
+#ifdef MAX_HAVE_MULTICHANNEL
+    class_addmethod(c, (method)aoo_receive_multichanneloutputs, "multichanneloutputs", A_CANT, 0);
+    class_addmethod(c, (method)aoo_receive_inputchanged, "inputchanged", A_CANT, 0);
+#endif
+
 	class_dspinit(c);
 	class_register(CLASS_BOX, c);
 	aoo_receive_class = c;
@@ -840,25 +863,6 @@ extern "C" void ext_main(void *r)
     }
 
     g_start_time = aoo::time_tag::now();
-
-#ifdef PD_HAVE_MULTICHANNEL
-    // runtime check for multichannel support:
-#ifdef _WIN32
-    // get a handle to the module containing the Pd API functions.
-    // NB: GetModuleHandle("pd.dll") does not cover all cases.
-    HMODULE module;
-    if (GetModuleHandleEx(
-        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            (LPCSTR)&pd_typedmess, &module)) {
-        g_signal_setmultiout = (t_signal_setmultiout)(void *)GetProcAddress(
-            module, "signal_setmultiout");
-    }
-#else
-    // search recursively, starting from the main program
-    g_signal_setmultiout = (t_signal_setmultiout)dlsym(
-        dlopen(nullptr, RTLD_NOW), "signal_setmultiout");
-#endif
-#endif // PD_HAVE_MULTICHANNEL
 ///////////////////////////////////////////
 
     aoo_node_setup();
@@ -874,6 +878,9 @@ void *aoo_receive_new(t_symbol *s, long argc, t_atom *argv)
 		dsp_setup((t_pxobject *)x, 1);	// MSP inlets: arg is # of inlets and is REQUIRED!
 		// use 0 if you don't need inlets
 		new (x) t_aoo_receive(argc, argv);
+        if(!x->x_valid){
+            return nullptr;
+        }
 	}
 	return (x);
 }
@@ -887,15 +894,29 @@ void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 {
     int32_t n_chans = x->x_nchannels;
 	if (m == ASSIST_INLET) { //inlet
-		sprintf(s, "(message) Message");
+		snprintf_zero(s, 256, "(message) Message");
 	}
 	else {	// outlet
         if(a == n_chans){
-            sprintf(s, "(message) Event output");
+            snprintf_zero(s, 256, "(message) Event output");
         } else {
-            sprintf(s, "(signal) Stream Ch %ld", a+1);
+            snprintf_zero(s, 256, "(signal) Stream Ch %ld", a+1);
         }
 	}
+}
+
+long aoo_receive_multichanneloutputs(t_aoo_send *x, int index)
+{
+	return x->x_nchannels;
+}
+
+long aoo_receive_inputchanged(t_aoo_send *x, long index, long chans)
+{
+    if (chans != x->x_nchannels) {
+        x->x_nchannels = chans;
+        return true;
+    }
+    return false;
 }
 
 // registers a function for the signal chain in Max

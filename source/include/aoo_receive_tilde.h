@@ -53,6 +53,8 @@ struct t_aoo_receive {
     t_node *x_node = nullptr;
     // sources
     std::vector<t_source> x_sources;
+
+    bool x_valid = true; // if the object is not properly constructed 
 	
     t_aoo_receive(int argc, t_atom *argv);
 	~t_aoo_receive();
@@ -69,3 +71,6 @@ void aoo_receive_free(t_aoo_receive *x);
 void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s);
 void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
 void aoo_receive_perform64(t_aoo_receive *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam);
+
+long aoo_receive_multichanneloutputs(t_aoo_send *x, int index);
+long aoo_receive_inputchanged(t_aoo_send *x, long index, long chans);

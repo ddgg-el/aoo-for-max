@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 536.0, 177.0, 545.0, 717.0 ],
+		"rect" : [ 100.0, 100.0, 545.0, 717.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -57,7 +57,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 536.0, 203.0, 545.0, 691.0 ],
+						"rect" : [ 100.0, 126.0, 545.0, 691.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -98,7 +98,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 142.0, 446.0, 124.001007080078125, 69.0 ]
+									"patching_rect" : [ 142.0, 446.0, 100.0, 24.0 ]
 								}
 
 							}
@@ -1572,22 +1572,22 @@
 		"lines" : [  ],
 		"dependency_cache" : [ 			{
 				"name" : "aoo.aoolink.maxpat",
-				"bootpath" : "~/Documents/Max 8/Packages/Aoo for Max/patchers",
-				"patcherrelativepath" : "../../../../../../../../../Max 8/Packages/Aoo for Max/patchers",
+				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/package/Aoo for Max/patchers",
+				"patcherrelativepath" : "../patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "aoo.meta.maxpat",
-				"bootpath" : "~/Documents/Max 8/Packages/Aoo for Max/patchers",
-				"patcherrelativepath" : "../../../../../../../../../Max 8/Packages/Aoo for Max/patchers",
+				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/package/Aoo for Max/patchers",
+				"patcherrelativepath" : "../patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "aoo.overview.maxpat",
-				"bootpath" : "~/Documents/Max 8/Packages/Aoo for Max/patchers",
-				"patcherrelativepath" : "../../../../../../../../../Max 8/Packages/Aoo for Max/patchers",
+				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/package/Aoo for Max/patchers",
+				"patcherrelativepath" : "../patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
