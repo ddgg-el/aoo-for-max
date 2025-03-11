@@ -330,12 +330,14 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_receive_tick);
     x_queue_clock = clock_new(this, (method)aoo_receive_queue_tick);
+    long offset;
 
-    long offset = attr_args_offset(argc, argv);
-
-    if((argv+offset)->a_type == A_SYM)
+    offset = attr_args_offset(argc, argv);
+    t_atom* attribute = argv+offset;
+    
+    if(attribute->a_type == A_SYM)
 	{
-        auto multiflag = atom_getsym(argv+offset)->s_name;
+        char* multiflag = atom_getsym(argv+offset)->s_name;
 		if(!strcmp(multiflag, "@multichannel")){
             if(offset < 1){
                 object_error((t_object*)this, "Missing argument <channels>");
@@ -389,8 +391,10 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     }
     x_id = id;
 
+    // TODO: add latency attribute
     // arg #4 (optional): latency (ms)
-    float latency = argc > 3 ? atom_getfloat(argv + 3) : DEFAULT_LATENCY;
+    //float latency = argc > 3 ? atom_getfloat(argv + 3) : DEFAULT_LATENCY;
+    float latency = DEFAULT_LATENCY;
 
     // event outlet
     x_msgout = outlet_new(this, 0);
@@ -399,18 +403,15 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
  #ifdef MAX_HAVE_MULTICHANNEL
     if(x_multi){
         outlet_new(this, "multichannelsignal");
-        ob.z_misc |= Z_NO_INPLACE;
-    } else {
+        ob.z_misc |= Z_NO_INPLACE | Z_MC_INLETS;
+    } else 
+#endif
+    {
         for (int i = 0; i < noutlets; ++i){
             outlet_new(this, "signal");
         }
     }
-#else
-    // make additional inlets
-    for (int i = 0; i < noutlets; ++i){
-        outlet_new(this, "signal");
-    }
-#endif
+
     // TODO: not needed?
     // channel vector
     if (x_nchannels > 0) {
@@ -636,7 +637,7 @@ static void aoo_receive_source_list(t_aoo_receive *x)
         t_atom msg[1];
         t_symbol* text = gensym("empty");
         atom_setsym(msg, text);
-        outlet_anything(x->x_msgout, gensym("source_list"), 1, msg);
+        outlet_anything(x->x_msgout, gensym("source"), 1, msg);
         object_post((t_object*)x, "no sources registered");
         return;
     }
@@ -794,7 +795,6 @@ static void aoo_receive_id(t_aoo_receive *x, double f)
 {
     aoo_receive_set(x, x->x_port, f);
 }
-// there is no method for 'real_samplerate' in pd exthernal?
 static void aoo_receive_real_samplerate(t_aoo_receive *x)
 {
     AooSampleRate sr;
@@ -805,7 +805,7 @@ static void aoo_receive_real_samplerate(t_aoo_receive *x)
 }
 //***********************************************************************************************
 
-extern "C" void ext_main(void *r)
+void ext_main(void *r)
 {
 	// object initialization, note the use of dsp_free for the freemethod, which is required
 	// unless you need to free allocated memory, in which case you should call dsp_free from
@@ -839,7 +839,6 @@ extern "C" void ext_main(void *r)
 
 #ifdef MAX_HAVE_MULTICHANNEL
     class_addmethod(c, (method)aoo_receive_multichanneloutputs, "multichanneloutputs", A_CANT, 0);
-    class_addmethod(c, (method)aoo_receive_inputchanged, "inputchanged", A_CANT, 0);
 #endif
 
 	class_dspinit(c);
@@ -874,14 +873,14 @@ void *aoo_receive_new(t_symbol *s, long argc, t_atom *argv)
 {
 	t_aoo_receive *x = (t_aoo_receive *)object_alloc(aoo_receive_class);
 
-	if (x) {
-		dsp_setup((t_pxobject *)x, 1);	// MSP inlets: arg is # of inlets and is REQUIRED!
-		// use 0 if you don't need inlets
-		new (x) t_aoo_receive(argc, argv);
-        if(!x->x_valid){
-            return nullptr;
-        }
-	}
+	
+    //dsp_setup((t_pxobject *)x, 1);	// MSP inlets: arg is # of inlets and is REQUIRED!
+    // use 0 if you don't need inlets
+    new (x) t_aoo_receive(argc, argv);
+    if(!x->x_valid){
+        return nullptr;
+    }
+	
 	return (x);
 }
 
@@ -905,28 +904,22 @@ void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 	}
 }
 
-long aoo_receive_multichanneloutputs(t_aoo_send *x, int index)
+long aoo_receive_multichanneloutputs(t_aoo_receive *x, int index)
 {
-	return x->x_nchannels;
-}
-
-long aoo_receive_inputchanged(t_aoo_send *x, long index, long chans)
-{
-    if (chans != x->x_nchannels) {
-        x->x_nchannels = chans;
-        return true;
+    if(x->x_multi){
+        return (long)x->x_nchannels;
+    } else {
+        return 1;
     }
-    return false;
 }
 
 // registers a function for the signal chain in Max
 void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
     int32_t nchannels = x->x_nchannels;
-    
     if (maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate) {
-        object_post((t_object*)x, "blocksize %ld -> %ld, samplerate %f -> %f", x->x_blocksize, maxvectorsize, x->x_samplerate, samplerate);
-        x->x_sink->setup(nchannels, samplerate, maxvectorsize, kAooFixedBlockSize);
+        object_post((t_object*)x, "blocksize -> %ld, samplerate -> %f, channels -> %d", maxvectorsize, samplerate, nchannels);
+        x->x_sink->setup(nchannels, samplerate, (AooSample)maxvectorsize, kAooFixedBlockSize);
         x->x_blocksize = maxvectorsize;
         x->x_samplerate = samplerate;
     }

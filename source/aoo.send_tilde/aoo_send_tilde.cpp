@@ -205,9 +205,11 @@ static void aoo_send_port(t_aoo_send *x, double f)
 t_aoo_send::t_aoo_send(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_send_tick);
+    long offset;
 
-    long offset = attr_args_offset(argc, argv);
-
+    offset = attr_args_offset(argc, argv);
+    t_atom* attribute = argv+offset;
+    
     if((argv+offset)->a_type == A_SYM)
 	{
         auto multiflag = atom_getsym(argv+offset)->s_name;
@@ -833,6 +835,14 @@ static void aoo_send_id(t_aoo_send *x, double f)
 {
     aoo_send_set(x, x->x_port, f);
 }
+static void aoo_send_real_samplerate(t_aoo_send *x)
+{
+    AooSampleRate sr;
+    x->x_source->getRealSampleRate(sr);
+    t_atom msg;
+    atom_setfloat(&msg, sr);
+    outlet_anything(x->x_msgout, gensym("real_samplerate"), 1, &msg);
+}
 
 #if AOO_USE_OPUS
 static bool get_opus_bitrate(t_aoo_send *x, t_atom *a) {
@@ -1016,16 +1026,6 @@ codec_sendit:
     // send message
     outlet_anything(x->x_msgout, gensym("codec_get"), 2, msg);
 }
-
-// there is no method for 'real_samplerate' in pd exthernal?
-static void aoo_send_real_samplerate(t_aoo_send *x)
-{
-    AooSampleRate sr;
-    x->x_source->getRealSampleRate(sr);
-    t_atom msg;
-    atom_setfloat(&msg, sr);
-    outlet_anything(x->x_msgout, gensym("real_samplerate"), 1, &msg);
-}
 //***********************************************************************************************
 
 void ext_main(void *r)
@@ -1148,8 +1148,6 @@ void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double sampler
         nchannels = x->x_nchannels;
     }
 
-    object_post((t_object*)x, "nchannels %d", nchannels);
-    object_post((t_object*)x, "channels %d\nmultichannel %s", x->x_nchannels, x->x_multi ? "yes" : "no");
     if(maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate || (t_int32)nchannels != x->x_nchannels){
 	    object_post((t_object*)x, "aoo_send_dsp64: %d %f %ld %ld", (int)nchannels, samplerate, maxvectorsize, flags);
         
