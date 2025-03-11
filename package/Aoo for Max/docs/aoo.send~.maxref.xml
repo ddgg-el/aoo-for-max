@@ -22,13 +22,20 @@
 	</objarg>
 	<objarg name="port" type="int">
 		<digest>The port number</digest>
-		<description></description>
+		<!-- <description></description> -->
 		<discussion>The object does not actually receives audio on the specified port but objects in the same network needs to be aware of the port of the streaming source</discussion>
 	</objarg>
 	<objarg name="id" type="int" optional="1">
 		<digest>Client id</digest>
 	</objarg>
 </objarglist>
+<!-- ATTRIBUTES -->
+<attributelist>
+	<attribute name="multichannel" type="none">
+		<digest>Enable multichannel mode</digest>
+		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value should be specified after its declaration and cannot be modifed after the creation of the object</description>
+	</attribute>
+</attributelist>
 <!-- MESSAGES-->
 <methodlist>
 	<method name="active" type="message">

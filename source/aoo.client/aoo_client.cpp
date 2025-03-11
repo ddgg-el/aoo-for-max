@@ -580,17 +580,17 @@ void aoo_client_assist(t_aoo_client *x, void *b, long m, long a, char *s)
 {
     if (m == ASSIST_INLET)
     { // inlet
-        sprintf(s, "(message) Messages");
+        snprintf_zero(s, 256, "(message) Messages");
     }
     else
     { // outlet
         if (a == 0)
         {
-            sprintf(s, "(message) Events");
+            snprintf_zero(s, 256, "(message) Events");
         }
         else
         {
-            sprintf(s, "(int) Connection status 0/1");
+            snprintf_zero(s, 256, "(int) Connection status 0/1");
         }
     }
 }
