@@ -183,7 +183,6 @@ static void aoo_send_set(t_aoo_send *x, int f1, int f2)
         x->x_node = nullptr;
     }
     x->x_port = port;
-    // object_post((t_object*)x, "port %d id %d", x->x_port, x->x_id);
 }
 /**
  * @brief alias for aoo_send_set
@@ -966,7 +965,6 @@ static void set_opus_signal(t_aoo_send *x, const t_atom *a){
                  aoo_strerror(err));
     }
 }
-#endif
 static void aoo_send_codec_set(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv){
     if (!x->check(argc, argv, 2, "codec_set")) return;
 
@@ -1026,6 +1024,7 @@ codec_sendit:
     // send message
     outlet_anything(x->x_msgout, gensym("codec_get"), 2, msg);
 }
+#endif
 //***********************************************************************************************
 
 void ext_main(void *r)
@@ -1065,9 +1064,10 @@ void ext_main(void *r)
     class_addmethod(c, (method)aoo_send_stream_time,"stream_time", A_FLOAT, 0);
 
     class_addmethod(c, (method)aoo_send_format, "format", A_GIMME, 0);
+#if AOO_USE_OPUS
     class_addmethod(c, (method)aoo_send_codec_set, "codec_set", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_codec_get,"codec_get", A_SYM, 0);
-
+#endif
     class_addmethod(c, (method)aoo_send_real_samplerate, "real_samplerate", 0);
 
     // initializes class dsp methods for audio processing
@@ -1149,7 +1149,6 @@ void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double sampler
     }
 
     if(maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate || (t_int32)nchannels != x->x_nchannels){
-	    object_post((t_object*)x, "aoo_send_dsp64: %d %f %ld %ld", (int)nchannels, samplerate, maxvectorsize, flags);
         
         x->x_source->setup((int32_t)nchannels, samplerate, (int32_t) maxvectorsize, kAooFixedBlockSize);
 

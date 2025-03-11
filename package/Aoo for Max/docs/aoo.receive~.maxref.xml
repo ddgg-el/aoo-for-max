@@ -43,7 +43,8 @@
 		<digest>Set send buffer size in ms (default: 25 ms)</digest>
 		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
 	</method>
-	<method name="codec_get" type="message">
+	<!-- UNSUPPORTED -->
+	<!-- <method name="codec_get" type="message">
 		<arglist>
 			<arg name="data" optional='0' type="string" />
 		</arglist>
@@ -70,7 +71,7 @@
 				<li>signal</li>
 			</ul>
 		</description>
-	</method>
+	</method> -->
 	<method name="dll_bandwidth" type="message">
 		<arglist>
 			<arg name="bandwidth" optional='0' type="float" />

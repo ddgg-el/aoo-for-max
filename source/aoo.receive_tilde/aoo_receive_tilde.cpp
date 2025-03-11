@@ -48,7 +48,7 @@ static void aoo_receive_handle_stream_message(t_aoo_receive *x, const AooStreamM
 {
     // FIXME: casting
     auto delay = (double)msg->sampleOffset / (double)x->x_samplerate * 1000.0;
-    // object_post((t_object*)x, "delay: %d", delay);
+
     if (delay > 0) {
         // put on queue and schedule on clock (using logical time)
         auto abstime = clock_getsystimeafter(delay);
@@ -637,7 +637,7 @@ static void aoo_receive_source_list(t_aoo_receive *x)
         t_atom msg[1];
         t_symbol* text = gensym("empty");
         atom_setsym(msg, text);
-        outlet_anything(x->x_msgout, gensym("source"), 1, msg);
+        outlet_anything(x->x_msgout, gensym("source_list"), 1, msg);
         object_post((t_object*)x, "no sources registered");
         return;
     }
@@ -751,6 +751,7 @@ static void aoo_receive_dll_bandwidth(t_aoo_receive *x, double f)
 {
     x->x_sink->setDllBandwidth(f);
 }
+#if AOO_USE_OPUS
 // <ip> <port> <id> <codec> <option> [<value>]
 static void aoo_receive_codec_set(t_aoo_receive *x, t_symbol *s, int argc, t_atom *argv){
     if (!x->check(argc, argv, 6, "codec_set")) return;
@@ -791,6 +792,7 @@ static void aoo_receive_codec_get(t_aoo_receive *x, t_symbol *s, int argc, t_ato
              opt->s_name, codec->s_name);
     return;
 }
+#endif
 static void aoo_receive_id(t_aoo_receive *x, double f)
 {
     aoo_receive_set(x, x->x_port, f);
@@ -833,8 +835,10 @@ void ext_main(void *r)
     class_addmethod(c, (method)aoo_receive_resample_method,"resample_method", A_SYM, 0);
     class_addmethod(c, (method)aoo_receive_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
     class_addmethod(c, (method)aoo_receive_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
+#if AOO_USE_OPUS
     class_addmethod(c, (method)aoo_receive_codec_set,"codec_set", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_codec_get,"codec_get", A_GIMME, 0);
+#endif
     class_addmethod(c, (method)aoo_receive_real_samplerate, "real_samplerate", 0);
 
 #ifdef MAX_HAVE_MULTICHANNEL
@@ -918,7 +922,6 @@ void aoo_receive_dsp64(t_aoo_receive *x, t_object *dsp64, short *count, double s
 {
     int32_t nchannels = x->x_nchannels;
     if (maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate) {
-        object_post((t_object*)x, "blocksize -> %ld, samplerate -> %f, channels -> %d", maxvectorsize, samplerate, nchannels);
         x->x_sink->setup(nchannels, samplerate, (AooSample)maxvectorsize, kAooFixedBlockSize);
         x->x_blocksize = maxvectorsize;
         x->x_samplerate = samplerate;
