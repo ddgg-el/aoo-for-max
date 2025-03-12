@@ -73,8 +73,15 @@
 					"patching_rect" : [ 33.0, 84.0, 125.0, 23.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 10.0, 57.0, 125.0, 23.0 ],
+					"saved_attribute_attributes" : 					{
+						"textcolor" : 						{
+							"expression" : "themecolor.theme_textcolor"
+						}
+
+					}
+,
 					"text" : "https://www.consmi.it",
-					"textcolor" : [ 0.2, 0.2, 0.2, 1.0 ]
+					"textcolor" : [ 0.129412, 0.129412, 0.129412, 1.0 ]
 				}
 
 			}

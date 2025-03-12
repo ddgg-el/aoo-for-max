@@ -96,8 +96,15 @@
 					"patching_rect" : [ 17.0, 20.0, 148.0, 25.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 6.0, 8.0, 164.0, 25.0 ],
+					"saved_attribute_attributes" : 					{
+						"textcolor" : 						{
+							"expression" : "themecolor.theme_textcolor"
+						}
+
+					}
+,
 					"text" : "Aoo Objects Overview",
-					"textcolor" : [ 0.2, 0.2, 0.2, 1.0 ]
+					"textcolor" : [ 0.129412, 0.129412, 0.129412, 1.0 ]
 				}
 
 			}

@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 571.0, 100.0, 711.0, 659.0 ],
+		"rect" : [ 100.0, 100.0, 711.0, 659.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -191,6 +191,18 @@
 										"assistshowspatchername" : 0,
 										"boxes" : [ 											{
 												"box" : 												{
+													"id" : "obj-1",
+													"linecount" : 2,
+													"maxclass" : "comment",
+													"numinlets" : 1,
+													"numoutlets" : 0,
+													"patching_rect" : [ 10.0, 143.0, 613.0, 33.0 ],
+													"text" : "A peer is referenced by its group and user name, so that <group> <user> effectively replaces <host> <port> in all relevant methods and events for [aoo.send~] and [aoo.receive~]."
+												}
+
+											}
+, 											{
+												"box" : 												{
 													"hidden" : 1,
 													"id" : "obj-27",
 													"linecount" : 2,
@@ -221,8 +233,15 @@
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
 													"patching_rect" : [ 181.0, 114.0, 268.0, 22.0 ],
+													"saved_attribute_attributes" : 													{
+														"textcolor" : 														{
+															"expression" : "themecolor.theme_textcolor"
+														}
+
+													}
+,
 													"text" : "https://en.wikipedia.org/wiki/UDP_hole_punching",
-													"textcolor" : [ 0.427450980392157, 0.427450980392157, 0.427450980392157, 1.0 ]
+													"textcolor" : [ 0.129412, 0.129412, 0.129412, 1.0 ]
 												}
 
 											}
@@ -258,19 +277,6 @@
 													"numoutlets" : 0,
 													"patching_rect" : [ 10.0, 220.0, 613.0, 33.0 ],
 													"text" : "In addition, peers also have a user ID, IP address and port number. The user ID is a unique number for each user in a group."
-												}
-
-											}
-, 											{
-												"box" : 												{
-													"id" : "obj-8",
-													"linecount" : 2,
-													"maxclass" : "comment",
-													"numinlets" : 1,
-													"numoutlets" : 0,
-													"patching_rect" : [ 10.0, 145.0, 611.0, 33.0 ],
-													"text" : "A peer is referenced by its group and user name, so that <group> <user> effectively replaces <host> <port> in all relevant methods and events for [aoo.send~] and [aoo.receive~].",
-													"textcolor" : [ 0.129411764705882, 0.129411764705882, 0.129411764705882, 1.0 ]
 												}
 
 											}
@@ -677,7 +683,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 571.0, 126.0, 711.0, 633.0 ],
+						"rect" : [ 0.0, 26.0, 711.0, 633.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1447,7 +1453,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 711.0, 633.0 ],
+						"rect" : [ 100.0, 126.0, 711.0, 633.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1568,7 +1574,7 @@
 													"numinlets" : 1,
 													"numoutlets" : 0,
 													"patching_rect" : [ 277.0, 178.0, 150.0, 60.0 ],
-													"text" : "for each message type you might need a different solutions to parse the incoming bytes"
+													"text" : "for each message type you might need a different solution to parse the incoming bytes"
 												}
 
 											}
@@ -2191,7 +2197,7 @@
 										}
 ,
 										"classnamespace" : "box",
-										"rect" : [ 0.0, 0.0, 640.0, 480.0 ],
+										"rect" : [ 59.0, 119.0, 774.0, 538.0 ],
 										"bglocked" : 0,
 										"openinpresentation" : 0,
 										"default_fontsize" : 12.0,
@@ -2232,7 +2238,7 @@
 													"numoutlets" : 3,
 													"outlettype" : [ "", "", "int" ],
 													"parameter_enable" : 0,
-													"patching_rect" : [ 117.0, 252.0, 20.0, 20.0 ],
+													"patching_rect" : [ 117.0, 177.0, 20.0, 20.0 ],
 													"rounded" : 60.0,
 													"text" : "2",
 													"textcolor" : [ 0.34902, 0.34902, 0.34902, 1.0 ]
@@ -2252,7 +2258,7 @@
 													"numoutlets" : 3,
 													"outlettype" : [ "", "", "int" ],
 													"parameter_enable" : 0,
-													"patching_rect" : [ 50.0, 100.0, 20.0, 20.0 ],
+													"patching_rect" : [ 50.0, 25.0, 20.0, 20.0 ],
 													"rounded" : 60.0,
 													"text" : "1",
 													"textcolor" : [ 0.34902, 0.34902, 0.34902, 1.0 ]
@@ -2265,7 +2271,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 240.0, 541.0, 466.0, 20.0 ],
+													"patching_rect" : [ 240.0, 466.0, 466.0, 20.0 ],
 													"text" : "No offset = send immediately. This is the default."
 												}
 
@@ -2277,7 +2283,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 183.0, 541.0, 52.0, 22.0 ],
+													"patching_rect" : [ 183.0, 466.0, 52.0, 22.0 ],
 													"text" : "offset -1"
 												}
 
@@ -2289,7 +2295,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 240.0, 506.0, 499.0, 33.0 ],
+													"patching_rect" : [ 240.0, 431.0, 499.0, 33.0 ],
 													"text" : "Set the time offset in ms. Use this for scheduling messages in the future to preserve relative timing."
 												}
 
@@ -2301,7 +2307,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 180.0, 506.0, 58.0, 22.0 ],
+													"patching_rect" : [ 180.0, 431.0, 58.0, 22.0 ],
 													"text" : "offset <f>"
 												}
 
@@ -2313,7 +2319,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 283.0, 456.0, 310.0, 33.0 ],
+													"patching_rect" : [ 283.0, 381.0, 310.0, 33.0 ],
 													"text" : "By default, messages are unreliable, i.e. they might get lost due to packet loss or be received out of order."
 												}
 
@@ -2324,7 +2330,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 246.0, 430.0, 205.0, 20.0 ],
+													"patching_rect" : [ 246.0, 355.0, 205.0, 20.0 ],
 													"text" : "enable/disable reliable messaging."
 												}
 
@@ -2336,7 +2342,7 @@
 													"numinlets" : 1,
 													"numoutlets" : 2,
 													"outlettype" : [ "", "" ],
-													"patching_rect" : [ 50.0, 541.0, 60.0, 22.0 ],
+													"patching_rect" : [ 50.0, 466.0, 60.0, 22.0 ],
 													"text" : "aoo.client"
 												}
 
@@ -2349,7 +2355,7 @@
 													"numoutlets" : 1,
 													"outlettype" : [ "int" ],
 													"parameter_enable" : 0,
-													"patching_rect" : [ 209.0, 430.0, 24.0, 24.0 ]
+													"patching_rect" : [ 209.0, 355.0, 24.0, 24.0 ]
 												}
 
 											}
@@ -2360,7 +2366,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 209.0, 456.0, 64.0, 22.0 ],
+													"patching_rect" : [ 209.0, 381.0, 64.0, 22.0 ],
 													"text" : "reliable $1"
 												}
 
@@ -2371,7 +2377,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 232.0, 397.0, 150.0, 20.0 ],
+													"patching_rect" : [ 232.0, 322.0, 150.0, 20.0 ],
 													"text" : "broadcast (= default)"
 												}
 
@@ -2383,7 +2389,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 189.5, 395.0, 39.0, 22.0 ],
+													"patching_rect" : [ 189.5, 320.0, 39.0, 22.0 ],
 													"text" : "target"
 												}
 
@@ -2394,7 +2400,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 264.0, 368.0, 150.0, 20.0 ],
+													"patching_rect" : [ 264.0, 293.0, 150.0, 20.0 ],
 													"text" : "target a group"
 												}
 
@@ -2406,7 +2412,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 176.5, 367.0, 87.0, 22.0 ],
+													"patching_rect" : [ 176.5, 292.0, 87.0, 22.0 ],
 													"text" : "target <group>"
 												}
 
@@ -2417,7 +2423,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 291.5, 341.0, 150.0, 20.0 ],
+													"patching_rect" : [ 291.5, 266.0, 150.0, 20.0 ],
 													"text" : "target a single peer"
 												}
 
@@ -2429,7 +2435,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 161.0, 340.0, 128.0, 22.0 ],
+													"patching_rect" : [ 161.0, 265.0, 128.0, 22.0 ],
 													"text" : "target <group> <user>"
 												}
 
@@ -2440,7 +2446,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 264.0, 310.5, 150.0, 20.0 ],
+													"patching_rect" : [ 264.0, 235.5, 150.0, 20.0 ],
 													"text" : "\"send\" selector is optional"
 												}
 
@@ -2452,7 +2458,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 141.5, 310.5, 119.0, 22.0 ],
+													"patching_rect" : [ 141.5, 235.5, 119.0, 22.0 ],
 													"text" : "list <type> <bytes...>"
 												}
 
@@ -2464,7 +2470,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 253.5, 275.5, 319.0, 33.0 ],
+													"patching_rect" : [ 253.5, 200.5, 319.0, 33.0 ],
 													"text" : "send a message to the current target (more efficient than the methods above)"
 												}
 
@@ -2476,7 +2482,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 117.0, 281.0, 131.0, 22.0 ],
+													"patching_rect" : [ 117.0, 206.0, 131.0, 22.0 ],
 													"text" : "send <type> <bytes...>"
 												}
 
@@ -2487,7 +2493,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 134.0, 252.0, 150.0, 20.0 ],
+													"patching_rect" : [ 134.0, 177.0, 150.0, 20.0 ],
 													"text" : " \"target style\""
 												}
 
@@ -2499,7 +2505,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 106.0, 219.0, 228.0, 22.0 ],
+													"patching_rect" : [ 106.0, 144.0, 228.0, 22.0 ],
 													"text" : "send_peer <IP> <port> <type> <bytes...>"
 												}
 
@@ -2510,7 +2516,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 331.0, 231.0, 150.0, 20.0 ],
+													"patching_rect" : [ 331.0, 156.0, 150.0, 20.0 ],
 													"text" : "send to a single peer"
 												}
 
@@ -2522,7 +2528,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 84.0, 192.0, 250.0, 22.0 ],
+													"patching_rect" : [ 84.0, 117.0, 250.0, 22.0 ],
 													"text" : "send_peer <group> <user> <type> <bytes...>"
 												}
 
@@ -2533,7 +2539,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 283.0, 163.0, 209.0, 20.0 ],
+													"patching_rect" : [ 283.0, 88.0, 209.0, 20.0 ],
 													"text" : "send to all peers in a given group"
 												}
 
@@ -2545,7 +2551,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 65.0, 163.0, 216.0, 22.0 ],
+													"patching_rect" : [ 65.0, 88.0, 216.0, 22.0 ],
 													"text" : "send_group <group> <type> <bytes...>"
 												}
 
@@ -2556,7 +2562,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 172.0, 133.0, 183.0, 20.0 ],
+													"patching_rect" : [ 172.0, 58.0, 183.0, 20.0 ],
 													"text" : "send a message to all peers"
 												}
 
@@ -2568,7 +2574,7 @@
 													"numinlets" : 2,
 													"numoutlets" : 1,
 													"outlettype" : [ "" ],
-													"patching_rect" : [ 50.0, 133.0, 117.0, 22.0 ],
+													"patching_rect" : [ 50.0, 58.0, 117.0, 22.0 ],
 													"text" : "broadcast <bytes...>"
 												}
 
@@ -2579,7 +2585,7 @@
 													"maxclass" : "comment",
 													"numinlets" : 1,
 													"numoutlets" : 0,
-													"patching_rect" : [ 70.0, 100.0, 150.0, 20.0 ],
+													"patching_rect" : [ 70.0, 25.0, 150.0, 20.0 ],
 													"text" : " \"direct style\""
 												}
 
