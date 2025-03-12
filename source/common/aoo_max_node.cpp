@@ -56,7 +56,6 @@ t_node * t_node::get(t_object *obj, int port, void *x, AooId id)
 t_node_imp::t_node_imp(t_symbol *s, int port, t_node_proxy* obj)
     : x_obj(obj), x_bindsym(s), x_port(port)
 {
-    post("create AooClient on port %d", port);
     auto client = AooClient::create();
 
     client->setEventHandler([](void *user, const AooEvent *event, AooThreadLevel level) {
