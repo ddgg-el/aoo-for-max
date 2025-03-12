@@ -600,7 +600,6 @@ static void aoo_receive_invite(t_aoo_receive *x, t_symbol *s, int argc, t_atom *
 
             x->x_sink->inviteSource(ep, &metadata);
         } else {
-            post("inviting");
             x->x_sink->inviteSource(ep, nullptr);
         }
         // notify send thread

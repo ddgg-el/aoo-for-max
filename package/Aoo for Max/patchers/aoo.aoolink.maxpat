@@ -86,8 +86,15 @@
 					"patching_rect" : [ 225.0, 59.0, 108.0, 23.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 207.5, 28.0, 108.0, 23.0 ],
+					"saved_attribute_attributes" : 					{
+						"textcolor" : 						{
+							"expression" : "themecolor.theme_textcolor"
+						}
+
+					}
+,
 					"text" : "https://aoo.iem.sh/",
-					"textcolor" : [ 0.2, 0.2, 0.2, 1.0 ]
+					"textcolor" : [ 0.129412, 0.129412, 0.129412, 1.0 ]
 				}
 
 			}
@@ -131,9 +138,7 @@
 				}
 
 			}
- ],
-		"dependency_cache" : [  ],
-		"autosave" : 0
+ ]
 	}
 
 }
