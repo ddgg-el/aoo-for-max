@@ -193,7 +193,7 @@ static void aoo_server_port(t_aoo_server *x, double f)
             } else {
                 msg = aoo_strerror(err);
             }
-            object_error((t_object*)x, "%s: setup failed: %s", msg.c_str());
+            object_error((t_object*)x, "setup failed: %s", msg.c_str());
             return;
         }
 

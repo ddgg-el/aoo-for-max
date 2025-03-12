@@ -1,10 +1,10 @@
-Aoo for Max8
+Aoo for Max
 ===========
 
 ### Overview
 This repository contains the source code for the `Aoo for Max` package. There is no need to manually build your project. To download a ready to use package please visit the Release page.
 
-The externals has been test on Max8.2 running on MacOS 12.7.6 and Windows11. Presumably they should also work with more modern releases.
+The externals has been tested on Max8.1 running on MacOS 12.1 and Windows11. Presumably they should also work with more modern releases.
 
 #### Folder structure
 ```
@@ -14,7 +14,7 @@ The externals has been test on Max8.2 running on MacOS 12.7.6 and Windows11. Pre
 ├── aoo
 ├── max-sdk-base
 ├── package
-│   └── Aoo for Max <---- the Max8 package
+│   └── Aoo for Max <---- the Max package
 ├── package-info.json
 └── source
 ```
@@ -66,9 +66,10 @@ From the project's root folder
 ```bash
 $ mkidr build
 $ cd build
-$ cmake ..
+$ cmake -G<your-generator> ..
 $ cmake --build . -j${nproc}
 ```
+use `"Xcode"`, `"Unix Makefiles"` or `"Visual Studio <x>"` in place of `<your-generator>`.
 
 The compiled externals will be installed in `package/Aoo for Max/externals`
 

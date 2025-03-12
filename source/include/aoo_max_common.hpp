@@ -13,9 +13,15 @@
 
 #include "codec/aoo_pcm.h"
 #include "codec/aoo_null.h"
-#if AOO_USE_OPUS
 
+#if AOO_USE_OPUS
 #include "codec/aoo_opus.h"
+#endif
+
+#if C74_MAX_SDK_VERSION > 0x701
+#define MAX_HAVE_MULTICHANNEL
+#else
+#pragma message("building without multichannel support; requires MaxSDK v8.2.0")
 #endif
 
 ///////////////////////////// priority queue ////////////////////////////////

@@ -183,7 +183,6 @@ static void aoo_send_set(t_aoo_send *x, int f1, int f2)
         x->x_node = nullptr;
     }
     x->x_port = port;
-    // object_post((t_object*)x, "port %d id %d", x->x_port, x->x_id);
 }
 /**
  * @brief alias for aoo_send_set
@@ -205,26 +204,33 @@ static void aoo_send_port(t_aoo_send *x, double f)
 t_aoo_send::t_aoo_send(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_send_tick);
+    long offset;
 
-    // flags multichannel support
-    // while (argc && argv->a_type == A_SYM) {
-    //     auto flag = argv->a_w.w_sym->s_name;
-    //     if (*flag == '-') {
-    //         if (!strcmp(flag, "-m")) {
-    //             if (g_signal_setmultiout) {
-    //                 x_multi = true;
-    //             } else {
-    //                 pd_error(this, "%s: no multi-channel support, ignoring '-m' flag", classname(this));
-    //             }
-    //         } else {
-    //             pd_error(this, "%s: ignore unknown flag '%s",
-    //                      classname(this), flag);
-    //         }
-    //         argc--; argv++;
-    //     } else {
-    //         break;
-    //     }
-    // }
+    offset = attr_args_offset(argc, argv);
+    t_atom* attribute = argv+offset;
+    
+    if(attribute->a_type == A_SYM)
+	{
+        auto multiflag = atom_getsym(attribute)->s_name;
+        if(multiflag){
+            if(!strcmp(multiflag, "@multichannel")){
+                if(offset < 1){
+                    object_error((t_object*)this, "Missing argument <channels>");
+                    x_valid = false;
+                    return;
+                }
+    #ifdef MAX_HAVE_MULTICHANNEL
+                x_multi = true;
+    #else
+                object_error((t_object*)this, "Object compiled without multichannel support");
+                x_valid = false;
+                return;
+    #endif
+            } else {
+                object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);
+            }
+        }
+	}
 
     // arg #1: channels
     int ninlets;
@@ -247,7 +253,8 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
             // this rather meant to handle patches that accidentally
             // use the old argument order where the port would come first!
             object_error((t_object*)this, "channel count (%d) out of range", ninlets);
-            ninlets = 0;
+            x_valid = false;
+            return;
         }
         x_nchannels = ninlets;
     }
@@ -264,9 +271,16 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
     }
     x_id = id;
 
+#ifdef MAX_HAVE_MULTICHANNEL
+    dsp_setup((t_pxobject*)this, ninlets);
+    if(x_multi){
+        obj.z_misc |= Z_NO_INPLACE | Z_MC_INLETS;
+    }
+#else
     // make additional inlets
     dsp_setup((t_pxobject *)this, ninlets);	// MSP inlets: arg is # of inlets and is REQUIRED!
-
+#endif
+    // TODO: check not needed?
     // channel vector
     if (x_nchannels > 0) {
         x_vec = std::make_unique<t_sample *[]>(x_nchannels);
@@ -652,14 +666,13 @@ static void aoo_send_sink_list(t_aoo_send *x)
         t_symbol* text = gensym("empty");
         atom_setsym(msg, text);
         outlet_anything(x->x_msgout, gensym("sink_list"), 1, msg);
-        object_post((t_object*)x, "no sinks registered");
         return;
     }
 
     for (auto& sink : x->x_sinks){
         t_atom msg[3];
         if (x->x_node->serialize_endpoint(sink.s_address, sink.s_id, 3, msg)){
-            outlet_anything(x->x_msgout, gensym("sink"), 3, msg);
+            outlet_anything(x->x_msgout, gensym("sink_list"), 3, msg);
         } else {
             error("BUG: t_node::serialize_endpoint");
         }
@@ -821,6 +834,14 @@ static void aoo_send_id(t_aoo_send *x, double f)
 {
     aoo_send_set(x, x->x_port, f);
 }
+static void aoo_send_real_samplerate(t_aoo_send *x)
+{
+    AooSampleRate sr;
+    x->x_source->getRealSampleRate(sr);
+    t_atom msg;
+    atom_setfloat(&msg, sr);
+    outlet_anything(x->x_msgout, gensym("real_samplerate"), 1, &msg);
+}
 
 #if AOO_USE_OPUS
 static bool get_opus_bitrate(t_aoo_send *x, t_atom *a) {
@@ -944,7 +965,6 @@ static void set_opus_signal(t_aoo_send *x, const t_atom *a){
                  aoo_strerror(err));
     }
 }
-#endif
 static void aoo_send_codec_set(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv){
     if (!x->check(argc, argv, 2, "codec_set")) return;
 
@@ -1004,16 +1024,7 @@ codec_sendit:
     // send message
     outlet_anything(x->x_msgout, gensym("codec_get"), 2, msg);
 }
-
-// there is no method for 'real_samplerate' in pd exthernal?
-static void aoo_send_real_samplerate(t_aoo_send *x)
-{
-    AooSampleRate sr;
-    x->x_source->getRealSampleRate(sr);
-    t_atom msg;
-    atom_setfloat(&msg, sr);
-    outlet_anything(x->x_msgout, gensym("real_samplerate"), 1, &msg);
-}
+#endif
 //***********************************************************************************************
 
 void ext_main(void *r)
@@ -1053,9 +1064,10 @@ void ext_main(void *r)
     class_addmethod(c, (method)aoo_send_stream_time,"stream_time", A_FLOAT, 0);
 
     class_addmethod(c, (method)aoo_send_format, "format", A_GIMME, 0);
+#if AOO_USE_OPUS
     class_addmethod(c, (method)aoo_send_codec_set, "codec_set", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_codec_get,"codec_get", A_SYM, 0);
-
+#endif
     class_addmethod(c, (method)aoo_send_real_samplerate, "real_samplerate", 0);
 
     // initializes class dsp methods for audio processing
@@ -1079,24 +1091,6 @@ void ext_main(void *r)
 
     g_start_time = aoo::time_tag::now();
 
-#ifdef PD_HAVE_MULTICHANNEL
-    // runtime check for multichannel support:
-#ifdef _WIN32
-    // get a handle to the module containing the Pd API functions.
-    // NB: GetModuleHandle("pd.dll") does not cover all cases.
-    HMODULE module;
-    if (GetModuleHandleEx(
-        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            (LPCSTR)&pd_typedmess, &module)) {
-        g_signal_setmultiout = (t_signal_setmultiout)(void *)GetProcAddress(
-            module, "signal_setmultiout");
-    }
-#else
-    // search recursively, starting from the main program
-    g_signal_setmultiout = (t_signal_setmultiout)dlsym(
-        dlopen(nullptr, RTLD_NOW), "signal_setmultiout");
-#endif
-#endif // PD_HAVE_MULTICHANNEL
 ///////////////////////////////////////////
 
     aoo_node_setup();
@@ -1108,6 +1102,9 @@ void *aoo_send_new(t_symbol *s, long argc, t_atom *argv)
 
 	// if (x) {
 		new (x) t_aoo_send(argc, argv);
+        if(!x->x_valid){
+            return nullptr;
+        }
 		// use 0 if you don't need inlets
 		// aoo.send~ has no signal outlet
 		// outlet_new(x, "signal"); 		// signal outlet (note "signal" rather than NULL)
@@ -1125,40 +1122,43 @@ void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
 {
 	if (m == ASSIST_INLET) { //inlet
         if(a == 0) {	// inlet 0 
-            sprintf(s, "(message/signal) Stream Audio Ch %ld", a+1);
+            snprintf_zero(s, 256, "(message/signal) Stream Audio Ch %ld", a+1);
         } else {
-            sprintf(s, "(signal) Stream Audio Ch %ld", a+1);
+            snprintf_zero(s, 256, "(signal) Stream Audio Ch %ld", a+1);
         }
 	}
 	else {	// outlet
-		sprintf(s, "(message) Event output", a);
+		snprintf_zero(s, 256, "(message) Event output");
 	}
 }
 
 // registers a function for the signal chain in Max
 void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
 {
-    int32_t nchannels = x->x_nchannels;    
-    if(maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate){
-	    object_post((t_object*)x, "aoo_send_dsp64: %d %f %ld %ld", nchannels, samplerate, maxvectorsize, flags);
-        x->x_source->setup(nchannels, samplerate, (int32_t) maxvectorsize, kAooFixedBlockSize);
-        x->x_blocksize = maxvectorsize;
-        x->x_samplerate = samplerate;
+    long nchannels;
+#ifdef MAX_HAVE_MULTICHANNEL
+    if(x->x_multi){
+        nchannels = (long)object_method(dsp64,gensym("getnuminputchannels"), x, 0);
+        AooFormatStorage f;
+        format_makedefault(f, (int)nchannels);
+        x->x_source->setFormat(f.header);
+    } else 
+#endif
+    {
+        nchannels = x->x_nchannels;
     }
 
-	// instead of calling dsp_add(), we send the "dsp_add64" message to the object representing the dsp chain
-	// the arguments passed are:
-	// 1: the dsp64 object passed-in by the calling function
-	// 2: the symbol of the "dsp_add64" message we are sending
-	// 3: a pointer to your object
-	// 4: a pointer to your 64-bit perform method
-	// 5: flags to alter how the signal chain handles your object -- just pass 0
-	// 6: a generic pointer that you can use to pass any additional data to your perform method
+    if(maxvectorsize != x->x_blocksize || samplerate != x->x_samplerate || (t_int32)nchannels != x->x_nchannels){
+        
+        x->x_source->setup((int32_t)nchannels, samplerate, (int32_t) maxvectorsize, kAooFixedBlockSize);
 
+        x->x_blocksize = maxvectorsize;
+        x->x_samplerate = samplerate;
+        x->x_nchannels = (int32_t)nchannels;
+    }
 	object_method(dsp64, gensym("dsp_add64"), x, aoo_send_perform64, 0, NULL);
 }
 
-// this is the 64-bit perform method audio vectors
 void aoo_send_perform64(t_aoo_send *x, t_object *dsp64, double **ins, long numins, double **outs, long numouts, long sampleframes, long flags, void *userparam)
 {
     

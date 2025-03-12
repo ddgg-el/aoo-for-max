@@ -6,8 +6,7 @@
 	Send an Aoo stream to an <o>aoo.receive~</o> object
 </digest>
 <description>
-	<p>Send an Aoo audio stream to one or more Aoo sinks (<o>aoo.receive~</o>) using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a></p>
-	<p>We might also refer to this object as a <b>Source</b> in an Aoo network</p>
+	<p>Send an Aoo audio stream to one or more Aoo sinks (<o>aoo.receive~</o>) using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a>. This object represents a <b>Source</b> in an Aoo network</p>
 </description>
 <!-- METADATA-->
 <metadatalist>
@@ -22,13 +21,20 @@
 	</objarg>
 	<objarg name="port" type="int">
 		<digest>The port number</digest>
-		<description></description>
+		<!-- <description></description> -->
 		<discussion>The object does not actually receives audio on the specified port but objects in the same network needs to be aware of the port of the streaming source</discussion>
 	</objarg>
 	<objarg name="id" type="int" optional="1">
 		<digest>Client id</digest>
 	</objarg>
 </objarglist>
+<!-- ATTRIBUTES -->
+<attributelist>
+	<attribute name="multichannel" type="none">
+		<digest>Enable multichannel mode</digest>
+		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value should be specified after its declaration and cannot be modifed after the creation of the object</description>
+	</attribute>
+</attributelist>
 <!-- MESSAGES-->
 <methodlist>
 	<method name="active" type="message">
@@ -66,7 +72,8 @@
 		<digest>Set send buffer size in ms (default: 25 ms)</digest>
 		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
 	</method>
-	<method name="codec_get" type="message">
+	<!-- UNSUPPORTED -->
+	<!-- <method name="codec_get" type="message">
 		<arglist>
 			<arg name="data" optional='0' type="string" />
 		</arglist>
@@ -93,7 +100,7 @@
 				<li>signal</li>
 			</ul>
 		</description>
-	</method>
+	</method> -->
 	<method name="dll_bandwidth" type="message">
 		<arglist>
 			<arg name="bandwidth" optional='0' type="float" />

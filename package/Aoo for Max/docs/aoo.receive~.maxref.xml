@@ -6,7 +6,7 @@
 	Receive an Aoo stream from an <o>aoo.send~</o> object
 </digest>
 <description>
-	Receive an Aoo audio stream from one or more Aoo sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a>
+	Receive an Aoo audio stream from one or more Aoo sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library. This object represent a <b>Sink</b> in an Aoo network</a>
 </description>
 <!-- METADATA-->
 <metadatalist>
@@ -27,6 +27,13 @@
 		<digest>Client id</digest>
 	</objarg>
 </objarglist>
+<!-- ATTRIBUTES -->
+<attributelist>
+	<attribute name="multichannel" type="none">
+		<digest>Enable multichannel mode</digest>
+		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value should be specified after its declaration and cannot be modifed after the creation of the object</description>
+	</attribute>
+</attributelist>
 <!-- MESSAGES-->
 <methodlist>
 	<method name="buffersize" type="message">
@@ -36,7 +43,8 @@
 		<digest>Set send buffer size in ms (default: 25 ms)</digest>
 		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
 	</method>
-	<method name="codec_get" type="message">
+	<!-- UNSUPPORTED -->
+	<!-- <method name="codec_get" type="message">
 		<arglist>
 			<arg name="data" optional='0' type="string" />
 		</arglist>
@@ -63,7 +71,7 @@
 				<li>signal</li>
 			</ul>
 		</description>
-	</method>
+	</method> -->
 	<method name="dll_bandwidth" type="message">
 		<arglist>
 			<arg name="bandwidth" optional='0' type="float" />
