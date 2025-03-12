@@ -47,11 +47,20 @@ int peer_to_atoms(const t_peer &peer, int argc, t_atom *argv)
 
 static void aoo_client_peer_list(t_aoo_client *x)
 {
+    object_post((t_object *)x, "peer_list");
+    if(x->x_peers.empty()){
+        t_atom msg[1];
+        t_symbol* text = gensym("empty");
+        atom_setsym(msg, text);
+        outlet_anything(x->x_msgout, gensym("peer_list"), 1, msg);
+        return;
+    }
+
     for (auto &peer : x->x_peers)
     {
         t_atom msg[5];
         peer_to_atoms(peer, 5, msg);
-        outlet_anything(x->x_msgout, gensym("peer"), 5, msg);
+        outlet_anything(x->x_msgout, gensym("peer_list"), 5, msg);
     }
 }
 static void aoo_client_broadcast(t_aoo_client *x, t_symbol *s, int argc, t_atom *argv)
