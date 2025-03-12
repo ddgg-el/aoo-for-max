@@ -337,24 +337,25 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     
     if(attribute->a_type == A_SYM)
 	{
-        char* multiflag = atom_getsym(argv+offset)->s_name;
-		if(!strcmp(multiflag, "@multichannel")){
-            if(offset < 1){
-                object_error((t_object*)this, "Missing argument <channels>");
+        char* multiflag = atom_getsym(attribute)->s_name;
+        if(multiflag){
+            if(!strcmp(multiflag, "@multichannel")){
+                if(offset < 1){
+                    object_error((t_object*)this, "Missing argument <channels>");
+                    x_valid = false;
+                    return;
+                }
+#ifdef MAX_HAVE_MULTICHANNEL
+                x_multi = true;
+#else
+                object_error((t_object*)this, "Object compiled without multichannel support");
                 x_valid = false;
                 return;
-            }
-#ifdef MAX_HAVE_MULTICHANNEL
-		    x_multi = true;
-#else
-            object_error((t_object*)this, "Object compiled without multichannel support");
-            x_valid = false;
-            return;
 #endif
-		} else {
-			object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);	
-		}
-		
+            } else {
+                object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);	
+            }
+        }
 	}
 
     // arg #1: channels
@@ -638,7 +639,6 @@ static void aoo_receive_source_list(t_aoo_receive *x)
         t_symbol* text = gensym("empty");
         atom_setsym(msg, text);
         outlet_anything(x->x_msgout, gensym("source_list"), 1, msg);
-        object_post((t_object*)x, "no sources registered");
         return;
     }
 
@@ -646,7 +646,7 @@ static void aoo_receive_source_list(t_aoo_receive *x)
     {
         t_atom msg[3];
         if (x->x_node->serialize_endpoint(src.s_address, src.s_id, 3, msg)) {
-            outlet_anything(x->x_msgout, gensym("source"), 3, msg);
+            outlet_anything(x->x_msgout, gensym("source_list"), 3, msg);
         } else {
             error("BUG: aoo_receive_source_list: serialize_endpoint");
         }
@@ -672,7 +672,6 @@ static void aoo_receive_fill_ratio(t_aoo_receive *x, t_symbol *s, int argc, t_at
             id = src.s_id;
         } else {
             object_error((t_object*)x, "%s: no sources");
-            
         }
     }
 

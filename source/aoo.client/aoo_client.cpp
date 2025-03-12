@@ -77,12 +77,12 @@ static void aoo_client_send_group(t_aoo_client *x, t_symbol *s, int argc, t_atom
             }
             else
             {
-                object_error((t_object *)x, "%s: could not find group '%s'", name->s_name);
+                object_error((t_object *)x, "could not find group '%s'", name->s_name);
             }
         }
         else
         {
-            object_error((t_object *)x, "%s: bad arguments to 'send_group': expecting <group> ...");
+            object_error((t_object *)x, "bad arguments to 'send_group': expecting <group> ...");
         }
     }
 }
@@ -101,13 +101,13 @@ static void aoo_client_send_peer(t_aoo_client *x, t_symbol *s, int argc, t_atom 
         }
         else
         {
-            object_error((t_object *)x, "%s: could not find peer %s|%s",
+            object_error((t_object *)x, "could not find peer %s|%s",
                          group->s_name, user->s_name);
         }
     }
     else
     {
-        object_error((t_object *)x, "%s: bad arguments to 'send_peer': expecting <group> <user> ...");
+        object_error((t_object *)x, "bad arguments to 'send_peer': expecting <group> <user> ...");
     }
 }
 static void aoo_client_send(t_aoo_client *x, t_symbol *s, int argc, t_atom *argv)
@@ -179,7 +179,7 @@ static void aoo_client_port(t_aoo_client *x, double f)
     // 0 is allowed -> don't listen
     if (port < 0)
     {
-        object_error((t_object *)x, "%s: bad port %d", port);
+        object_error((t_object *)x, "bad port %d", port);
         return;
     }
 
@@ -207,7 +207,7 @@ static void aoo_client_sim_packet_loss(t_aoo_client *x, double f)
     auto e = x->x_node->client()->control(kAooCtlSetSimulatePacketLoss, 0, AOO_ARG(val));
     if (e != kAooOk)
     {
-        object_error((t_object *)x, "%s: 'sim_packet_loss' message failed (%s)",
+        object_error((t_object *)x, "'sim_packet_loss' message failed (%s)",
                      aoo_strerror(e));
     }
 }
@@ -221,7 +221,7 @@ static void aoo_client_sim_packet_reorder(t_aoo_client *x, double f)
     auto e = x->x_node->client()->control(kAooCtlSetSimulatePacketReorder, 0, AOO_ARG(val));
     if (e != kAooOk)
     {
-        object_error((t_object *)x, "%s: 'sim_packet_reorder' message failed (%s)",
+        object_error((t_object *)x, "'sim_packet_reorder' message failed (%s)",
                      aoo_strerror(e));
     }
 }
@@ -235,7 +235,7 @@ static void aoo_client_sim_packet_jitter(t_aoo_client *x, double f)
     auto e = x->x_node->client()->control(kAooCtlSetSimulatePacketJitter, 0, AOO_ARG(val));
     if (e != kAooOk)
     {
-        object_error((t_object *)x, "%s: 'sim_packet_jitter' message failed (%s)",
+        object_error((t_object *)x, "'sim_packet_jitter' message failed (%s)",
                      aoo_strerror(e));
     }
 }
@@ -257,7 +257,7 @@ static void aoo_client_target(t_aoo_client *x, t_symbol *s, int argc, t_atom *ar
         }
         else
         {
-            object_error((t_object *)x, "%s: could not find peer '%s|%s'",
+            object_error((t_object *)x, "could not find peer '%s|%s'",
                          groupname->s_name, username->s_name);
             x->x_target = false;
         }
@@ -274,7 +274,7 @@ static void aoo_client_target(t_aoo_client *x, t_symbol *s, int argc, t_atom *ar
         }
         else
         {
-            object_error((t_object *)x, "%s: could not find group '%s'", name->s_name);
+            object_error((t_object *)x, "could not find group '%s'", name->s_name);
             x->x_target = false;
         }
     }
@@ -308,7 +308,7 @@ static void AOO_CALL connect_cb(t_aoo_client *x, const AooRequest *request,
 
         x->push_reply([x, errmsg = std::move(errmsg)]()
                       {
-object_error((t_object*)x, "%s: can't connect to server: %s", errmsg.c_str());
+object_error((t_object*)x, "can't connect to server: %s", errmsg.c_str());
 
 if (!x->x_connected){
 outlet_float(x->x_stateout, 0);
@@ -319,12 +319,12 @@ static void aoo_client_connect(t_aoo_client *x, t_symbol *s, int argc, t_atom *a
 {
     if (x->x_connected)
     {
-        object_error((t_object *)x, "%s: already connected");
+        object_error((t_object *)x, "already connected");
         return;
     }
     if (argc < 2)
     {
-        object_error((t_object *)x, "%s: too few arguments for '%s' method", s->s_name);
+        object_error((t_object *)x, "too few arguments for '%s' method", s->s_name);
         return;
     }
     if (x->x_node)
@@ -387,7 +387,7 @@ outlet_anything(x->x_msgout, gensym("group_join"), 3, msg); });
 
         x->push_reply([x, group = std::move(group), errmsg = std::move(errmsg)]()
                       {
-object_error((t_object*)x, "%s: can't join group '%s': %s",
+object_error((t_object*)x, "can't join group '%s': %s",
 group.c_str(), errmsg.c_str());
 
 t_atom msg[2];
@@ -400,14 +400,14 @@ static void aoo_client_group_join(t_aoo_client *x, t_symbol *s, int argc, t_atom
 {
     if (!x->x_connected)
     {
-        object_error((t_object *)x, "%s: not connected");
+        object_error((t_object *)x, "not connected");
         return;
     }
     if (x->x_node)
     {
         if (argc < 3)
         {
-            object_error((t_object *)x, "%s: too few arguments for '%s' method", s->s_name);
+            object_error((t_object *)x, "too few arguments for '%s' method", s->s_name);
             return;
         }
         AooClientJoinGroup args;
@@ -464,7 +464,7 @@ static void AOO_CALL group_leave_cb(t_aoo_client *x, const AooRequest *request,
                 error("group_leave_cb");
                 return;
             }
-            object_error((t_object*)x, "%s: can't leave group '%s': %s",
+            object_error((t_object*)x, "can't leave group '%s': %s",
             group->name->s_name, errmsg.c_str());
 
             t_atom msg[2];
@@ -478,7 +478,7 @@ static void aoo_client_group_leave(t_aoo_client *x, t_symbol *group)
 {
     if (!x->x_connected)
     {
-        object_error((t_object *)x, "%s: not connected");
+        object_error((t_object *)x, "not connected");
         return;
     }
     if (x->x_node)
@@ -490,7 +490,7 @@ static void aoo_client_group_leave(t_aoo_client *x, t_symbol *group)
         }
         else
         {
-            object_error((t_object *)x, "%s: can't leave group %s: not a group member",
+            object_error((t_object *)x, "can't leave group %s: not a group member",
                          group->s_name);
         }
     }

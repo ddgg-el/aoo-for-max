@@ -6,8 +6,7 @@
 	Send an Aoo stream to an <o>aoo.receive~</o> object
 </digest>
 <description>
-	<p>Send an Aoo audio stream to one or more Aoo sinks (<o>aoo.receive~</o>) using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a></p>
-	<p>We might also refer to this object as a <b>Source</b> in an Aoo network</p>
+	<p>Send an Aoo audio stream to one or more Aoo sinks (<o>aoo.receive~</o>) using the <a href="https://aoo.iem.sh/">Audio over OSC Library</a>. This object represents a <b>Source</b> in an Aoo network</p>
 </description>
 <!-- METADATA-->
 <metadatalist>

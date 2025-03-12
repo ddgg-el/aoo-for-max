@@ -209,26 +209,27 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
     offset = attr_args_offset(argc, argv);
     t_atom* attribute = argv+offset;
     
-    if((argv+offset)->a_type == A_SYM)
+    if(attribute->a_type == A_SYM)
 	{
-        auto multiflag = atom_getsym(argv+offset)->s_name;
-		if(!strcmp(multiflag, "@multichannel")){
-            if(offset < 1){
-                object_error((t_object*)this, "Missing argument <channels>");
+        auto multiflag = atom_getsym(attribute)->s_name;
+        if(multiflag){
+            if(!strcmp(multiflag, "@multichannel")){
+                if(offset < 1){
+                    object_error((t_object*)this, "Missing argument <channels>");
+                    x_valid = false;
+                    return;
+                }
+    #ifdef MAX_HAVE_MULTICHANNEL
+                x_multi = true;
+    #else
+                object_error((t_object*)this, "Object compiled without multichannel support");
                 x_valid = false;
                 return;
+    #endif
+            } else {
+                object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);
             }
-#ifdef MAX_HAVE_MULTICHANNEL
-		    x_multi = true;
-#else
-            object_error((t_object*)this, "Object compiled without multichannel support");
-            x_valid = false;
-            return;
-#endif
-		} else {
-			object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);	
-		}
-		
+        }
 	}
 
     // arg #1: channels
@@ -665,14 +666,13 @@ static void aoo_send_sink_list(t_aoo_send *x)
         t_symbol* text = gensym("empty");
         atom_setsym(msg, text);
         outlet_anything(x->x_msgout, gensym("sink_list"), 1, msg);
-        object_post((t_object*)x, "no sinks registered");
         return;
     }
 
     for (auto& sink : x->x_sinks){
         t_atom msg[3];
         if (x->x_node->serialize_endpoint(sink.s_address, sink.s_id, 3, msg)){
-            outlet_anything(x->x_msgout, gensym("sink"), 3, msg);
+            outlet_anything(x->x_msgout, gensym("sink_list"), 3, msg);
         } else {
             error("BUG: t_node::serialize_endpoint");
         }
