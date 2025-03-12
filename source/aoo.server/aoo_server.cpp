@@ -276,7 +276,21 @@ void ext_main(void *r)
 
 void aoo_server_assist(t_aoo_server *x, void *b, long m, long a, char *s)
 {
-	;
+	if (m == ASSIST_INLET)
+    { // inlet
+        snprintf_zero(s, 256, "(message) Messages");
+    }
+    else
+    { // outlet
+        if (a == 0)
+        {
+            snprintf_zero(s, 256, "(message) Events");
+        }
+        else
+        {
+            snprintf_zero(s, 256, "(int) Connection status 0/1");
+        }
+    }
 }
 
 void aoo_server_free(t_aoo_server *x)

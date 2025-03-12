@@ -1122,9 +1122,13 @@ void aoo_send_assist(t_aoo_send *x, void *b, long m, long a, char *s)
 {
 	if (m == ASSIST_INLET) { //inlet
         if(a == 0) {	// inlet 0 
-            snprintf_zero(s, 256, "(message/signal) Stream Audio Ch %ld", a+1);
+            if(x->x_multi){
+                snprintf_zero(s, 256, "(message/multi-channel signal) Multichannel Audio Stream");
+            }else {
+                snprintf_zero(s, 256, "(message/signal) Audio Stream Ch %ld", a+1);
+            }
         } else {
-            snprintf_zero(s, 256, "(signal) Stream Audio Ch %ld", a+1);
+            snprintf_zero(s, 256, "(signal) Audio Stream Ch %ld", a+1);
         }
 	}
 	else {	// outlet
