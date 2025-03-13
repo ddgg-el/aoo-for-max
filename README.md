@@ -71,7 +71,7 @@ $ cmake --build . -j${nproc}
 ```
 use `"Xcode"`, `"Unix Makefiles"` or `"Visual Studio <x>"` in place of `<your-generator>`, or simply omit the -G option to use the default one.
 
-The compiled externals will be installed in `package/Aoo for Max/externals`
+The compiled externals will be installed in `package/Aoo for Max/externals`. At this point you are ready to [install](#installation) the project.
 
 ### Reference for Development
 
