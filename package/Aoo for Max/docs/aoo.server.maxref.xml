@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
 
-<c74object name="aoo.server" module="msp" category="Aoo">
+<c74object name="aoo.server" module="msp" category="AOO">
 <digest>
-	An AooServer
+	An AOO Server
 </digest>
 <description>
 	Use this object to host an AOO server for a local network or the public internet. 

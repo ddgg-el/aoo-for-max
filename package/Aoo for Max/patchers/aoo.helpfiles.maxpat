@@ -71,8 +71,8 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 29.0, 147.0, 138.0, 22.0 ],
-					"text" : "sprintf load %s.maxhelp"
+					"patching_rect" : [ 29.0, 147.0, 172.0, 22.0 ],
+					"text" : "sprintf loadunique %s.maxhelp"
 				}
 
 			}

@@ -47,7 +47,7 @@
 					"patching_rect" : [ 29.0, 29.5, 265.0, 20.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 9.5, 12.0, 228.0, 20.0 ],
-					"text" : "Aoo Library Developed by: Christof Ressi"
+					"text" : "AOO Library Developed by: Christof Ressi"
 				}
 
 			}
@@ -107,7 +107,7 @@
 					"patching_rect" : [ 29.0, 59.0, 194.0, 20.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 9.5, 29.5, 194.0, 20.0 ],
-					"text" : "Learn more about the Aoo Library: "
+					"text" : "Learn more about the AOO Library: "
 				}
 
 			}

@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 100.0, 100.0, 789.0, 596.0 ],
+		"rect" : [ 104.0, 148.0, 789.0, 616.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -42,6 +42,68 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-4",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 0,
+					"patcher" : 					{
+						"fileversion" : 1,
+						"appversion" : 						{
+							"major" : 8,
+							"minor" : 5,
+							"revision" : 1,
+							"architecture" : "x64",
+							"modernui" : 1
+						}
+,
+						"classnamespace" : "box",
+						"rect" : [ 0.0, 26.0, 789.0, 590.0 ],
+						"bglocked" : 0,
+						"openinpresentation" : 0,
+						"default_fontsize" : 12.0,
+						"default_fontface" : 0,
+						"default_fontname" : "Arial",
+						"gridonopen" : 1,
+						"gridsize" : [ 15.0, 15.0 ],
+						"gridsnaponopen" : 1,
+						"objectsnaponopen" : 1,
+						"statusbarvisible" : 2,
+						"toolbarvisible" : 1,
+						"lefttoolbarpinned" : 0,
+						"toptoolbarpinned" : 0,
+						"righttoolbarpinned" : 0,
+						"bottomtoolbarpinned" : 0,
+						"toolbars_unpinned_last_save" : 0,
+						"tallnewobj" : 0,
+						"boxanimatetime" : 200,
+						"enablehscroll" : 1,
+						"enablevscroll" : 1,
+						"devicewidth" : 0.0,
+						"description" : "",
+						"digest" : "",
+						"tags" : "",
+						"style" : "",
+						"subpatcher_template" : "",
+						"showontab" : 1,
+						"assistshowspatchername" : 0,
+						"boxes" : [  ],
+						"lines" : [  ]
+					}
+,
+					"patching_rect" : [ 28.5, 158.0, 25.0, 22.0 ],
+					"saved_object_attributes" : 					{
+						"description" : "",
+						"digest" : "",
+						"globalpatchername" : "",
+						"tags" : ""
+					}
+,
+					"text" : "p ?"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-2",
 					"maxclass" : "newobj",
 					"numinlets" : 0,
@@ -57,7 +119,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 100.0, 126.0, 789.0, 570.0 ],
+						"rect" : [ 104.0, 174.0, 789.0, 590.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -87,6 +149,65 @@
 						"showontab" : 1,
 						"assistshowspatchername" : 0,
 						"boxes" : [ 							{
+								"box" : 								{
+									"id" : "obj-23",
+									"linecount" : 5,
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 319.0, 270.0, 123.0, 74.0 ],
+									"text" : "the sink_channel message allows you to set a specific receive start channel to the sink"
+								}
+
+							}
+, 							{
+								"box" : 								{
+									"id" : "obj-36",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 179.0, 242.0, 32.0, 20.0 ],
+									"text" : "try 1"
+								}
+
+							}
+, 							{
+								"box" : 								{
+									"bubble" : 1,
+									"id" : "obj-21",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 56.0, 120.0, 80.0, 24.0 ],
+									"text" : "add a sink"
+								}
+
+							}
+, 							{
+								"box" : 								{
+									"bubble" : 1,
+									"id" : "obj-19",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 123.248001098632812, 184.0, 109.0, 24.0 ],
+									"text" : "start streaming"
+								}
+
+							}
+, 							{
+								"box" : 								{
+									"bubble" : 1,
+									"id" : "obj-18",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 567.0, 485.5, 109.0, 24.0 ],
+									"text" : "start the audio"
+								}
+
+							}
+, 							{
 								"box" : 								{
 									"id" : "obj-31",
 									"maxclass" : "number",
@@ -132,17 +253,6 @@
 							}
 , 							{
 								"box" : 								{
-									"id" : "obj-23",
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 121.0, 184.0, 72.0, 20.0 ],
-									"text" : "start stream"
-								}
-
-							}
-, 							{
-								"box" : 								{
 									"bgcolor" : [ 1.0, 0.788235, 0.470588, 1.0 ],
 									"fontname" : "Arial Bold",
 									"hint" : "",
@@ -154,21 +264,10 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "int" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 418.0, 448.5, 20.0, 20.0 ],
+									"patching_rect" : [ 539.0, 487.5, 20.0, 20.0 ],
 									"rounded" : 60.0,
 									"text" : "2",
 									"textcolor" : [ 0.34902, 0.34902, 0.34902, 1.0 ]
-								}
-
-							}
-, 							{
-								"box" : 								{
-									"id" : "obj-21",
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 438.0, 448.5, 68.0, 20.0 ],
-									"text" : "start audio"
 								}
 
 							}
@@ -189,17 +288,6 @@
 									"rounded" : 60.0,
 									"text" : "1",
 									"textcolor" : [ 0.34902, 0.34902, 0.34902, 1.0 ]
-								}
-
-							}
-, 							{
-								"box" : 								{
-									"id" : "obj-34",
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 52.0, 120.0, 53.0, 20.0 ],
-									"text" : "add sink"
 								}
 
 							}
@@ -230,7 +318,7 @@
 									"numinlets" : 1,
 									"numoutlets" : 2,
 									"outlettype" : [ "signal", "signal" ],
-									"patching_rect" : [ 364.0, 404.0, 74.0, 22.0 ],
+									"patching_rect" : [ 485.0, 443.0, 74.0, 22.0 ],
 									"text" : "mc.unpack~"
 								}
 
@@ -238,13 +326,13 @@
 , 							{
 								"box" : 								{
 									"id" : "obj-5",
-									"lastchannelcount" : 2,
+									"lastchannelcount" : 3,
 									"maxclass" : "mc.live.gain~",
 									"numinlets" : 1,
 									"numoutlets" : 4,
 									"outlettype" : [ "multichannelsignal", "", "float", "list" ],
 									"parameter_enable" : 1,
-									"patching_rect" : [ 364.0, 258.0, 48.0, 136.0 ],
+									"patching_rect" : [ 485.0, 297.0, 48.0, 136.0 ],
 									"saved_attribute_attributes" : 									{
 										"valueof" : 										{
 											"parameter_initial" : [ "-inf" ],
@@ -297,7 +385,7 @@
 									"maxclass" : "ezdac~",
 									"numinlets" : 2,
 									"numoutlets" : 0,
-									"patching_rect" : [ 364.0, 436.0, 45.0, 45.0 ]
+									"patching_rect" : [ 485.0, 475.0, 45.0, 45.0 ]
 								}
 
 							}
@@ -320,7 +408,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 364.0, 177.0, 66.0, 22.0 ],
+									"patching_rect" : [ 485.0, 216.0, 66.0, 22.0 ],
 									"text" : "source_list"
 								}
 
@@ -333,7 +421,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 555.0, 275.0, 24.0, 24.0 ]
+									"patching_rect" : [ 676.0, 314.0, 24.0, 24.0 ]
 								}
 
 							}
@@ -344,7 +432,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 2,
 									"outlettype" : [ "", "" ],
-									"patching_rect" : [ 555.0, 245.0, 62.0, 22.0 ],
+									"patching_rect" : [ 676.0, 284.0, 62.0, 22.0 ],
 									"text" : "route ping"
 								}
 
@@ -356,8 +444,8 @@
 									"numinlets" : 1,
 									"numoutlets" : 2,
 									"outlettype" : [ "multichannelsignal", "" ],
-									"patching_rect" : [ 364.0, 214.0, 210.0, 22.0 ],
-									"text" : "aoo.receive~ 2 8090 2 @multichannel"
+									"patching_rect" : [ 485.0, 253.0, 210.0, 22.0 ],
+									"text" : "aoo.receive~ 3 8090 2 @multichannel"
 								}
 
 							}
@@ -688,7 +776,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 789.0, 570.0 ],
+						"rect" : [ 0.0, 26.0, 789.0, 590.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -718,6 +806,42 @@
 						"showontab" : 1,
 						"assistshowspatchername" : 0,
 						"boxes" : [ 							{
+								"box" : 								{
+									"bubble" : 1,
+									"id" : "obj-13",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 483.0, 393.0, 109.0, 24.0 ],
+									"text" : "start the audio"
+								}
+
+							}
+, 							{
+								"box" : 								{
+									"bubble" : 1,
+									"id" : "obj-10",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 113.0, 203.0, 109.0, 24.0 ],
+									"text" : "start the stream"
+								}
+
+							}
+, 							{
+								"box" : 								{
+									"bubble" : 1,
+									"id" : "obj-1",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 45.0, 136.0, 232.0, 24.0 ],
+									"text" : "add a sink that will receive the stream"
+								}
+
+							}
+, 							{
 								"box" : 								{
 									"id" : "obj-48",
 									"maxclass" : "newobj",
@@ -762,7 +886,7 @@
 									"numoutlets" : 5,
 									"outlettype" : [ "signal", "signal", "", "float", "list" ],
 									"parameter_enable" : 1,
-									"patching_rect" : [ 385.5, 210.0, 74.0, 128.0 ],
+									"patching_rect" : [ 403.5, 234.0, 74.0, 128.0 ],
 									"saved_attribute_attributes" : 									{
 										"valueof" : 										{
 											"parameter_initial" : [ "-inf" ],
@@ -784,23 +908,12 @@
 							}
 , 							{
 								"box" : 								{
-									"id" : "obj-2",
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 462.0, 371.5, 65.0, 20.0 ],
-									"text" : "start audio"
-								}
-
-							}
-, 							{
-								"box" : 								{
 									"id" : "obj-41",
 									"local" : 1,
 									"maxclass" : "ezdac~",
 									"numinlets" : 2,
 									"numoutlets" : 0,
-									"patching_rect" : [ 385.5, 359.0, 45.0, 45.0 ]
+									"patching_rect" : [ 403.5, 383.0, 45.0, 45.0 ]
 								}
 
 							}
@@ -817,7 +930,7 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "int" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 440.0, 371.5, 20.0, 20.0 ],
+									"patching_rect" : [ 458.0, 395.5, 20.0, 20.0 ],
 									"rounded" : 60.0,
 									"text" : "2",
 									"textcolor" : [ 0.34902, 0.34902, 0.34902, 1.0 ]
@@ -833,17 +946,6 @@
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 21.0, 338.0, 29.0, 22.0 ],
 									"text" : "thru"
-								}
-
-							}
-, 							{
-								"box" : 								{
-									"id" : "obj-42",
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 110.5, 205.0, 89.0, 20.0 ],
-									"text" : "start stream"
 								}
 
 							}
@@ -889,23 +991,12 @@
 							}
 , 							{
 								"box" : 								{
-									"id" : "obj-34",
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 45.0, 138.0, 261.0, 20.0 ],
-									"text" : "change localhost with IP address and add sink"
-								}
-
-							}
-, 							{
-								"box" : 								{
 									"id" : "obj-25",
 									"maxclass" : "message",
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 386.0, 143.0, 66.0, 22.0 ],
+									"patching_rect" : [ 404.0, 167.0, 66.0, 22.0 ],
 									"text" : "source_list"
 								}
 
@@ -918,7 +1009,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 495.0, 251.0, 24.0, 24.0 ]
+									"patching_rect" : [ 513.0, 275.0, 24.0, 24.0 ]
 								}
 
 							}
@@ -929,7 +1020,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 2,
 									"outlettype" : [ "", "" ],
-									"patching_rect" : [ 495.0, 216.0, 62.0, 22.0 ],
+									"patching_rect" : [ 513.0, 240.0, 62.0, 22.0 ],
 									"text" : "route ping"
 								}
 
@@ -941,7 +1032,7 @@
 									"numinlets" : 1,
 									"numoutlets" : 3,
 									"outlettype" : [ "signal", "signal", "" ],
-									"patching_rect" : [ 386.0, 180.0, 128.0, 22.0 ],
+									"patching_rect" : [ 404.0, 204.0, 128.0, 22.0 ],
 									"text" : "aoo.receive~ 2 8090 1"
 								}
 
@@ -1038,7 +1129,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 25.0, 534.0, 24.0, 24.0 ]
+									"patching_rect" : [ 21.0, 519.0, 24.0, 24.0 ]
 								}
 
 							}
@@ -1048,7 +1139,7 @@
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 68.0, 517.0, 61.0, 22.0 ],
+									"patching_rect" : [ 64.0, 502.0, 61.0, 22.0 ],
 									"text" : "print send"
 								}
 
@@ -1060,7 +1151,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 2,
 									"outlettype" : [ "", "" ],
-									"patching_rect" : [ 25.0, 485.0, 62.0, 22.0 ],
+									"patching_rect" : [ 21.0, 470.0, 62.0, 22.0 ],
 									"text" : "route ping"
 								}
 
@@ -1128,7 +1219,7 @@
 									"numinlets" : 0,
 									"numoutlets" : 0,
 									"offset" : [ 0.0, 0.0 ],
-									"patching_rect" : [ 611.0, 376.0, 148.0, 92.0 ],
+									"patching_rect" : [ 607.0, 406.0, 148.0, 92.0 ],
 									"viewvisibility" : 1
 								}
 
@@ -1148,7 +1239,7 @@
 									"numinlets" : 0,
 									"numoutlets" : 0,
 									"offset" : [ 0.0, 0.0 ],
-									"patching_rect" : [ 427.0, 470.0, 332.0, 62.0 ],
+									"patching_rect" : [ 423.0, 500.0, 332.0, 62.0 ],
 									"viewvisibility" : 1
 								}
 
@@ -1171,6 +1262,13 @@
 							}
  ],
 						"lines" : [ 							{
+								"patchline" : 								{
+									"destination" : [ "obj-6", 0 ],
+									"source" : [ "obj-11", 0 ]
+								}
+
+							}
+, 							{
 								"patchline" : 								{
 									"destination" : [ "obj-11", 1 ],
 									"source" : [ "obj-12", 0 ]
@@ -1342,7 +1440,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 789.0, 570.0 ],
+						"rect" : [ 0.0, 26.0, 789.0, 590.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -1373,13 +1471,27 @@
 						"assistshowspatchername" : 0,
 						"boxes" : [ 							{
 								"box" : 								{
+									"fontname" : "Lato",
+									"fontsize" : 13.0,
+									"id" : "obj-11",
+									"maxclass" : "comment",
+									"numinlets" : 1,
+									"numoutlets" : 0,
+									"patching_rect" : [ 582.0, 529.0, 178.0, 22.0 ],
+									"style" : "helpfile_label",
+									"text" : "see reference for all messages"
+								}
+
+							}
+, 							{
+								"box" : 								{
 									"id" : "obj-22",
 									"maxclass" : "number",
 									"numinlets" : 1,
 									"numoutlets" : 2,
 									"outlettype" : [ "", "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 98.5, 435.0, 50.0, 22.0 ]
+									"patching_rect" : [ 96.5, 458.0, 50.0, 22.0 ]
 								}
 
 							}
@@ -1391,7 +1503,7 @@
 									"numoutlets" : 2,
 									"outlettype" : [ "", "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 58.0, 375.0, 50.0, 22.0 ]
+									"patching_rect" : [ 56.0, 398.0, 50.0, 22.0 ]
 								}
 
 							}
@@ -1403,7 +1515,7 @@
 									"numoutlets" : 2,
 									"outlettype" : [ "", "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 31.0, 315.5, 50.0, 22.0 ]
+									"patching_rect" : [ 29.0, 338.5, 50.0, 22.0 ]
 								}
 
 							}
@@ -1448,7 +1560,7 @@
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 496.0, 315.5, 250.0, 33.0 ],
+									"patching_rect" : [ 529.5, 393.0, 250.0, 33.0 ],
 									"text" : "you can have multiple send and receive using the same port, but different with IDs"
 								}
 
@@ -1460,23 +1572,8 @@
 									"numinlets" : 4,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 496.0, 357.5, 115.0, 22.0 ],
+									"patching_rect" : [ 529.5, 435.0, 115.0, 22.0 ],
 									"text" : "aoo.send~ 4 9080 2"
-								}
-
-							}
-, 							{
-								"box" : 								{
-									"bubblepoint" : 1.0,
-									"bubbleside" : 0,
-									"bubbletextmargin" : 14,
-									"id" : "obj-9",
-									"linecount" : 2,
-									"maxclass" : "comment",
-									"numinlets" : 1,
-									"numoutlets" : 0,
-									"patching_rect" : [ 611.5, 495.0, 150.0, 33.0 ],
-									"text" : "see reference for all messages"
 								}
 
 							}
@@ -1486,7 +1583,7 @@
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 394.0, 262.0, 95.0, 22.0 ],
+									"patching_rect" : [ 378.0, 285.0, 95.0, 22.0 ],
 									"text" : "s aoo-send-msg"
 								}
 
@@ -1505,13 +1602,12 @@
 , 							{
 								"box" : 								{
 									"bubble" : 1,
-									"bubblepoint" : 1.0,
 									"id" : "obj-43",
 									"linecount" : 3,
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 611.5, 185.0, 151.0, 51.0 ],
+									"patching_rect" : [ 595.5, 233.5, 151.0, 51.0 ],
 									"text" : "manually accept uninvitation (if 'auto_invite' is off.)"
 								}
 
@@ -1522,11 +1618,10 @@
 									"bubblepoint" : 0.0,
 									"bubbleside" : 2,
 									"id" : "obj-41",
-									"linecount" : 2,
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 507.5, 140.0, 255.0, 52.0 ],
+									"patching_rect" : [ 491.5, 163.0, 268.0, 39.0 ],
 									"text" : "manually accept invitation (if 'auto_invite' is off.)"
 								}
 
@@ -1538,7 +1633,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 463.0, 225.0, 141.0, 22.0 ],
+									"patching_rect" : [ 447.0, 248.0, 141.0, 22.0 ],
 									"text" : "uninvite localhost 8090 1"
 								}
 
@@ -1550,7 +1645,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 433.0, 195.0, 127.0, 22.0 ],
+									"patching_rect" : [ 417.0, 218.0, 127.0, 22.0 ],
 									"text" : "invite localhost 8090 1"
 								}
 
@@ -1564,7 +1659,7 @@
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 422.5, 86.599853515625, 222.0, 37.0 ],
+									"patching_rect" : [ 406.5, 109.599853515625, 222.0, 37.0 ],
 									"text" : "automatically accept (un)invitations (default: on)"
 								}
 
@@ -1577,7 +1672,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "int" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 394.0, 124.0, 24.0, 24.0 ]
+									"patching_rect" : [ 378.0, 147.0, 24.0, 24.0 ]
 								}
 
 							}
@@ -1588,7 +1683,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 394.0, 155.0, 83.0, 22.0 ],
+									"patching_rect" : [ 378.0, 178.0, 83.0, 22.0 ],
 									"text" : "auto_invite $1"
 								}
 
@@ -1685,9 +1780,9 @@
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 10.0, 64.599853515625, 69.0, 22.0 ],
+									"patching_rect" : [ 10.0, 64.599853515625, 753.0, 22.0 ],
 									"style" : "helpfile_label",
-									"text" : "Messaging"
+									"text" : "There are several messages that allow you to monitor or fine tune the aoo.send~ while streaming. Here a few of them."
 								}
 
 							}
@@ -1713,7 +1808,7 @@
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 31.0, 506.0, 95.0, 22.0 ],
+									"patching_rect" : [ 29.0, 529.0, 95.0, 22.0 ],
 									"text" : "s aoo-send-msg"
 								}
 
@@ -1722,11 +1817,10 @@
 								"box" : 								{
 									"bubble" : 1,
 									"id" : "obj-65",
-									"linecount" : 2,
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 185.0, 457.5, 244.0, 37.0 ],
+									"patching_rect" : [ 180.0, 488.0, 278.0, 24.0 ],
 									"text" : "set send buffer size in ms (default: 25 ms)"
 								}
 
@@ -1738,7 +1832,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 98.5, 465.0, 77.0, 22.0 ],
+									"patching_rect" : [ 96.5, 488.0, 77.0, 22.0 ],
 									"text" : "buffersize $1"
 								}
 
@@ -1751,7 +1845,7 @@
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 135.0, 385.5, 323.0, 37.0 ],
+									"patching_rect" : [ 131.0, 420.0, 323.0, 37.0 ],
 									"text" : "buffersize (ms) for resending lost packets (default: 1000) - set to 0 to disable packet resending."
 								}
 
@@ -1763,7 +1857,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 58.0, 404.5, 62.0, 22.0 ],
+									"patching_rect" : [ 56.0, 427.5, 62.0, 22.0 ],
 									"text" : "resend $1"
 								}
 
@@ -1772,11 +1866,10 @@
 								"box" : 								{
 									"bubble" : 1,
 									"id" : "obj-19",
-									"linecount" : 2,
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 91.0, 319.5, 234.0, 37.0 ],
+									"patching_rect" : [ 81.0, 365.5, 272.0, 24.0 ],
 									"text" : "set ping interval in ms (default: 1000), 0 = off"
 								}
 
@@ -1788,7 +1881,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 31.0, 342.5, 48.0, 22.0 ],
+									"patching_rect" : [ 29.0, 365.5, 48.0, 22.0 ],
 									"text" : "ping $1"
 								}
 
@@ -1939,21 +2032,21 @@
 ,
 		"dependency_cache" : [ 			{
 				"name" : "aoo.aoolink.maxpat",
-				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/package/Aoo for Max/patchers",
+				"bootpath" : "~/Documents/ownCloud/progetti/aoo_package/package/AOO for Max/patchers",
 				"patcherrelativepath" : "../patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "aoo.meta.maxpat",
-				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/package/Aoo for Max/patchers",
+				"bootpath" : "~/Documents/ownCloud/progetti/aoo_package/package/AOO for Max/patchers",
 				"patcherrelativepath" : "../patchers",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
 				"name" : "aoo.overview.maxpat",
-				"bootpath" : "~/Documents/ownCloud/consmi/tesi/seggioli/Biennio/aoo_package/package/Aoo for Max/patchers",
+				"bootpath" : "~/Documents/ownCloud/progetti/aoo_package/package/AOO for Max/patchers",
 				"patcherrelativepath" : "../patchers",
 				"type" : "JSON",
 				"implicit" : 1

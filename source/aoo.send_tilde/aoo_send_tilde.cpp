@@ -209,11 +209,13 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
     offset = attr_args_offset(argc, argv);
     t_atom* attribute = argv+offset;
     
-    if(attribute->a_type == A_SYM)
+    if(atom_gettype(attribute) == A_SYM)
 	{
-        auto multiflag = atom_getsym(attribute)->s_name;
-        if(multiflag){
-            if(!strcmp(multiflag, "@multichannel")){
+        t_symbol *sym = atom_getsym(attribute);
+        if(sym == gensym("@multichannel")){
+            char* multiflag = sym->s_name;
+            if(!strcmp(multiflag, "@multichannel"))
+                if(multiflag){
                 if(offset < 1){
                     object_error((t_object*)this, "Missing argument <channels>");
                     x_valid = false;

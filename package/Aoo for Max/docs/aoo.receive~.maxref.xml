@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
 
-<c74object name="aoo.receive~" module="msp" category="Aoo">
+<c74object name="aoo.receive~" module="msp" category="AOO">
 <digest>
-	Receive an Aoo stream from an <o>aoo.send~</o> object
+	Receive an AOO stream from an <o>aoo.send~</o> object
 </digest>
 <description>
-	Receive an Aoo audio stream from one or more Aoo sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library. This object represent a <b>Sink</b> in an Aoo network</a>
+	Receive an AOO audio stream from one or more AOO sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library. This object represent a <b>Sink</b> in an AOO network</a>
 </description>
 <!-- METADATA-->
 <metadatalist>
@@ -29,9 +29,9 @@
 </objarglist>
 <!-- ATTRIBUTES -->
 <attributelist>
-	<attribute name="multichannel" type="none">
+	<attribute name="multichannel" type="number" default="1">
 		<digest>Enable multichannel mode</digest>
-		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value should be specified after its declaration and cannot be modifed after the creation of the object</description>
+		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value needs to be specified after its declaration</description>
 	</attribute>
 </attributelist>
 <!-- MESSAGES-->

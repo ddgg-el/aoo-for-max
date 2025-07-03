@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
 
-<c74object name="aoo.client" module="msp" category="Aoo">
+<c74object name="aoo.client" module="msp" category="AOO">
 <digest>
-	An AooClient
+	An AOOClient
 </digest>
 <description>
 	Facilitates communication between several peers in a network.
@@ -133,6 +133,7 @@
 </methodlist>
 <!--SEEALSO-->
 <seealsolist>
+	<seealso name="AOO Overview" />
 	<seealso name="aoo.send~"/>
 	<seealso name="aoo.receive~"/>
 	<seealso name="aoo.server"/>

@@ -335,10 +335,13 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     offset = attr_args_offset(argc, argv);
     t_atom* attribute = argv+offset;
     
-    if(attribute->a_type == A_SYM)
+    if(atom_gettype(attribute) == A_SYM)
 	{
-        char* multiflag = atom_getsym(attribute)->s_name;
-        if(multiflag){
+        t_symbol *sym = atom_getsym(attribute);
+
+        if(sym == gensym("@multichannel")){
+            char* multiflag = sym->s_name;
+
             if(!strcmp(multiflag, "@multichannel")){
                 if(offset < 1){
                     object_error((t_object*)this, "Missing argument <channels>");
