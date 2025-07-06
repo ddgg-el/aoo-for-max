@@ -7,7 +7,7 @@
 	"tags": ["audio", "network", "osc", "DSP"],
 	"website": "https://aoo.iem.sh/",
 	"extensible": 0,
-	"max_version_min": "8.2",
+	"max_version_min": "8.1",
 	"max_version_max": "none",
 	"os": {
 		"macintosh": {
