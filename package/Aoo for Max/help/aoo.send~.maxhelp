@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 104.0, 148.0, 789.0, 616.0 ],
+		"rect" : [ 100.0, 100.0, 789.0, 616.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -119,7 +119,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 104.0, 174.0, 789.0, 590.0 ],
+						"rect" : [ 100.0, 126.0, 789.0, 590.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -374,7 +374,7 @@
 									"numoutlets" : 0,
 									"patching_rect" : [ 10.0, 65.0, 706.0, 38.0 ],
 									"style" : "helpfile_label",
-									"text" : "Multichannel support. Both aoo.receive~ and aoo.send~ have a multichannel mode using the @multichannel flag. Multichannel objects are compatible with regular MSP objects (in that case, only the first channel will be used)."
+									"text" : "Multichannel support. Both aoo.receive~ and aoo.send~ have a multichannel mode using the @multichannel attribute. Multichannel objects are compatible with regular MSP objects (in that case, only the first channel will be used)."
 								}
 
 							}
@@ -421,7 +421,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 676.0, 314.0, 24.0, 24.0 ]
+									"patching_rect" : [ 686.0, 313.0, 24.0, 24.0 ]
 								}
 
 							}
@@ -432,7 +432,7 @@
 									"numinlets" : 2,
 									"numoutlets" : 2,
 									"outlettype" : [ "", "" ],
-									"patching_rect" : [ 676.0, 284.0, 62.0, 22.0 ],
+									"patching_rect" : [ 686.0, 283.0, 62.0, 22.0 ],
 									"text" : "route ping"
 								}
 
@@ -444,8 +444,8 @@
 									"numinlets" : 1,
 									"numoutlets" : 2,
 									"outlettype" : [ "multichannelsignal", "" ],
-									"patching_rect" : [ 485.0, 253.0, 210.0, 22.0 ],
-									"text" : "aoo.receive~ 3 8090 2 @multichannel"
+									"patching_rect" : [ 485.0, 253.0, 220.0, 22.0 ],
+									"text" : "aoo.receive~ 3 8090 2 @multichannel 1"
 								}
 
 							}
@@ -575,8 +575,8 @@
 									"numinlets" : 1,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 32.0, 443.0, 198.0, 22.0 ],
-									"text" : "aoo.send~ 2 9080 3 @multichannel"
+									"patching_rect" : [ 32.0, 443.0, 208.0, 22.0 ],
+									"text" : "aoo.send~ 2 9080 3 @multichannel 1"
 								}
 
 							}

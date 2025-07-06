@@ -29,9 +29,9 @@
 </objarglist>
 <!-- ATTRIBUTES -->
 <attributelist>
-	<attribute name="multichannel" type="number" default="1">
+	<attribute name="multichannel" type="int" default="0">
 		<digest>Enable multichannel mode</digest>
-		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value needs to be specified after its declaration</description>
+		<description>Enable multichannel mode (0/1).</description>
 	</attribute>
 </attributelist>
 <!-- MESSAGES-->
@@ -111,9 +111,9 @@
 		<arglist>
 			<arg name="latency" optional='0' type="int"/>
 		</arglist>
-		<digest>Set the latency (in seconds)</digest>
+		<digest>Set the latency (in ms)</digest>
 		<description>
-			<p>Set the latency (in seconds)</p>
+			<p>Set the latency (in ms)</p>
 			<p>If a new stream is started, processing is delayed for the specified time resp. until we have received the corresponding number of blocks. This gives a buffer for compensating network and audio jitter.</p>
      		<p>For local networks small latencies of 5-20 ms should work; for unreliable/unpredictable networks you might need to increase it significantly if you want to avoid dropouts.</p>
 	 		<p>Higher latencies also allow for missing packets to be resent (if enabled). You can effectively create 'reliable' streams over unstable connections.</p>

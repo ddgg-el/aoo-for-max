@@ -30,9 +30,9 @@
 </objarglist>
 <!-- ATTRIBUTES -->
 <attributelist>
-	<attribute name="multichannel" type="number" default="1">
+	<attribute name="multichannel" type="int" default="1">
 		<digest>Enable multichannel mode</digest>
-		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value needs to be specified after its declaration</description>
+		<description>Enable multichannel mode (0/1).</description>
 	</attribute>
 </attributelist>
 <!-- MESSAGES-->

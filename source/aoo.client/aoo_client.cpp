@@ -1,33 +1,12 @@
 /**
     @file
-    aoo_client - a max object shell
-    jeremy bernstein - jeremy@bootsquad.com
-
-    @ingroup	examples
+    aoo_client - Facilitates communication between several peers in an AOO network.
+   	original by: Christof Ressi, ported to Max by Davide Gagliardi and Francesca Seggioli
+    @ingroup network
 */
+
 #include "aoo_max_common.hpp"
 
-/*
-t_aoo_client::t_aoo_client(int argc, t_atom *argv)
-{
-    x_dejitter = dejitter_get();
-    x_clock = clock_new(this, (method)aoo_client_tick);
-    x_queue_clock = clock_new(this, (method)aoo_client_queue_tick);
-    x_stateout = outlet_new(&x_obj, 0);
-    x_msgout = outlet_new(&x_obj, 0);
-
-    int port = argc ? atom_getfloat(argv) : 0;
-
-    x_node = port > 0 ? t_node::get((t_pd *)this, port) : nullptr;
-
-    if (x_node){
-        post(this, PD_DEBUG, "%s: new client on port %d",
-                classname(this), port);
-        // start clock
-        clock_delay(x_clock, AOO_CLIENT_POLL_INTERVAL);
-    }
-}
-*/
 int peer_to_atoms(const t_peer &peer, int argc, t_atom *argv)
 {
     if (argc >= 5)

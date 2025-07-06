@@ -1,8 +1,10 @@
 /**
 	@file
-	aoo_server - a max object shell
+	aoo_server - An AOO Server
+    original by: Christof Ressi, ported to Max by Davide Gagliardi and Francesca Seggioli
 	@ingroup	network
 */
+
 #include "ext_critical.h"
 #include "aoo_max_server.h"
 

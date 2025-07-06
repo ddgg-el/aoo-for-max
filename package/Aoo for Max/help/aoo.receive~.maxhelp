@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 416.0, 140.0, 765.0, 613.0 ],
+		"rect" : [ 100.0, 100.0, 765.0, 613.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -119,7 +119,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 416.0, 166.0, 765.0, 587.0 ],
+						"rect" : [ 0.0, 26.0, 765.0, 587.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
@@ -166,7 +166,7 @@
 									"maxclass" : "comment",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 512.0, 254.0, 221.0, 47.0 ],
+									"patching_rect" : [ 512.0, 254.0, 222.0, 47.0 ],
 									"text" : "the sink_channel message allows you to set a specific receive start channel to the sink"
 								}
 
@@ -363,7 +363,7 @@
 									"numoutlets" : 0,
 									"patching_rect" : [ 10.0, 65.0, 706.0, 38.0 ],
 									"style" : "helpfile_label",
-									"text" : "Multichannel support. Both aoo.receive~ and aoo.send~ have a multichannel mode using the @multichannel flag. Multichannel objects are compatible with regular MSP objects (in that case, only the first channel will be used)."
+									"text" : "Multichannel support. Both aoo.receive~ and aoo.send~ have a multichannel mode using the @multichannel attribute. Multichannel objects are compatible with regular MSP objects (in that case, only the first channel will be used)."
 								}
 
 							}
@@ -472,7 +472,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "bang" ],
 									"parameter_enable" : 0,
-									"patching_rect" : [ 223.0, 328.0, 24.0, 24.0 ]
+									"patching_rect" : [ 233.0, 324.0, 24.0, 24.0 ]
 								}
 
 							}
@@ -485,7 +485,7 @@
 									"numinlets" : 3,
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "" ],
-									"patching_rect" : [ 223.0, 298.0, 88.0, 22.0 ],
+									"patching_rect" : [ 233.0, 294.0, 88.0, 22.0 ],
 									"text" : "route ping time"
 								}
 
@@ -499,8 +499,8 @@
 									"numinlets" : 1,
 									"numoutlets" : 2,
 									"outlettype" : [ "multichannelsignal", "" ],
-									"patching_rect" : [ 32.0, 264.0, 210.0, 22.0 ],
-									"text" : "aoo.receive~ 3 8091 3 @multichannel"
+									"patching_rect" : [ 32.0, 264.0, 220.0, 22.0 ],
+									"text" : "aoo.receive~ 3 8091 3 @multichannel 1"
 								}
 
 							}
@@ -608,7 +608,7 @@
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 0,
-									"patching_rect" : [ 292.0, 329.0, 74.0, 22.0 ],
+									"patching_rect" : [ 302.0, 325.0, 74.0, 22.0 ],
 									"text" : "print receive"
 								}
 
@@ -636,8 +636,8 @@
 									"numinlets" : 1,
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
-									"patching_rect" : [ 430.0, 430.0, 198.0, 22.0 ],
-									"text" : "aoo.send~ 2 9081 2 @multichannel"
+									"patching_rect" : [ 430.0, 430.0, 208.0, 22.0 ],
+									"text" : "aoo.send~ 2 9081 2 @multichannel 1"
 								}
 
 							}
@@ -828,7 +828,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 765.0, 587.0 ],
+						"rect" : [ 100.0, 126.0, 765.0, 587.0 ],
 						"bglocked" : 0,
 						"openinpresentation" : 0,
 						"default_fontsize" : 12.0,
