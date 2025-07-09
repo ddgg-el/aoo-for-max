@@ -112,11 +112,11 @@ void t_aoo_client::dispatch_message(t_float delay, AooId group, AooId user,
 void t_aoo_client::send_message(int argc, t_atom *argv, AooId group, AooId user)
 {
     if (argc < 2) {
-        object_error((t_object*)this, "%s: message needs type + arguments");
+        object_error((t_object*)this, "message needs type + arguments");
         return;
     }
     if (!x_connected){
-        object_error((t_object*)this, "%s: not connected");
+        object_warn((t_object*)this, "not connected");
         return;
     }
 
@@ -153,7 +153,7 @@ bool t_aoo_client::check(const char *name) const
     if (x_node){
         return true;
     } else {
-        object_error((t_object*)this, "%s: '%s' failed: no socket!", name);
+        object_error((t_object*)this, "'%s' failed: no socket!", name);
         return false;
     }
 }
@@ -163,7 +163,7 @@ bool t_aoo_client::check(int argc, t_atom *argv, int minargs, const char *name) 
     if (!check(name)) return false;
 
     if (argc < minargs){
-        object_error((t_object*)this, "%s: too few arguments for '%s' message",  name);
+        object_error((t_object*)this, "too few arguments for '%s' message",  name);
         return false;
     }
 

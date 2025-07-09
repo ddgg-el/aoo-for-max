@@ -895,7 +895,12 @@ void aoo_receive_free(t_aoo_receive *x)
 
 void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
 {
-    int32_t n_chans = x->x_nchannels;
+    int32_t n_chans;
+    if(x->x_multi){
+        n_chans = 1;
+    } else {
+        n_chans = x->x_nchannels;
+    } 
 	if (m == ASSIST_INLET) { //inlet
 		snprintf_zero(s, 256, "(message) Message");
 	}
@@ -903,7 +908,11 @@ void aoo_receive_assist(t_aoo_receive *x, void *b, long m, long a, char *s)
         if(a == n_chans){
             snprintf_zero(s, 256, "(message) Event output");
         } else {
-            snprintf_zero(s, 256, "(signal) Stream Ch %ld", a+1);
+            if(x->x_multi){
+                snprintf_zero(s, 256, "(multi-channel signal) Multichannel Stream");
+            } else {
+                snprintf_zero(s, 256, "(signal) Audio Stream Ch %ld", a+1);
+            }
         }
 	}
 }

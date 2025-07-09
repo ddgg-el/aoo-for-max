@@ -66,14 +66,14 @@ From the project's root folder
 ```bash
 $ mkidr build
 $ cd build
-$ cmake -G<your-generator> ..
+$ cmake -G<your-generator> .. -DCMAKE_BUILD_TYPE=Release
 $ cmake --build . -j${nproc}
 ```
-use `"Xcode"`, `"Unix Makefiles"` or `"Visual Studio <x>"` in place of `<your-generator>`.
+use `"Xcode"`, `"Unix Makefiles"` or `"Visual Studio <x>"` in place of `<your-generator>`, or simply omit the -G option to use the default one.
 
-The compiled externals will be installed in `package/AOO for Max/externals`
+The compiled externals will be installed in `package/Aoo for Max/externals`. At this point you are ready to [install](#installation) the project.
 
-### Reference for Developers
+### Reference for Development
 
 Max SDK
 [https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html](https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html)

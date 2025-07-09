@@ -6,13 +6,13 @@
 	An AOOClient
 </digest>
 <description>
-	Facilitates communication between several peers in a network.
+	Facilitates communication between several peers in an Aoo network.
 </description>
 <discussion>
 	<p>The AOO client first connects to an AOO server. For the internet, the server has to be publicly accessable. For local networks, the server may be private, i.e. run on a user's machine.</p>
 	<p>Once the client has joined a group, it receives a list of all existing peers in that group and is notified whenever a peer joins/leaves the group.</p>
 	<p>Peers may send each other messages over the internet, which wouldn't be possible otherwise because of NAT and firewalls. For more info see <a href='https://en.wikipedia.org/wiki/UDP_hole_punching'>https://en.wikipedia.org/wiki/UDP_hole_punching</a>.</p>
-	<p>A peer is referenced by its group and user name, so that &lt;group&gt; &lt;user&gt; effectively replaces &lt;host&gt; &lt;port&gt; in all relevant methods and events for [aoo_send~] and [aoo_receive~].</p>
+	<p>A peer is referenced by its group and user name, so that &lt;group&gt; &lt;user&gt; effectively replaces &lt;host&gt; &lt;port&gt; in all relevant methods and events for <o>aoo_send~</o> and <o>aoo_receive~</o>.</p>
 	<p>All AOO objects on the same port share the same peer list.</p>
 	<p>In addition, peers also have a user ID, IP address and port number. The user ID is a unique number for each user in a group.</p>
 	<p>TIP: the user ID helps to faciliate ad hoc peer-to-peer audio streaming. The client would pick <o>aoo.receive~</o> objects for each peer and use the peer's user ID as the sink ID. The peer would in turn use its *own* user ID for its <o>aoo.send~</o> object.</p>

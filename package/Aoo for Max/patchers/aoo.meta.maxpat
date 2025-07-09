@@ -88,13 +88,13 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-27",
-					"linecount" : 2,
+					"linecount" : 5,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 33.0, 137.5, 129.0, 35.0 ],
-					"text" : ";\rmax launchbrowser $1"
+					"patching_rect" : [ 33.0, 137.5, 163.0, 76.0 ],
+					"text" : ";\rmax launchbrowser https://github.com/ddgg-el/aoo-for-max/tree/main/package/Aoo%20for%20Max"
 				}
 
 			}
@@ -117,7 +117,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 33.0, 84.0, 125.0, 23.0 ],
+					"patching_rect" : [ 33.0, 84.0, 53.0, 23.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 10.0, 57.0, 125.0, 23.0 ],
 					"saved_attribute_attributes" : 					{
@@ -127,7 +127,7 @@
 
 					}
 ,
-					"text" : "https://www.consmi.it",
+					"text" : "WebSite",
 					"textcolor" : [ 0.129412, 0.129412, 0.129412, 1.0 ]
 				}
 

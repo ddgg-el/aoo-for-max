@@ -65,7 +65,7 @@ static void aoo_client_send_group(t_aoo_client *x, t_symbol *s, int argc, t_atom
             }
             else
             {
-                object_error((t_object *)x, "could not find group '%s'", name->s_name);
+                object_warn((t_object *)x, "could not find group '%s'", name->s_name);
             }
         }
         else
@@ -245,7 +245,7 @@ static void aoo_client_target(t_aoo_client *x, t_symbol *s, int argc, t_atom *ar
         }
         else
         {
-            object_error((t_object *)x, "could not find peer '%s|%s'",
+            object_warn((t_object *)x, "could not find peer '%s|%s'",
                          groupname->s_name, username->s_name);
             x->x_target = false;
         }
@@ -262,7 +262,7 @@ static void aoo_client_target(t_aoo_client *x, t_symbol *s, int argc, t_atom *ar
         }
         else
         {
-            object_error((t_object *)x, "could not find group '%s'", name->s_name);
+            object_warn((t_object *)x, "could not find group '%s'", name->s_name);
             x->x_target = false;
         }
     }
@@ -279,35 +279,34 @@ static void AOO_CALL connect_cb(t_aoo_client *x, const AooRequest *request,
 {
     if (result == kAooErrorNone)
     {
-        x->push_reply([x]()
-                      {
-                          // remove all peers and groups (to be sure)
-                          x->x_peers.clear();
-                          x->x_groups.clear();
-                          x->x_connected = true;
+        x->push_reply([x](){
+            // remove all peers and groups (to be sure)
+            x->x_peers.clear();
+            x->x_groups.clear();
+            x->x_connected = true;
 
-                          outlet_float(x->x_stateout, 1); // connected
-                      });
+            outlet_float(x->x_stateout, 1); // connected
+        });
     }
     else
     {
         auto &e = response->error;
         std::string errmsg = *e.errorMessage ? e.errorMessage : aoo_strerror(result);
 
-        x->push_reply([x, errmsg = std::move(errmsg)]()
-                      {
-object_error((t_object*)x, "can't connect to server: %s", errmsg.c_str());
+        x->push_reply([x, errmsg = std::move(errmsg)](){
+            object_error((t_object*)x, "can't connect to server: %s", errmsg.c_str());
 
-if (!x->x_connected){
-outlet_float(x->x_stateout, 0);
-} });
+            if (!x->x_connected){
+                outlet_float(x->x_stateout, 0);
+            } 
+        });
     }
 }
 static void aoo_client_connect(t_aoo_client *x, t_symbol *s, int argc, t_atom *argv)
 {
     if (x->x_connected)
     {
-        object_error((t_object *)x, "already connected");
+        object_warn((t_object *)x, "already connected");
         return;
     }
     if (argc < 2)
@@ -356,16 +355,16 @@ static void AOO_CALL group_join_cb(t_aoo_client *x, const AooRequest *request,
     // add group
     auto name = gensym(group_name.c_str());
     if (!x->find_group(group_id)) {
-    x->x_groups.push_back({ name, group_id });
+        x->x_groups.push_back({ name, group_id });
     } else {
-error("group_join_cb");
-}
+        error("group_join_cb");
+    }
 
-t_atom msg[3];
-atom_setsym(msg, name);
-atom_setfloat(msg + 1, 1); // 1: success
-atom_setfloat(msg + 2, user_id);
-outlet_anything(x->x_msgout, gensym("group_join"), 3, msg); });
+    t_atom msg[3];
+    atom_setsym(msg, name);
+    atom_setfloat(msg + 1, 1); // 1: success
+    atom_setfloat(msg + 2, user_id);
+    outlet_anything(x->x_msgout, gensym("group_join"), 3, msg); });
     }
     else
     {
@@ -373,15 +372,15 @@ outlet_anything(x->x_msgout, gensym("group_join"), 3, msg); });
         std::string group = std::string(request->groupJoin.groupName);
         std::string errmsg = *e.errorMessage ? e.errorMessage : aoo_strerror(result);
 
-        x->push_reply([x, group = std::move(group), errmsg = std::move(errmsg)]()
-                      {
-object_error((t_object*)x, "can't join group '%s': %s",
-group.c_str(), errmsg.c_str());
+        x->push_reply([x, group = std::move(group), errmsg = std::move(errmsg)](){
+            object_warn((t_object*)x, "can't join group '%s': %s",
+            group.c_str(), errmsg.c_str());
 
-t_atom msg[2];
-atom_setsym(msg, gensym(group.c_str()));
-atom_setfloat(msg + 1, 0); // 0: fail
-outlet_anything(x->x_msgout, gensym("group_join"), 2, msg); });
+            t_atom msg[2];
+            atom_setsym(msg, gensym(group.c_str()));
+            atom_setfloat(msg + 1, 0); // 0: fail
+            outlet_anything(x->x_msgout, gensym("group_join"), 2, msg); 
+        });
     }
 }
 static void aoo_client_group_join(t_aoo_client *x, t_symbol *s, int argc, t_atom *argv)
@@ -452,7 +451,7 @@ static void AOO_CALL group_leave_cb(t_aoo_client *x, const AooRequest *request,
                 error("group_leave_cb");
                 return;
             }
-            object_error((t_object*)x, "can't leave group '%s': %s",
+            object_warn((t_object*)x, "can't leave group '%s': %s",
             group->name->s_name, errmsg.c_str());
 
             t_atom msg[2];
@@ -478,7 +477,7 @@ static void aoo_client_group_leave(t_aoo_client *x, t_symbol *group)
         }
         else
         {
-            object_error((t_object *)x, "can't leave group %s: not a group member",
+            object_warn((t_object *)x, "can't leave group %s: not a group member",
                          group->s_name);
         }
     }
