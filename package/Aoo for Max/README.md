@@ -1,4 +1,4 @@
-Aoo for Max
+AOO for Max
 ===========
 
 This package contains the Max8 externals to work with [Audio over OSC](https://aoo.iem.sh/), a lightweight and flexible peer-to-peer audio streaming and messaging library
@@ -8,7 +8,7 @@ This package contains the Max8 externals to work with [Audio over OSC](https://a
 
 ---
 ## Installation
-Copy the `Aoo for Max` folder into your Max `Packages` folder (in MacOs it is usually under `/Users/<user>/Documents/Max 8/Packages`) or set the path in Max under `Options > File Preferences...` 
+Copy the `AOO for Max` folder into your Max `Packages` folder (in MacOs it is usually under `/Users/<user>/Documents/Max 8/Packages`) or set the path in Max under `Options > File Preferences...` 
 
 
 ---
@@ -32,4 +32,4 @@ Since then it has been used in several art projects and software applications.
 ---
 ## Contributing
 
-**Aoo for Max** is an open-source project. The source code is hosted on [Github](https://github.com/ddgg-el/aoo-for-max8).
+**AOO for Max** is an open-source project. The source code is hosted on [Github](https://github.com/ddgg-el/aoo-for-max8).

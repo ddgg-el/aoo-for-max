@@ -1,8 +1,8 @@
-Aoo for Max
+AOO for Max
 ===========
 
 ### Overview
-This repository contains the source code for the `Aoo for Max` package. There is no need to manually build your project. To download a ready to use package please visit the Release page.
+This repository contains the source code for the `AOO for Max` package. There is no need to manually build your project. To download a ready to use package please visit the Release page.
 
 The externals has been tested on Max8.1 running on MacOS 12.1 and Windows11. Presumably they should also work with more modern releases.
 
@@ -14,14 +14,14 @@ The externals has been tested on Max8.1 running on MacOS 12.1 and Windows11. Pre
 ├── aoo
 ├── max-sdk-base
 ├── package
-│   └── Aoo for Max <---- the Max package
+│   └── AOO for Max <---- the Max package
 ├── package-info.json
 └── source
 ```
 The `source` folder contains the source file for each external while the `package` contains the ready to install Max package folder into which the externals will be compiled.
 
 ### Installation
-Manually copy the downlaoded `Aoo for Max` folder into your Max `Packages` folder or add it to the Max `Options > File Preferences...`
+Manually copy the downlaoded `AOO for Max` folder into your Max `Packages` folder or add it to the Max `Options > File Preferences...`
 When building from source you will find this folder inside the  `package` repo subfolder
 
 ---
@@ -78,5 +78,5 @@ The compiled externals will be installed in `package/Aoo for Max/externals`. At 
 Max SDK
 [https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html](https://sdk.cdn.cycling74.com/max-sdk-8.2.0/index.html)
 
-Aoo
+AOO
 [https://aoo.iem.sh/docs/](https://aoo.iem.sh/docs/)

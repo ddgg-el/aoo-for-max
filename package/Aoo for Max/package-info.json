@@ -1,12 +1,23 @@
 {
-	"name": "Aoo for Max",
-	"displayname": "Aoo",
+	"name": "AOO for Max",
+	"displayname": "AOO",
 	"version": "1.0.0",
 	"authors": ["Davide Gagliardi", "Francesca Seggioli"],
-	"description": "Max external for the Aoo Library",
+	"description": "Max externals for the AOO Library ('Audio Over OSC'), a low-latency peer-to-peer audio streaming and messaging library, using OSC as the underlying transport protocol.",
 	"tags": ["audio", "network", "osc", "DSP"],
 	"website": "https://aoo.iem.sh/",
 	"extensible": 0,
-	"max_version_min": "8.0",
-	"homepatcher": "Aoo Overview.maxpat" 
+	"max_version_min": "8.1",
+	"max_version_max": "none",
+	"os": {
+		"macintosh": {
+			"min_version": "",
+			"platform": ["x64", "aarch64"]
+		},
+		"windows": {
+			"min_version": "",
+			"platform": ["x64"]
+		}
+	},
+	"homepatcher": "AOO Overview.maxpat" 
 }

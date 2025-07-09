@@ -1,11 +1,10 @@
 /**
 	@file
-	aoo.receive~: a simple audio object for Max
-	original by: Christof Ressi, ported to Max by Francesca Seggioli
+	aoo.receive~: Receive an AOO stream from an <o>aoo.send~</o> object
+	original by: Christof Ressi, ported to Max by Davide Gagliardi and Francesca Seggioli
 	@ingroup network
 */
 
-// #include "aoo.h"
 #include "aoo_receive_tilde.h"
 
 // for hardware buffer sizes up to 1024 @ 44.1 kHz
@@ -335,28 +334,31 @@ t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
     offset = attr_args_offset(argc, argv);
     t_atom* attribute = argv+offset;
     
-    if(attribute->a_type == A_SYM)
+    if(atom_gettype(attribute) == A_SYM)
 	{
-        char* multiflag = atom_getsym(attribute)->s_name;
-        if(multiflag){
-            if(!strcmp(multiflag, "@multichannel")){
-                if(offset < 1){
-                    object_error((t_object*)this, "Missing argument <channels>");
-                    x_valid = false;
-                    return;
-                }
-#ifdef MAX_HAVE_MULTICHANNEL
-                x_multi = true;
-#else
-                object_error((t_object*)this, "Object compiled without multichannel support");
+        t_symbol *sym = atom_getsym(attribute);
+
+        if(sym == gensym("@multichannel")){
+            int multi_value = atom_getintarg(offset+1,argc, argv);
+            
+            if(offset < 1){
+                object_error((t_object*)this, "Missing argument <channels>");
                 x_valid = false;
                 return;
-#endif
-            } else {
-                object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);	
             }
+#ifdef MAX_HAVE_MULTICHANNEL
+            if(multi_value == 1){
+                x_multi = true;
+            }
+#else
+            object_error((t_object*)this, "Object compiled without multichannel support");
+            x_valid = false;
+            return;
+#endif
+        } else {
+            object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", sym->s_name);	
         }
-	}
+    }
 
     // arg #1: channels
     int noutlets;

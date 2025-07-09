@@ -40,25 +40,14 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
-					"id" : "obj-11",
-					"maxclass" : "message",
-					"numinlets" : 2,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 138.0, 128.0, 35.0, 22.0 ],
-					"text" : "open"
-				}
-
-			}
-, 			{
-				"box" : 				{
 					"id" : "obj-9",
+					"linecount" : 2,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 17.0, 77.0, 160.0, 22.0 ],
-					"text" : "load \"Aoo Overview.maxpat\""
+					"patching_rect" : [ 17.0, 77.0, 105.0, 35.0 ],
+					"text" : "loadunique \"AOO Overview.maxpat\""
 				}
 
 			}
@@ -69,7 +58,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 17.0, 106.0, 51.0, 22.0 ],
+					"patching_rect" : [ 17.0, 124.0, 51.0, 22.0 ],
 					"text" : "pcontrol"
 				}
 
@@ -93,7 +82,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 17.0, 20.0, 148.0, 25.0 ],
+					"patching_rect" : [ 17.0, 20.0, 154.0, 25.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 6.0, 8.0, 164.0, 25.0 ],
 					"saved_attribute_attributes" : 					{
@@ -103,7 +92,7 @@
 
 					}
 ,
-					"text" : "Aoo Objects Overview",
+					"text" : "AOO Objects Overview",
 					"textcolor" : [ 0.129412, 0.129412, 0.129412, 1.0 ]
 				}
 
@@ -129,13 +118,6 @@
 			}
  ],
 		"lines" : [ 			{
-				"patchline" : 				{
-					"destination" : [ "obj-6", 0 ],
-					"source" : [ "obj-11", 0 ]
-				}
-
-			}
-, 			{
 				"patchline" : 				{
 					"destination" : [ "obj-9", 0 ],
 					"source" : [ "obj-25", 0 ]

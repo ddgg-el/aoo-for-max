@@ -1,9 +1,10 @@
 /**
 	@file
-	aoo.send~: a simple audio object for Max
-	original by: Christof Ressi, ported to Max bz Davide Gagliardi
+	aoo.send~: Send an AOO stream to an <o>aoo.receive~</o> object
+	original by: Christof Ressi, ported to Max by Davide Gagliardi and Francesca Seggioli
 	@ingroup network
 */
+
 #include "aoo_send_tilde.h"
 
 static void aoo_send_tick(t_aoo_send *x)
@@ -209,27 +210,30 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
     offset = attr_args_offset(argc, argv);
     t_atom* attribute = argv+offset;
     
-    if(attribute->a_type == A_SYM)
+    if(atom_gettype(attribute) == A_SYM)
 	{
-        auto multiflag = atom_getsym(attribute)->s_name;
-        if(multiflag){
-            if(!strcmp(multiflag, "@multichannel")){
-                if(offset < 1){
-                    object_error((t_object*)this, "Missing argument <channels>");
-                    x_valid = false;
-                    return;
-                }
-    #ifdef MAX_HAVE_MULTICHANNEL
-                x_multi = true;
-    #else
-                object_error((t_object*)this, "Object compiled without multichannel support");
+        t_symbol *sym = atom_getsym(attribute);
+        if(sym == gensym("@multichannel")){
+            int multi_value = atom_getintarg(offset+1, argc, argv);
+
+            if(offset < 1){
+                object_error((t_object*)this, "Missing argument <channels>");
                 x_valid = false;
                 return;
-    #endif
-            } else {
-                object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", multiflag);
             }
+    #ifdef MAX_HAVE_MULTICHANNEL
+            if(multi_value == 1){
+                x_multi = true;
+            }
+    #else
+            object_error((t_object*)this, "Object compiled without multichannel support");
+            x_valid = false;
+            return;
+    #endif
+        } else {
+            object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", sym->s_name);
         }
+        
 	}
 
     // arg #1: channels

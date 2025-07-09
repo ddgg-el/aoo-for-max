@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <?xml-stylesheet href="./c74ref.xsl" type="text/xsl"?>
 
-<c74object name="aoo.receive~" module="msp" category="Aoo">
+<c74object name="aoo.receive~" module="msp" category="AOO">
 <digest>
-	Receive an Aoo stream from an <o>aoo.send~</o> object
+	Receive an AOO stream from an <o>aoo.send~</o> object
 </digest>
 <description>
-	Receive an Aoo audio stream from one or more Aoo sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library.</a> This object represent a <b>Sink</b> in an Aoo network.
+	Receive an AOO audio stream from one or more AOO sources using the <a href="https://aoo.iem.sh/">Audio over OSC Library. This object represent a <b>Sink</b> in an AOO network</a>
 </description>
 <!-- METADATA-->
 <metadatalist>
@@ -29,9 +29,9 @@
 </objarglist>
 <!-- ATTRIBUTES -->
 <attributelist>
-	<attribute name="multichannel" type="none">
+	<attribute name="multichannel" type="int" default="0">
 		<digest>Enable multichannel mode</digest>
-		<description>Enable multichannel mode. You should consider this more as a flag than an actual attribute: no value should be specified after its declaration and cannot be modifed after the creation of the object</description>
+		<description>Enable multichannel mode (0/1).</description>
 	</attribute>
 </attributelist>
 <!-- MESSAGES-->
@@ -111,9 +111,9 @@
 		<arglist>
 			<arg name="latency" optional='0' type="int"/>
 		</arglist>
-		<digest>Set the latency (in seconds)</digest>
+		<digest>Set the latency (in ms)</digest>
 		<description>
-			<p>Set the latency (in seconds)</p>
+			<p>Set the latency (in ms)</p>
 			<p>If a new stream is started, processing is delayed for the specified time resp. until we have received the corresponding number of blocks. This gives a buffer for compensating network and audio jitter.</p>
      		<p>For local networks small latencies of 5-20 ms should work; for unreliable/unpredictable networks you might need to increase it significantly if you want to avoid dropouts.</p>
 	 		<p>Higher latencies also allow for missing packets to be resent (if enabled). You can effectively create 'reliable' streams over unstable connections.</p>
