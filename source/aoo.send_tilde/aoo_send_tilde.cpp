@@ -206,35 +206,43 @@ t_aoo_send::t_aoo_send(int argc, t_atom *argv)
 {
     x_clock = clock_new(this, (method)aoo_send_tick);
     long offset;
-
     offset = attr_args_offset(argc, argv);
-    t_atom* attribute = argv+offset;
-    
-    if(atom_gettype(attribute) == A_SYM)
-	{
-        t_symbol *sym = atom_getsym(attribute);
-        if(sym == gensym("@multichannel")){
-            int multi_value = atom_getintarg(offset+1, argc, argv);
 
-            if(offset < 1){
-                object_error((t_object*)this, "Missing argument <channels>");
+    if(offset < argc){
+        t_atom* attribute = argv+offset;
+        
+        if(atom_gettype(attribute) == A_SYM)
+        {
+            t_symbol *sym = atom_getsym(attribute);
+            
+            if(sym && sym == gensym("@multichannel")){
+                int multi_value = atom_getintarg(offset+1, argc, argv);
+    
+                if(offset < 1){
+                    object_error((t_object*)this, "Missing argument <channels>");
+                    x_valid = false;
+                    return;
+                }
+        #ifdef MAX_HAVE_MULTICHANNEL
+                if(multi_value == 1){
+                    x_multi = true;
+                }
+        #else
+                object_error((t_object*)this, "Object compiled without multichannel support");
                 x_valid = false;
                 return;
+        #endif
+            } else {
+                if(sym && sym->s_name){
+                    object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", sym->s_name);
+                } else {
+                    object_warn((t_object*)this, "unknown attribute.");
+                }
             }
-    #ifdef MAX_HAVE_MULTICHANNEL
-            if(multi_value == 1){
-                x_multi = true;
-            }
-    #else
-            object_error((t_object*)this, "Object compiled without multichannel support");
-            x_valid = false;
-            return;
-    #endif
-        } else {
-            object_warn((t_object*)this, "unknown attribute %s. Did you mean @multichannel?", sym->s_name);
+            
         }
-        
-	}
+    }
+
 
     // arg #1: channels
     int ninlets;
@@ -1146,7 +1154,7 @@ void aoo_send_dsp64(t_aoo_send *x, t_object *dsp64, short *count, double sampler
     long nchannels;
 #ifdef MAX_HAVE_MULTICHANNEL
     if(x->x_multi){
-        nchannels = (long)object_method(dsp64,gensym("getnuminputchannels"), x, 0);
+        nchannels = (intptr_t)object_method(dsp64,gensym("getnuminputchannels"), x, 0);
         AooFormatStorage f;
         format_makedefault(f, (int)nchannels);
         x->x_source->setFormat(f.header);
