@@ -327,8 +327,8 @@ static void aoo_receive_port(t_aoo_receive *x, double f)
 //********************** member functions **********************
 t_aoo_receive::t_aoo_receive(int argc, t_atom *argv)
 {
-    x_clock = clock_new(this, (method)aoo_receive_tick);
-    x_queue_clock = clock_new(this, (method)aoo_receive_queue_tick);
+    x_clock = clock_new(this, (method)(void*)aoo_receive_tick);
+    x_queue_clock = clock_new(this, (method)(void*)aoo_receive_queue_tick);
     long offset;
     offset = attr_args_offset(argc, argv);
     
@@ -681,7 +681,7 @@ static void aoo_receive_fill_ratio(t_aoo_receive *x, t_symbol *s, int argc, t_at
             addr = src.s_address;
             id = src.s_id;
         } else {
-            object_error((t_object*)x, "%s: no sources");
+            object_error((t_object*)x, "no sources");
         }
     }
 
@@ -743,12 +743,12 @@ static void aoo_receive_resample_method(t_aoo_receive *x, t_symbol *s)
     } else if (name == "cubic") {
         method = kAooResampleCubic;
     } else {
-        object_error((t_object*)x, "%s: bad resample method '%s'",
+        object_error((t_object*)x, "bad resample method '%s'",
                   name.data());
         return;
     }
     if (x->x_sink->setResampleMethod(method) != kAooOk) {
-        object_error((t_object*)x, "%s: resample method '%s' not supported",
+        object_error((t_object*)x, "resample method '%s' not supported",
                   name.data());
     }
 }
@@ -775,7 +775,7 @@ static void aoo_receive_codec_set(t_aoo_receive *x, t_symbol *s, int argc, t_ato
     auto codec = atom_getsym(argv + 3);
     auto opt = atom_getsym(argv + 4);
     // no codec options yet
-    object_error((t_object*)x,"%s: unknown parameter '%s' for codec '%s'",
+    object_error((t_object*)x,"unknown parameter '%s' for codec '%s'",
              opt->s_name, codec->s_name);
 }
 // <ip> <port> <id> <codec> <option>
@@ -797,7 +797,7 @@ static void aoo_receive_codec_get(t_aoo_receive *x, t_symbol *s, int argc, t_ato
     std::copy(argv, argv + 5, msg);
 #endif
     // no codec options yet
-    object_error((t_object*)x, "%s: unknown parameter '%s' for codec '%s'",
+    object_error((t_object*)x, "unknown parameter '%s' for codec '%s'",
              opt->s_name, codec->s_name);
     return;
 }
@@ -822,36 +822,36 @@ void ext_main(void *r)
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo.receive~", (method)aoo_receive_new, (method)aoo_receive_free, (long)sizeof(t_aoo_receive), 0L, A_GIMME, 0);
+	t_class *c = class_new("aoo.receive~", (method)(void*)aoo_receive_new, (method)(void*)aoo_receive_free, (long)sizeof(t_aoo_receive), 0L, A_GIMME, 0);
 
-	class_addmethod(c, (method)aoo_receive_dsp64,	"dsp64",	A_CANT, 0);
-	class_addmethod(c, (method)aoo_receive_assist,	"assist",	A_CANT, 0);
+	class_addmethod(c, (method)(void*)aoo_receive_dsp64,	"dsp64",	A_CANT, 0);
+	class_addmethod(c, (method)(void*)aoo_receive_assist,	"assist",	A_CANT, 0);
 
-    class_addmethod(c, (method)aoo_receive_ping,"ping", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_invite, "invite", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_receive_uninvite,"uninvite", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_receive_source_list, "source_list", 0);
-    class_addmethod(c, (method)aoo_receive_latency,"latency", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_port,"port", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_id,"id", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_fill_ratio,"fill_ratio", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_receive_packetsize,"packetsize", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_buffersize,"buffersize", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_reset,"reset", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_receive_resend,"resend", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_resend_limit,"resend_limit", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_resend_interval,"resend_interval", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_resample_method,"resample_method", A_SYM, 0);
-    class_addmethod(c, (method)aoo_receive_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_receive_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_ping,"ping", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_invite, "invite", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_uninvite,"uninvite", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_source_list, "source_list", 0);
+    class_addmethod(c, (method)(void*)aoo_receive_latency,"latency", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_port,"port", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_id,"id", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_fill_ratio,"fill_ratio", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_packetsize,"packetsize", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_buffersize,"buffersize", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_reset,"reset", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_resend,"resend", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_resend_limit,"resend_limit", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_resend_interval,"resend_interval", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_resample_method,"resample_method", A_SYM, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
 #if AOO_USE_OPUS
     class_addmethod(c, (method)aoo_receive_codec_set,"codec_set", A_GIMME, 0);
     class_addmethod(c, (method)aoo_receive_codec_get,"codec_get", A_GIMME, 0);
 #endif
-    class_addmethod(c, (method)aoo_receive_real_samplerate, "real_samplerate", 0);
+    class_addmethod(c, (method)(void*)aoo_receive_real_samplerate, "real_samplerate", 0);
 
 #ifdef MAX_HAVE_MULTICHANNEL
-    class_addmethod(c, (method)aoo_receive_multichanneloutputs, "multichanneloutputs", A_CANT, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_multichanneloutputs, "multichanneloutputs", A_CANT, 0);
 #endif
 
 	class_dspinit(c);

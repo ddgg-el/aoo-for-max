@@ -6,6 +6,7 @@ project(${THIS_FOLDER_NAME})
 message(STATUS "Project: ${PROJECT_NAME}")
 
 ################################################################
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Max-SDK directories and settings
 set(MAX_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/max-sdk-base" CACHE STRING "Max SDK Base folder")

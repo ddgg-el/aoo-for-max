@@ -204,7 +204,7 @@ static void aoo_send_port(t_aoo_send *x, double f)
  */
 t_aoo_send::t_aoo_send(int argc, t_atom *argv)
 {
-    x_clock = clock_new(this, (method)aoo_send_tick);
+    x_clock = clock_new(this, (method)(void*)aoo_send_tick);
     long offset;
     offset = attr_args_offset(argc, argv);
 
@@ -778,11 +778,11 @@ static void aoo_send_resample_method(t_aoo_send *x, t_symbol *s)
     } else if (name == "cubic") {
         method = kAooResampleCubic;
     } else {
-        object_error((t_object*)x, "%s: bad resample method '%s'", name.data());
+        object_error((t_object*)x, "bad resample method '%s'", name.data());
         return;
     }
     if (x->x_source->setResampleMethod(method) != kAooOk) {
-        object_error((t_object*)x, "%s: resample method '%s' not supported",
+        object_error((t_object*)x, "resample method '%s' not supported",
                   name.data());
     }
 }
@@ -817,7 +817,7 @@ static void aoo_send_format(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
         if (!x->x_multi && (strcmp(f.header.codecName, "null") != 0)) {
             if (f.header.numChannels > x->x_nchannels){
                 if (x->x_nchannels > 0) {
-                    object_error((t_object*)x, "%s: 'channel' argument (%d) in 'format' message out of range!",
+                    object_error((t_object*)x, "'channel' argument (%d) in 'format' message out of range!",
                              f.header.numChannels);
                     f.header.numChannels = x->x_nchannels;
                 } else {
@@ -837,7 +837,7 @@ static void aoo_send_format(t_aoo_send *x, t_symbol *s, int argc, t_atom *argv)
                 outlet_anything(x->x_msgout, gensym("format"), n, msg);
             }
         } else {
-            object_error((t_object*)x, "%s: could not set format: %s",
+            object_error((t_object*)x, "could not set format: %s",
                      aoo_strerror(err));
         }
     }
@@ -860,7 +860,7 @@ static bool get_opus_bitrate(t_aoo_send *x, t_atom *a) {
     opus_int32 value;
     auto err = AooSource_getOpusBitrate(x->x_source.get(), 0, &value);
     if (err != kAooOk){
-        object_error((t_object*)x, "%s: could not get bitrate: %s", aoo_strerror(err));
+        object_error((t_object*)x, "could not get bitrate: %s", aoo_strerror(err));
         return false;
     }
     // NOTE: because of a bug in opus_multistream_encoder (as of opus v1.3.2)
@@ -888,7 +888,7 @@ static void set_opus_bitrate(t_aoo_send *x, const t_atom *a) {
         } else if (sym == gensym("max")){
             value = OPUS_BITRATE_MAX;
         } else {
-            object_error((t_object*)x, "%s: bad bitrate argument '%s'",
+            object_error((t_object*)x, "bad bitrate argument '%s'",
                      sym->s_name);
             return;
         }
@@ -897,14 +897,14 @@ static void set_opus_bitrate(t_aoo_send *x, const t_atom *a) {
         if (bitrate > 0){
             value = bitrate;
         } else {
-            object_error((t_object*)x, "%s: bitrate argument %d out of range",
+            object_error((t_object*)x, "bitrate argument %d out of range",
                      bitrate);
             return;
         }
     }
     auto err = AooSource_setOpusBitrate(x->x_source.get(), 0, value);
     if (err != kAooOk){
-        object_error((t_object*)x, "%s: could not set bitrate: %s",
+        object_error((t_object*)x, "could not set bitrate: %s",
                  aoo_strerror(err));
     }
 }
@@ -912,7 +912,7 @@ static bool get_opus_complexity(t_aoo_send *x, t_atom *a){
     opus_int32 value;
     auto err = AooSource_getOpusComplexity(x->x_source.get(), 0, &value);
     if (err != kAooOk){
-        object_error((t_object*)x, "%s: could not get complexity: %s",
+        object_error((t_object*)x, "could not get complexity: %s",
                  aoo_strerror(err));
         return false;
     }
@@ -923,13 +923,13 @@ static void set_opus_complexity(t_aoo_send *x, const t_atom *a){
     // 0-10
     opus_int32 value = atom_getfloat(a);
     if (value < 0 || value > 10){
-        object_error((t_object*)x, "%s: complexity value %d out of range",
+        object_error((t_object*)x, "complexity value %d out of range",
                  value);
         return;
     }
     auto err = AooSource_setOpusComplexity(x->x_source.get(), 0, value);
     if (err != kAooOk){
-        object_error((t_object*)x, "%s: could not set complexity: %s",
+        object_error((t_object*)x, "could not set complexity: %s",
                  aoo_strerror(err));
     }
 }
@@ -937,7 +937,7 @@ static bool get_opus_signal(t_aoo_send *x, t_atom *a){
     opus_int32 value;
     auto err = AooSource_getOpusSignalType(x->x_source.get(), 0, &value);
     if (err != kAooOk){
-        object_error((t_object*)x, "%s: could not get signal type: %s",
+        object_error((t_object*)x, "could not get signal type: %s",
                  aoo_strerror(err));
         return false;
     }
@@ -967,13 +967,13 @@ static void set_opus_signal(t_aoo_send *x, const t_atom *a){
     } else if (type == gensym("voice")){
         value = OPUS_SIGNAL_VOICE;
     } else {
-        object_error((t_object*)x,"%s: unsupported signal type '%s'",
+        object_error((t_object*)x,"unsupported signal type '%s'",
                  type->s_name);
         return;
     }
     auto err = AooSource_setOpusSignalType(x->x_source.get(), 0, value);
     if (err != kAooOk){
-        object_error((t_object*)x, "%s: could not set signal type: %s",
+        object_error((t_object*)x, "could not set signal type: %s",
                  aoo_strerror(err));
     }
 }
@@ -996,7 +996,7 @@ static void aoo_send_codec_set(t_aoo_send *x, t_symbol *s, int argc, t_atom *arg
         }
     }
 #endif
-    object_error((t_object*)x,"%s: unknown parameter '%s' for codec '%s'",
+    object_error((t_object*)x,"unknown parameter '%s' for codec '%s'",
              name->s_name, x->x_codec->s_name);
 }
 static void aoo_send_codec_get(t_aoo_send *x, t_symbol *s){
@@ -1028,7 +1028,7 @@ static void aoo_send_codec_get(t_aoo_send *x, t_symbol *s){
         }
     }
 #endif
-    object_error((t_object*)x,"%s: unknown parameter '%s' for codec '%s'",
+    object_error((t_object*)x,"unknown parameter '%s' for codec '%s'",
                      s->s_name, x->x_codec->s_name);
     return;
 
@@ -1045,42 +1045,42 @@ void ext_main(void *r)
 	// unless you need to free allocated memory, in which case you should call dsp_free from
 	// your custom free function.
 
-	t_class *c = class_new("aoo.send~", (method)aoo_send_new, (method)aoo_send_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
+	t_class *c = class_new("aoo.send~", (method)(void*)aoo_send_new, (method)(void*)aoo_send_free, (long)sizeof(t_aoo_send), 0L, A_GIMME, 0);
 
-	class_addmethod(c, (method)aoo_send_dsp64,		"dsp64",	A_CANT, 0);
-	class_addmethod(c, (method)aoo_send_assist,	"assist",	A_CANT, 0);
+	class_addmethod(c, (method)(void*)aoo_send_dsp64,		"dsp64",	A_CANT, 0);
+	class_addmethod(c, (method)(void*)aoo_send_assist,	"assist",	A_CANT, 0);
 
-    class_addmethod(c, (method)aoo_send_add, "add", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_remove,"remove", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_start, "start", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_stop, "stop", 0);
-    class_addmethod(c, (method)aoo_send_sink_channel, "sink_channel", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_auto_invite, "auto_invite", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_invite, "invite", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_uninvite, "uninvite", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_active, "active", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_port,"port", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_id,"id", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_packetsize,"packetsize", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_ping,"ping", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_buffersize,"buffersize", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_reset, "reset", 0);
-    class_addmethod(c, (method)aoo_send_resend,"resend", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_sink_list, "sink_list", 0);
+    class_addmethod(c, (method)(void*)aoo_send_add, "add", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_remove,"remove", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_start, "start", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_stop, "stop", 0);
+    class_addmethod(c, (method)(void*)aoo_send_sink_channel, "sink_channel", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_auto_invite, "auto_invite", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_invite, "invite", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_uninvite, "uninvite", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_active, "active", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_port,"port", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_id,"id", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_packetsize,"packetsize", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_ping,"ping", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_buffersize,"buffersize", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_reset, "reset", 0);
+    class_addmethod(c, (method)(void*)aoo_send_resend,"resend", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_sink_list, "sink_list", 0);
 
-    class_addmethod(c, (method)aoo_send_redundancy,"redundancy", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_resample_method,"resample_method", A_SYM, 0);
-    class_addmethod(c, (method)aoo_send_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_binary,"binary", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_send_stream_time,"stream_time", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_redundancy,"redundancy", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_resample_method,"resample_method", A_SYM, 0);
+    class_addmethod(c, (method)(void*)aoo_send_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_binary,"binary", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_send_stream_time,"stream_time", A_FLOAT, 0);
 
-    class_addmethod(c, (method)aoo_send_format, "format", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_format, "format", A_GIMME, 0);
 #if AOO_USE_OPUS
     class_addmethod(c, (method)aoo_send_codec_set, "codec_set", A_GIMME, 0);
     class_addmethod(c, (method)aoo_send_codec_get,"codec_get", A_SYM, 0);
 #endif
-    class_addmethod(c, (method)aoo_send_real_samplerate, "real_samplerate", 0);
+    class_addmethod(c, (method)(void*)aoo_send_real_samplerate, "real_samplerate", 0);
 
     // initializes class dsp methods for audio processing
 	class_dspinit(c);

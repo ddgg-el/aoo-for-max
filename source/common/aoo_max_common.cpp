@@ -192,10 +192,10 @@ bool atom_to_datatype(const t_atom &a, AooDataType& type, void *x) {
             }
             return true;
         } else {
-            object_error((t_object*)x, "%s: unknown data type '%s'", object_classname((t_object*)x), str);
+            object_error((t_object*)x, "unknown data type '%s'", str);
         }
     } else {
-        object_error((t_object*)x, "%s: bad metadata type", object_classname((t_object*)x));
+        object_error((t_object*)x, "bad metadata type");
     }
     return false;
 }
@@ -242,7 +242,7 @@ static int32_t format_getparam(void *x, int argc, t_atom *argv, int which, const
     #if 1
         t_symbol *s = atom_getsym(argv + which);
         if (s != gensym("_")){
-            object_error((t_object*)x, "%s: bad %s argument (%s), using %d", name, s->s_name, def);
+            object_error((t_object*)x, "bad %s argument (%s), using %d", name, s->s_name, def);
         }
     #endif
     }
@@ -286,7 +286,7 @@ bool format_parse(t_object *x, AooFormatStorage &f, int argc, t_atom *argv, int 
             bitdepth = kAooPcmFloat64;
             break;
         default:
-            object_error(x, "%s: bad bitdepth argument %d", nbits);
+            object_error(x, "bad bitdepth argument %d", nbits);
             return false;
         }
 
@@ -310,7 +310,7 @@ bool format_parse(t_object *x, AooFormatStorage &f, int argc, t_atom *argv, int 
             } else if (type == "lowdelay") {
                 applicationType = OPUS_APPLICATION_RESTRICTED_LOWDELAY;
             } else {
-                object_error(x,"%s: unsupported application type '%s'",
+                object_error(x,"unsupported application type '%s'",
                          type.data());
                 return false;
             }
@@ -323,7 +323,7 @@ bool format_parse(t_object *x, AooFormatStorage &f, int argc, t_atom *argv, int 
     }
 #endif
     else {
-        object_error(x, "%s: unknown codec '%s'", codec->s_name);
+        object_error(x, "unknown codec '%s'", codec->s_name);
         return false;
     }
     return true;

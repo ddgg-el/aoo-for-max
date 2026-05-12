@@ -46,8 +46,8 @@ static void aoo_client_tick(t_aoo_client *x)
 t_aoo_client::t_aoo_client(int argc, t_atom *argv)
 {
     x_dejitter = dejitter_get();
-    x_clock = clock_new(this, (method)aoo_client_tick);
-    x_queue_clock = clock_new(this, (method)aoo_client_queue_tick);
+    x_clock = clock_new(this, (method)(void*)aoo_client_tick);
+    x_queue_clock = clock_new(this, (method)(void*)aoo_client_queue_tick);
     x_stateout = outlet_new(&ob, 0);
     x_msgout = outlet_new(&ob, 0);
 

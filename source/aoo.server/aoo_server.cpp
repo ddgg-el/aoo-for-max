@@ -202,12 +202,12 @@ static void aoo_server_port(t_aoo_server *x, double f)
 	    t_max_err err;
 
         // start server threads
-    	err = systhread_create((method)x->run, x, 0, 0, 0, &x->x_thread);
+    	err = systhread_create((method)(void*)x->run, x, 0, 0, 0, &x->x_thread);
     	if(err != MAX_ERR_NONE){
         	object_error((t_object*)x, "Could not create server thread");
     	}
         // start udp thread
-		err = systhread_create((method)x->receive, x, 0, 0, 0, &x->x_udp_thread);
+		err = systhread_create((method)(void*)x->receive, x, 0, 0, 0, &x->x_udp_thread);
     	if(err != MAX_ERR_NONE){
         	object_error((t_object*)x, "Could not create udp thread");
     	}
@@ -221,7 +221,7 @@ static void aoo_server_port(t_aoo_server *x, double f)
 
 t_aoo_server::t_aoo_server(int argc, t_atom *argv)
 {
-	x_clock = clock_new(this, (method)aoo_server_tick);
+	x_clock = clock_new(this, (method)(void*)aoo_server_tick);
 	x_stateout = outlet_new(&x_obj, 0);
 	x_msgout = outlet_new(&x_obj, 0);
 
@@ -245,12 +245,12 @@ void ext_main(void *r)
 {
 	t_class *c;
 
-	c = class_new("aoo.server", (method)aoo_server_new, (method)aoo_server_free, (long)sizeof(t_aoo_server),
+	c = class_new("aoo.server", (method)(void*)aoo_server_new, (method)(void*)aoo_server_free, (long)sizeof(t_aoo_server),
 				  0L, A_GIMME, 0);
 
-	class_addmethod(c, (method)aoo_server_assist, "assist", A_CANT, 0);
-	class_addmethod(aoo_server_class, (method)aoo_server_port, "port", A_FLOAT, 0);
-	class_addmethod(aoo_server_class, (method)aoo_server_relay, "relay", A_FLOAT, 0);
+	class_addmethod(c, (method)(void*)aoo_server_assist, "assist", A_CANT, 0);
+	class_addmethod(aoo_server_class, (method)(void*)aoo_server_port, "port", A_FLOAT, 0);
+	class_addmethod(aoo_server_class, (method)(void*)aoo_server_relay, "relay", A_FLOAT, 0);
 
 
 	class_register(CLASS_BOX, c);
@@ -278,18 +278,12 @@ void ext_main(void *r)
 
 void aoo_server_assist(t_aoo_server *x, void *b, long m, long a, char *s)
 {
-	if (m == ASSIST_INLET)
-    { // inlet
+	if (m == ASSIST_INLET) { // inlet
         snprintf_zero(s, 256, "(message) Messages");
-    }
-    else
-    { // outlet
-        if (a == 0)
-        {
+    } else { // outlet
+        if (a == 0) {
             snprintf_zero(s, 256, "(message) Events");
-        }
-        else
-        {
+        } else {
             snprintf_zero(s, 256, "(int) Connection status 0/1");
         }
     }

@@ -9,7 +9,7 @@ t_dejitter::t_dejitter()
     t_symbol *name_sym = gensym(t_dejitter::bindsym);
     object_register(namespace_sym, name_sym, this);
     // TODO: clock in samples
-    d_clock = clock_new(this, (method)tick);
+    d_clock = clock_new(this, (method)(void*)tick);
     clock_delay(d_clock, 0);
 }
 
@@ -105,7 +105,7 @@ uint64_t dejitter_osctime(t_dejitter *x) {
 void aoo_dejitter_setup(void)
 {
     t_class *c;
-    c = class_new("aoo_dejitter", (method)aoo_dejitter_new, (method)aoo_dejitter_free, sizeof(t_dejitter), 0L, A_NOTHING, 0);
+    c = class_new("aoo_dejitter", (method)(void*)aoo_dejitter_new, (method)(void*)aoo_dejitter_free, sizeof(t_dejitter), 0L, A_NOTHING, 0);
     class_register(CLASS_NOBOX, c);
     
     aoo_dejitter_class = c;

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "aoo_max_common.hpp"
 #include "ext.h"			// standard Max include
 #include "ext_obex.h"		// required for new style Max object
 
 #include "aoo.h"
 #include "common/net_utils.hpp"
 #include "common/sync.hpp"
+#include "z_sampletype.h"
 
 #include <functional>
 

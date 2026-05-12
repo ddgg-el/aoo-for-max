@@ -104,12 +104,12 @@ t_node_imp::t_node_imp(t_symbol *s, int port, t_node_proxy* obj)
 #else
     t_max_err err;
     // start send thread
-    err = systhread_create((method)send, this, 0, 0, 0, &x_sendthread);
+    err = systhread_create((method)(void*)send, this, 0, 0, 0, &x_sendthread);
     if(err != MAX_ERR_NONE){
         object_error((t_object*)this, "Could not create send thread");
     }
     // start receive thread
-    err = systhread_create((method)receive, this, 0, 0, 0, &x_recvthread);
+    err = systhread_create((method)(void*)receive, this, 0, 0, 0, &x_recvthread);
     if(err != MAX_ERR_NONE){
         object_error((t_object*)this, "Could not create receive thread");
     }
@@ -263,7 +263,7 @@ bool t_node_imp::add_object(t_object *obj, void *x, AooId id)
         if (!x_clientobj){
             x_clientobj = (t_object*)obj;
             // start thread lazily
-            t_max_err err = systhread_create((method)run_client, this, 0, 0, 0, &x_clientthread);
+            t_max_err err = systhread_create((method)(void*)run_client, this, 0, 0, 0, &x_clientthread);
             if(err != MAX_ERR_NONE){
                 object_error((t_object*)obj, "Could not create client thread");
             }
@@ -432,7 +432,7 @@ void t_node_imp::receive(t_node_imp *x) {
 void aoo_node_setup(void)
 {
     t_class *c;
-    c = class_new("aoo_node", (method)aoo_node_new, (method)aoo_node_free, sizeof(t_node_proxy), 0L, A_NOTHING, 0);
+    c = class_new("aoo_node", (method)(void*)aoo_node_new, (method)(void*)aoo_node_free, sizeof(t_node_proxy), 0L, A_NOTHING, 0);
     class_register(CLASS_NOBOX, c);
     aoo_node_proxy_class = c;
 

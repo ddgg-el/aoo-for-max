@@ -487,33 +487,33 @@ void ext_main(void *r)
 {
     t_class *c;
 
-    c = class_new("aoo.client", (method)aoo_client_new, (method)aoo_client_free, (long)sizeof(t_aoo_client), 0L, A_GIMME, 0);
+    c = class_new("aoo.client", (method)(void*)aoo_client_new, (method)(void*)aoo_client_free, (long)sizeof(t_aoo_client), 0L, A_GIMME, 0);
 
-    class_addmethod(c, (method)aoo_client_assist, "assist", A_CANT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_assist, "assist", A_CANT, 0);
 
-    class_addmethod(c, (method)aoo_client_connect, "connect", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_disconnect, "disconnect", 0);
-    class_addmethod(c, (method)aoo_client_group_join, "group_join", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_group_leave, "group_leave", A_SYM, 0);
-    class_addmethod(c, (method)aoo_client_peer_list, "peer_list", 0);
-    class_addmethod(c, (method)aoo_client_broadcast, "broadcast", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_send_peer, "send_peer", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_send_group, "send_group", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_target, "target", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_send, "send", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_client_offset, "offset", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_delay, "delay", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_schedule, "schedule", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_discard_late, "discard_late", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_reliable, "reliable", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_dejitter, "dejitter", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_port, "port", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_packetsize, "packetsize", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_binary, "binary", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_connect, "connect", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_disconnect, "disconnect", 0);
+    class_addmethod(c, (method)(void*)aoo_client_group_join, "group_join", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_group_leave, "group_leave", A_SYM, 0);
+    class_addmethod(c, (method)(void*)aoo_client_peer_list, "peer_list", 0);
+    class_addmethod(c, (method)(void*)aoo_client_broadcast, "broadcast", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_send_peer, "send_peer", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_send_group, "send_group", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_target, "target", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_send, "send", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_client_offset, "offset", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_delay, "delay", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_schedule, "schedule", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_discard_late, "discard_late", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_reliable, "reliable", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_dejitter, "dejitter", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_port, "port", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_packetsize, "packetsize", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_binary, "binary", A_FLOAT, 0);
     // debug/simulate
-    class_addmethod(c, (method)aoo_client_sim_packet_reorder, "sim_packet_reorder", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_sim_packet_loss, "sim_packet_loss", A_FLOAT, 0);
-    class_addmethod(c, (method)aoo_client_sim_packet_jitter, "sim_packet_jitter", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_sim_packet_reorder, "sim_packet_reorder", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_sim_packet_loss, "sim_packet_loss", A_FLOAT, 0);
+    class_addmethod(c, (method)(void*)aoo_client_sim_packet_jitter, "sim_packet_jitter", A_FLOAT, 0);
 
     class_register(CLASS_BOX, c);
     aoo_client_class = c;

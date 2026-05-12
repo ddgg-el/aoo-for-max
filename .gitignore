@@ -1,5 +1,7 @@
 build/
 .vscode/
+.clangd
+clang-format
 backup/
 externals/
 studi/
