@@ -1,4 +1,6 @@
 #include "aoo_max_common.hpp"
+#include "codec/aoo_pcm.h"
+#include "z_dsp.h"
 
 double get_elapsed_ms(AooNtpTime tt) {
     return aoo::time_tag::duration(g_start_time, tt);
@@ -7,7 +9,7 @@ double get_elapsed_ms(AooNtpTime tt) {
 void format_makedefault(AooFormatStorage &f, int nchannels)
 {
     AooFormatPcm_init((AooFormatPcm *)&f, nchannels,
-                      sys_getsr(), 64, kAooPcmFloat32);
+                      sys_getsr(), sys_getblksize(), kAooPcmFloat64);
 }
 
 int format_to_atoms(const AooFormat &f, int argc, t_atom *argv)
@@ -236,8 +238,11 @@ int atoms_to_data(AooDataType type, int argc, const t_atom *argv, AooByte *data,
 static int32_t format_getparam(void *x, int argc, t_atom *argv, int which, const char *name, int32_t def)
 {
     if (argc > which){
-        if (argv[which].a_type == A_FLOAT){
-            return argv[which].a_w.w_float;
+        auto value = argv[which];
+        if (value.a_type == A_FLOAT){
+            return value.a_w.w_float;
+        } else if (value.a_type == A_LONG) {
+            return value.a_w.w_long;
         }
     #if 1
         t_symbol *s = atom_getsym(argv + which);
