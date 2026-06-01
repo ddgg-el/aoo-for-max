@@ -112,7 +112,6 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 165.0, 243.0, 40.0, 22.0 ],
-									"presentation_linecount" : 2,
 									"text" : "music"
 								}
 
@@ -173,7 +172,6 @@
 									"numinlets" : 1,
 									"numoutlets" : 0,
 									"patching_rect" : [ 187.0, 178.0, 39.0, 20.0 ],
-									"presentation_linecount" : 2,
 									"text" : "0 - 10"
 								}
 
@@ -354,7 +352,7 @@
 
 							}
  ],
-						"originid" : "pat-42"
+						"originid" : "pat-8"
 					}
 ,
 					"patching_rect" : [ 514.0, 33.0, 135.0, 22.0 ],
@@ -392,7 +390,6 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 389.0, 268.0, 139.0, 20.0 ],
-					"presentation_linecount" : 2,
 					"text" : "codec with defaul values"
 				}
 
@@ -416,7 +413,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 352.0, 294.0, 109.0, 22.0 ],
-					"presentation_linecount" : 2,
 					"text" : "format pcm _ _ _ 4"
 				}
 
@@ -456,7 +452,7 @@
 					"lockeddragscroll" : 0,
 					"lockedsize" : 0,
 					"maxclass" : "bpatcher",
-					"name" : "codec-settings.maxpat",
+					"name" : "codec-settings-gui.maxpat",
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"offset" : [ 0.0, 0.0 ],
@@ -525,7 +521,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 7.333333333333343, 479.0, 84.0, 35.0 ],
-					"text" : "opus 1. 480. 48000. audio"
+					"text" : "pcm 1. 128. 48000. 2."
 				}
 
 			}
@@ -857,7 +853,7 @@
 				"type" : "iLaX"
 			}
 , 			{
-				"name" : "codec-settings.maxpat",
+				"name" : "codec-settings-gui.maxpat",
 				"bootpath" : "~/Documents/src/aoo_package/package/AOO for Max/extras",
 				"patcherrelativepath" : "../extras",
 				"type" : "JSON",

@@ -148,7 +148,7 @@
 										}
 ,
 										"classnamespace" : "box",
-										"rect" : [ 393.0, 181.0, 507.0, 284.0 ],
+										"rect" : [ 660.0, 152.0, 507.0, 284.0 ],
 										"gridsize" : [ 15.0, 15.0 ],
 										"boxes" : [ 											{
 												"box" : 												{
@@ -213,7 +213,7 @@
 
 											}
  ],
-										"originid" : "pat-55"
+										"originid" : "pat-22"
 									}
 ,
 									"patching_rect" : [ 338.0, 113.0, 35.0, 22.0 ],
@@ -677,7 +677,7 @@
 
 											}
  ],
-										"originid" : "pat-61"
+										"originid" : "pat-28"
 									}
 ,
 									"patching_rect" : [ 515.0, 246.0, 135.0, 22.0 ],
@@ -787,7 +787,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 635.5, 426.0, 75.0, 49.0 ],
-									"text" : "2. pcm 2. 64. 48000. 8."
+									"text" : "2. pcm 2. 128. 48000. 2."
 								}
 
 							}
@@ -800,7 +800,7 @@
 									"numoutlets" : 1,
 									"outlettype" : [ "" ],
 									"patching_rect" : [ 18.0, 494.0, 84.0, 35.0 ],
-									"text" : "pcm 2. 64. 48000. 8."
+									"text" : "pcm 2. 128. 48000. 2."
 								}
 
 							}
@@ -958,7 +958,7 @@
 									"numoutlets" : 0,
 									"patching_rect" : [ 10.0, 64.599853515625, 753.0, 22.0 ],
 									"style" : "helpfile_label",
-									"text" : "AOO can stream PCM data or Opus (compressed)"
+									"text" : "AOO can stream PCM data or Opus (compressed) useful for WiFi transmissions"
 								}
 
 							}
@@ -1162,7 +1162,7 @@
 
 							}
  ],
-						"originid" : "pat-53"
+						"originid" : "pat-20"
 					}
 ,
 					"patching_rect" : [ 55.0, 116.0, 57.0, 22.0 ],
@@ -1192,7 +1192,7 @@
 						"showontab" : 1,
 						"boxes" : [  ],
 						"lines" : [  ],
-						"originid" : "pat-67"
+						"originid" : "pat-34"
 					}
 ,
 					"patching_rect" : [ 82.0, 187.0, 25.0, 22.0 ],
@@ -1818,7 +1818,7 @@
 
 							}
  ],
-						"originid" : "pat-69"
+						"originid" : "pat-36"
 					}
 ,
 					"patching_rect" : [ 63.0, 154.0, 86.0, 22.0 ],
@@ -2450,7 +2450,7 @@
 
 							}
  ],
-						"originid" : "pat-75"
+						"originid" : "pat-42"
 					}
 ,
 					"patching_rect" : [ 28.5, 48.0, 47.0, 22.0 ],
@@ -3002,7 +3002,7 @@
 
 							}
  ],
-						"originid" : "pat-85"
+						"originid" : "pat-52"
 					}
 ,
 					"patching_rect" : [ 47.0, 78.0, 71.0, 22.0 ],
@@ -3023,7 +3023,7 @@
 			}
  ],
 		"lines" : [  ],
-		"originid" : "pat-51",
+		"originid" : "pat-18",
 		"parameters" : 		{
 			"obj-1::obj-40" : [ "live.gain~", "live.gain~", 0 ],
 			"obj-2::obj-5" : [ "mc.live.gain~", "mc.live.gain~", 0 ],

@@ -43,35 +43,6 @@
 		<digest>Set send buffer size in ms (default: 25 ms)</digest>
 		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
 	</method>
-	<!-- UNSUPPORTED -->
-	<!-- <method name="codec_get" type="message">
-		<arglist>
-			<arg name="data" optional='0' type="string" />
-		</arglist>
-		<digest>Get opus codec settings. Use only when setting <m>format</m>='opus'</digest>
-		<description>
-			<p>Get opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
-			<ul>
-				<li>bitrate</li>
-				<li>complexity</li>
-				<li>signal</li>
-			</ul>
-		</description>
-	</method>
-	<method name="codec_set" type="message">
-		<arglist>
-			<arg name="data" optional='0' type="string" />
-		</arglist>
-		<digest>Set opus codec settings. Use only when setting <m>format</m>='opus'</digest>
-		<description>
-			<p>Set opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
-			<ul>
-				<li>bitrate</li>
-				<li>complexity</li>
-				<li>signal</li>
-			</ul>
-		</description>
-	</method> -->
 	<method name="dll_bandwidth" type="message">
 		<arglist>
 			<arg name="bandwidth" optional='0' type="float" />
