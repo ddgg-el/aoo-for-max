@@ -845,8 +845,8 @@ void ext_main(void *r)
     class_addmethod(c, (method)(void*)aoo_receive_dynamic_resampling,"dynamic_resampling", A_FLOAT, 0);
     class_addmethod(c, (method)(void*)aoo_receive_dll_bandwidth,"dll_bandwidth", A_FLOAT, 0);
 #if AOO_USE_OPUS
-    class_addmethod(c, (method)aoo_receive_codec_set,"codec_set", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_receive_codec_get,"codec_get", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_codec_set,"codec_set", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_receive_codec_get,"codec_get", A_GIMME, 0);
 #endif
     class_addmethod(c, (method)(void*)aoo_receive_real_samplerate, "real_samplerate", 0);
 

@@ -1077,8 +1077,8 @@ void ext_main(void *r)
 
     class_addmethod(c, (method)(void*)aoo_send_format, "format", A_GIMME, 0);
 #if AOO_USE_OPUS
-    class_addmethod(c, (method)aoo_send_codec_set, "codec_set", A_GIMME, 0);
-    class_addmethod(c, (method)aoo_send_codec_get,"codec_get", A_SYM, 0);
+    class_addmethod(c, (method)(void*)aoo_send_codec_set, "codec_set", A_GIMME, 0);
+    class_addmethod(c, (method)(void*)aoo_send_codec_get,"codec_get", A_SYM, 0);
 #endif
     class_addmethod(c, (method)(void*)aoo_send_real_samplerate, "real_samplerate", 0);
 

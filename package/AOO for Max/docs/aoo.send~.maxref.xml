@@ -72,8 +72,8 @@
 		<digest>Set send buffer size in ms (default: 25 ms)</digest>
 		<description>Set send buffer size in ms (default: 25 ms). This is useful if you are streaming on slow networks</description>
 	</method>
-	<!-- UNSUPPORTED -->
-	<!-- <method name="codec_get" type="message">
+	
+	<method name="codec_get" type="message">
 		<arglist>
 			<arg name="data" optional='0' type="string" />
 		</arglist>
@@ -95,12 +95,12 @@
 		<description>
 			<p>Set opus codec settings. Use only when setting <m>format</m>='opus'. Possible values are:</p>
 			<ul>
-				<li>bitrate</li>
-				<li>complexity</li>
-				<li>signal</li>
+				<li>bitrate (kbit/s)</li>
+				<li>complexity (0-10)</li>
+				<li>signal(auto | music | voice)</li>
 			</ul>
 		</description>
-	</method> -->
+	</method>
 	<method name="dll_bandwidth" type="message">
 		<arglist>
 			<arg name="bandwidth" optional='0' type="float" />
@@ -115,9 +115,9 @@
 			<p>See the paper "Using a DLL to filter time" by Fons Adriaensen.</p>
 		</description>
 	</method>
-	<method name="format" type="message">
+	<method name="format" type="list">
 		<arglist>
-			<arg name="format" optional='0' type="string" />
+			<arg name="format" optional='0' type="list" />
 		</arglist>
 		<digest>Set the audio format. Possible values are: 'pcm' or 'opus'</digest>
 		<description>
@@ -126,6 +126,10 @@
 				<li>pcm</li>
 				<li>opus</li>
 			</ul>
+			<p>You can also specify other options by sending a list of parameters. These are:</p>
+			<m>format pcm nchannels blocksize samplerate bitdepth</m>
+			<p>or</p>
+			<m>format opus nchannels blocksize samplerate application</m>	
 		</description>
 	</method>
 	<method name="id" type="message">

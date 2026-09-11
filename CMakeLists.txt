@@ -7,6 +7,7 @@ message(STATUS "Project: ${PROJECT_NAME}")
 
 ################################################################
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_compile_options(-Wunused-function)
 
 # Max-SDK directories and settings
 set(MAX_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/max-sdk-base" CACHE STRING "Max SDK Base folder")
@@ -17,9 +18,11 @@ message(STATUS "Max SDK directory: ${MAX_SDK_DIR}")
 message(STATUS "OSX Deployment Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}\n")
 
 ################################################################
+# Back Compatibility with OPUS
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 # Aoo directories and settings
-option(AOO_USE_OPUS "use Opus codec" OFF)
+option(AOO_USE_OPUS "use Opus codec" ON)
 set(AOO_SAMPLE_SIZE 64 CACHE STRING "Audio sample size" )
 
 add_subdirectory(aoo EXCLUDE_FROM_ALL)
